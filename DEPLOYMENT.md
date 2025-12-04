@@ -108,7 +108,7 @@ If you want to make the token address configurable:
 
 3. **Update Code**
    ```typescript
-   const OMEN_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_OMEN_TOKEN_ADDRESS || 'REPLACE_WITH_REAL_TOKEN_ADDRESS';
+   const OMEN_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_OMEN_TOKEN_ADDRESS || '7XuMtMfPXxHbjDLYtxmK4wRvYiFu1N9F8VDXukMTpump';
    const MINIMUM_TOKENS = parseInt(process.env.NEXT_PUBLIC_MINIMUM_TOKENS || '1000');
    ```
 
