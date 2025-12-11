@@ -92,12 +92,28 @@ export async function fetchPolymarketTrending(limit = 50, offset = 0) {
                 const yesVotes = Math.floor(totalVolume * yesPrice);
                 const noVotes = Math.floor(totalVolume * noPrice);
 
+                // Parse outcomes (Robust handling)
+                let outcomes = market.outcomes;
+                if (typeof outcomes === 'string') {
+                    try {
+                        outcomes = JSON.parse(outcomes);
+                    } catch (e) {
+                        console.warn('Failed to parse outcomes', outcomes);
+                        outcomes = ["YES", "NO"];
+                    }
+                }
+
+                // Ensure it's an array
+                if (!Array.isArray(outcomes)) {
+                    outcomes = ["YES", "NO"];
+                }
+
                 return {
                     id: parseInt(market.id) || parseInt(event.id) || Math.random() * 100000,
                     question: event.title,
                     category: classifyCategory(event.slug),
                     endDate: market.endDate,
-                    outcomeLabels: market.outcomes ? JSON.parse(JSON.stringify(market.outcomes)) : undefined, // Safe copy of outcomes
+                    outcomeLabels: outcomes,
                     timeLeft: formatDate(market.endDate),
                     yesVotes: yesVotes,
                     noVotes: noVotes,
