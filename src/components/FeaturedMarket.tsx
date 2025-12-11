@@ -4,19 +4,28 @@ import { motion } from 'framer-motion';
 import { TrendingUp, Users, DollarSign, Clock, ArrowUpRight, Activity } from 'lucide-react';
 import { Sparkline } from './Sparkline';
 
+import { useState } from 'react';
+import { saveVote } from '@/utils/voteStorage';
+import { useWallet } from '@solana/wallet-adapter-react';
+
 interface FeaturedMarketProps {
     data?: {
+        id: number;
         question: string;
         category: string;
         timeLeft: string;
         yesVotes: number;
         noVotes: number;
         totalVolume: number;
+        outcomeLabels?: string[];
     };
-    onOpenCreateModal?: () => void; // Pass down the open modal handler
+    onOpenCreateModal?: () => void;
 }
 
 export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps) => {
+    const { publicKey, connected } = useWallet();
+    const [betMode, setBetMode] = useState<'yes' | 'no' | null>(null);
+    const [stakeAmount, setStakeAmount] = useState('');
     // Determine Yes % (default 85 if no data)
     const yesPercentage = data ? ((data.yesVotes / (data.yesVotes + data.noVotes)) * 100) : 85;
     const yesPrice = Math.floor(yesPercentage);
@@ -123,23 +132,72 @@ export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps)
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <button className="group relative overflow-hidden p-6 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/50 rounded-2xl transition-all duration-300">
-                                <div className="relative z-10 flex flex-col items-center gap-1">
-                                    <span className="text-green-400 font-black text-2xl tracking-tight">YES</span>
-                                    <span className="text-white font-mono text-sm group-hover:scale-110 transition-transform bg-green-500/20 px-2 py-0.5 rounded">{yesPrice}¢</span>
-                                </div>
-                                {/* Hover Glow */}
-                                <div className="absolute inset-0 bg-green-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </button>
+                        <div className="grid grid-cols-1 gap-4">
+                            {betMode ? (
+                                <div className="bg-gray-800/80 p-6 rounded-2xl border border-gray-700 animate-in fade-in slide-in-from-bottom-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className={`text-xl font-black uppercase tracking-tight ${betMode === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
+                                            Bet on {betMode === 'yes' ? 'YES' : 'NO'}
+                                        </h3>
+                                        <button onClick={() => setBetMode(null)} className="text-gray-500 hover:text-white">✕</button>
+                                    </div>
 
-                            <button className="group relative overflow-hidden p-6 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/50 rounded-2xl transition-all duration-300">
-                                <div className="relative z-10 flex flex-col items-center gap-1">
-                                    <span className="text-red-400 font-black text-2xl tracking-tight">NO</span>
-                                    <span className="text-white font-mono text-sm group-hover:scale-110 transition-transform bg-red-500/20 px-2 py-0.5 rounded">{noPrice}¢</span>
+                                    <div className="relative mb-4">
+                                        <input
+                                            type="number"
+                                            placeholder="Enter Amount"
+                                            value={stakeAmount}
+                                            onChange={(e) => setStakeAmount(e.target.value)}
+                                            className="w-full bg-black/40 border-2 border-gray-600 focus:border-purple-500 rounded-xl px-4 py-3 text-lg text-white placeholder-gray-600 outline-none transition-all"
+                                            autoFocus
+                                        />
+                                        <span className="absolute right-4 top-4 text-sm font-bold text-gray-400">$PROPHET</span>
+                                    </div>
+
+                                    <button
+                                        onClick={() => {
+                                            if (!stakeAmount || !data?.id || !publicKey) return;
+                                            saveVote({
+                                                predictionId: data.id,
+                                                choice: betMode,
+                                                walletAddress: publicKey.toString(),
+                                                timestamp: Date.now(),
+                                                amount: parseFloat(stakeAmount)
+                                            });
+                                            alert(`Bet Placed! ${stakeAmount} $PROPHET on ${betMode.toUpperCase()}`);
+                                            setBetMode(null);
+                                        }}
+                                        className={`w-full py-4 rounded-xl text-lg font-black uppercase tracking-widest text-white shadow-xl transition-transform active:scale-95 ${betMode === 'yes' ? 'bg-gradient-to-r from-green-600 to-green-500 hover:to-green-400 shadow-green-900/20' : 'bg-gradient-to-r from-red-600 to-red-500 hover:to-red-400 shadow-red-900/20'
+                                            }`}
+                                    >
+                                        CONFIRM BET
+                                    </button>
                                 </div>
-                                <div className="absolute inset-0 bg-red-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </button>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => connected ? setBetMode('yes') : alert('Connect Wallet!')}
+                                        className="group relative overflow-hidden p-6 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/50 rounded-2xl transition-all duration-300 active:scale-95"
+                                    >
+                                        <div className="relative z-10 flex flex-col items-center gap-1">
+                                            <span className="text-green-400 font-black text-2xl tracking-tight">YES</span>
+                                            <span className="text-white font-mono text-sm group-hover:scale-110 transition-transform bg-green-500/20 px-2 py-0.5 rounded">{yesPrice}¢</span>
+                                        </div>
+                                        <div className="absolute inset-0 bg-green-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => connected ? setBetMode('no') : alert('Connect Wallet!')}
+                                        className="group relative overflow-hidden p-6 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/50 rounded-2xl transition-all duration-300 active:scale-95"
+                                    >
+                                        <div className="relative z-10 flex flex-col items-center gap-1">
+                                            <span className="text-red-400 font-black text-2xl tracking-tight">NO</span>
+                                            <span className="text-white font-mono text-sm group-hover:scale-110 transition-transform bg-red-500/20 px-2 py-0.5 rounded">{noPrice}¢</span>
+                                        </div>
+                                        <div className="absolute inset-0 bg-red-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="pt-6 border-t border-white/5 text-center">

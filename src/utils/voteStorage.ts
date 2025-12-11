@@ -3,6 +3,7 @@ export interface Vote {
     choice: 'yes' | 'no';
     walletAddress: string;
     timestamp: number;
+    amount?: number; // Optional stake amount
 }
 
 const VOTES_KEY = 'prophet_votes';

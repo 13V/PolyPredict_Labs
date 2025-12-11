@@ -41,6 +41,10 @@ export const PredictionCard = ({
     const [hasTokens, setHasTokens] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
 
+    // Betting UI State
+    const [betMode, setBetMode] = useState<'yes' | 'no' | null>(null);
+    const [stakeAmount, setStakeAmount] = useState('');
+
     // Default labels
     const yesLabel = outcomeLabels?.[0] || 'YES';
     const noLabel = outcomeLabels?.[1] || 'NO';
@@ -97,36 +101,46 @@ export const PredictionCard = ({
 
     // ... handleVote ...
 
-    const handleVote = async (choice: 'yes' | 'no') => {
+    const handleVoteClick = (choice: 'yes' | 'no') => {
         if (!connected || !publicKey) {
             alert('Please connect your wallet first!');
             return;
         }
-
-        if (voted) return; // Already voted
-
+        if (voted) return;
         if (!hasTokens) {
-            alert('You need to hold $PROPHET tokens to vote!');
+            alert('Insufficient $PROPHET tokens!');
+            return;
+        }
+        setBetMode(choice); // Activate Input Mode
+    };
+
+    const confirmBet = async () => {
+        if (!betMode || !publicKey) return;
+
+        if (!stakeAmount || parseFloat(stakeAmount) <= 0) {
+            alert('Enter a valid amount');
             return;
         }
 
-        // Save vote
+        // Save vote (Mock Contract Call)
         const vote = {
             predictionId: id,
-            choice,
+            choice: betMode,
             walletAddress: publicKey.toString(),
             timestamp: Date.now(),
+            amount: parseFloat(stakeAmount) // Save amount
         };
 
         saveVote(vote);
 
         // Update local state
-        if (choice === 'yes') {
+        if (betMode === 'yes') {
             setYesVotes(prev => prev + 1);
         } else {
             setNoVotes(prev => prev + 1);
         }
-        setVoted(choice);
+        setVoted(betMode);
+        setBetMode(null); // Reset UI
     };
 
     const totalVotes = yesVotes + noVotes;
@@ -227,23 +241,51 @@ export const PredictionCard = ({
                         noLabel={noLabel}
                         onResolve={(outcome) => console.log('Resolved:', outcome)}
                     />
+                ) : betMode ? (
+                    // BETTING INPUT MODE
+                    <div className="bg-gray-900/80 p-3 rounded-lg border border-gray-700">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className={`text-xs font-bold uppercase ${betMode === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
+                                Bet on {betMode === 'yes' ? yesLabel : noLabel}
+                            </span>
+                            <button onClick={() => setBetMode(null)} className="text-gray-500 hover:text-white text-xs">✕</button>
+                        </div>
+
+                        <div className="relative mb-2">
+                            <input
+                                type="number"
+                                placeholder="Amount"
+                                value={stakeAmount}
+                                onChange={(e) => setStakeAmount(e.target.value)}
+                                className="w-full bg-black/50 border border-gray-600 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500"
+                            />
+                            <span className="absolute right-2 top-1.5 text-xs text-gray-500 font-bold">$PROPHET</span>
+                        </div>
+
+                        <button
+                            onClick={confirmBet}
+                            className={`w-full py-1.5 rounded text-xs font-bold text-white transition-colors ${betMode === 'yes' ? 'bg-green-600 hover:bg-green-500' : 'bg-red-600 hover:bg-red-500'
+                                }`}
+                        >
+                            Confirm Bet
+                        </button>
+                    </div>
                 ) : (
+                    // STANDARD VOTE BUTTONS
                     <div className="grid grid-cols-2 gap-2">
                         <button
-                            onClick={() => handleVote('yes')}
-                            disabled={!connected || voted !== null || !hasTokens}
+                            onClick={() => handleVoteClick('yes')}
                             className={`py-2 rounded-lg text-xs font-bold transition-colors border ${!hasTokens && connected
-                                ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed'
+                                ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed opacity-50'
                                 : 'bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-black border-green-500/20'
                                 }`}
                         >
                             {yesLabel} {yesPercentage.toFixed(0)}¢
                         </button>
                         <button
-                            onClick={() => handleVote('no')}
-                            disabled={!connected || voted !== null || !hasTokens}
+                            onClick={() => handleVoteClick('no')}
                             className={`py-2 rounded-lg text-xs font-bold transition-colors border ${!hasTokens && connected
-                                ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed'
+                                ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed opacity-50'
                                 : 'bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border-red-500/20'
                                 }`}
                         >
