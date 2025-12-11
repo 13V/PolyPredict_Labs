@@ -26,26 +26,42 @@ export async function fetchPolymarketTrending(limit = 50, offset = 0) {
 
     while (attempt < maxRetries) {
         try {
-            // Use our own internal API route (Server-Side) to bypass CORS and improve reliability
-            const targetUrl = `/api/markets?limit=${limit}&offset=${offset}`;
+            // STRATEGY: Client-Side Fetch via Public CORS Proxy
+            // This bypasses Vercel's Data Center IP (which is likely blocked) 
+            // and uses the user's browser connection via a permissive proxy.
 
-            // Add timeout to prevent hanging (15s)
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            const gammaUrl = `https://gamma-api.polymarket.com/events?active=true&closed=false&order=liquidity&ascending=false&limit=${limit}&offset=${offset}`;
 
-            const response = await fetch(targetUrl, { signal: controller.signal });
-            clearTimeout(timeoutId);
+            // Try 1: corsproxy.io (Reliable, fast)
+            // Try 2: allorigins.win (Fallback)
+            let response;
+            try {
+                // Attempt 1
+                console.log('Fetching via corsproxy.io...');
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(gammaUrl)}`;
+                response = await fetch(proxyUrl);
 
-            if (!response.ok) {
-                // If 500/503/429, retry. If 404, throw immediately.
-                if (response.status >= 500 || response.status === 429) {
-                    throw new Error(`Server Error: ${response.status}`);
+                if (!response.ok) throw new Error('Proxy 1 failed');
+            } catch (e) {
+                // Attempt 2
+                console.log('Fetching via allorigins...');
+                const proxyUrl2 = `https://api.allorigins.win/raw?url=${encodeURIComponent(gammaUrl)}`;
+                response = await fetch(proxyUrl2);
+            }
+
+            if (!response || !response.ok) {
+                // Try 3: Direct Internal API (Last Resort - usually blocked on Vercel)
+                console.log('Fallback to Internal API...');
+                const internalUrl = `/api/markets?limit=${limit}&offset=${offset}`;
+                response = await fetch(internalUrl);
+
+                if (!response.ok) {
+                    throw new Error(`All Fetch Methods Failed: ${response.status}`);
                 }
-                throw new Error(`Failed to fetch from Polymarket: ${response.status} ${response.statusText}`);
             }
 
             const events: PolymarketEvent[] = await response.json();
-            console.log(`Debug: Received ${events.length} raw events from Polymarket`);
+            console.log(`Debug: Received ${events.length} raw events`);
 
             // Map to our internal format
             return events.map(event => {
