@@ -124,7 +124,7 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <Sparkles className="h-8 w-8 text-purple-500" />
               <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-                PROPHET
+                PROPHET PROTOCOL (LIVE)
               </h1>
             </div>
             <WalletConnect />

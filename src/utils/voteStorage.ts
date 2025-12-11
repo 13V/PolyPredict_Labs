@@ -82,10 +82,28 @@ export interface Resolution {
     stakedAmount: number;
 }
 
-export function saveResolution(resolution: Resolution): void {
+export function saveResolution(predictionId: number | Resolution, outcome?: 'yes' | 'no'): void {
     const resolutions = getAllResolutions();
-    resolutions.push(resolution);
-    localStorage.setItem(RESOLUTIONS_KEY, JSON.stringify(resolutions));
+
+    let newResolution: Resolution;
+
+    if (typeof predictionId === 'object') {
+        newResolution = predictionId;
+    } else {
+        if (!outcome) return; // Should not happen based on usage
+        newResolution = {
+            predictionId,
+            outcome,
+            timestamp: Date.now(),
+            stakedAmount: 0 // Default for Oracle/Auto resolution
+        };
+    }
+
+    // Remove existing if any (update it)
+    const filtered = resolutions.filter(r => r.predictionId !== newResolution.predictionId);
+    filtered.push(newResolution);
+
+    localStorage.setItem(RESOLUTIONS_KEY, JSON.stringify(filtered));
 }
 
 export function getAllResolutions(): Resolution[] {
