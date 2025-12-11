@@ -16,7 +16,7 @@ export async function GET(request: Request) {
                 'Accept': 'application/json',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             },
-            next: { revalidate: 60 } // Cache for 60s
+            cache: 'no-store' // Ensure fresh data on Edge
         });
 
         if (!response.ok) {

@@ -27,41 +27,44 @@ export async function fetchPolymarketTrending(limit = 50, offset = 0) {
     while (attempt < maxRetries) {
         try {
             // STRATEGY: Client-Side Fetch via Public CORS Proxy
-            // This bypasses Vercel's Data Center IP (which is likely blocked) 
-            // and uses the user's browser connection via a permissive proxy.
+            // STRATEGY: Client-Side Proxy Priority
+            // Reason: Vercel Data Center IPs are blocked. Edge IPs might be blocked.
+            // User IPs (via Proxy) are the most reliable.
 
             const gammaUrl = `https://gamma-api.polymarket.com/events?active=true&closed=false&order=liquidity&ascending=false&limit=${limit}&offset=${offset}`;
-
-            // Try 1: corsproxy.io (Reliable, fast)
-            // Try 2: allorigins.win (Fallback)
             let response;
+            let usedSource = 'Client-Proxy';
+
             try {
-                // Attempt 1
+                // Priority 1: Client Proxy
                 console.log('Fetching via corsproxy.io...');
                 const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(gammaUrl)}`;
                 response = await fetch(proxyUrl);
-
                 if (!response.ok) throw new Error('Proxy 1 failed');
-            } catch (e) {
-                // Attempt 2
-                console.log('Fetching via allorigins...');
-                const proxyUrl2 = `https://api.allorigins.win/raw?url=${encodeURIComponent(gammaUrl)}`;
-                response = await fetch(proxyUrl2);
-            }
+            } catch (proxyError) {
+                console.warn('Proxy 1 failed, attempting fallback...', proxyError);
 
-            if (!response || !response.ok) {
-                // Try 3: Direct Internal API (Last Resort - usually blocked on Vercel)
-                console.log('Fallback to Internal API...');
-                const internalUrl = `/api/markets?limit=${limit}&offset=${offset}`;
-                response = await fetch(internalUrl);
-
-                if (!response.ok) {
-                    throw new Error(`All Fetch Methods Failed: ${response.status}`);
+                // Priority 2: Alternative Proxy
+                try {
+                    usedSource = 'allorigins';
+                    const proxyUrl2 = `https://api.allorigins.win/raw?url=${encodeURIComponent(gammaUrl)}`;
+                    response = await fetch(proxyUrl2);
+                    if (!response.ok) throw new Error('Proxy 2 failed');
+                } catch (internalError) {
+                    // Priority 3: Internal API (Likely blocked, but worth a shot)
+                    usedSource = 'Internal-API';
+                    console.log('Fallback to Internal API...');
+                    const internalUrl = `/api/markets?limit=${limit}&offset=${offset}`;
+                    response = await fetch(internalUrl);
                 }
             }
 
+            if (!response || !response.ok) {
+                throw new Error(`All Fetch Methods Failed. Last status: ${response ? response.status : 'Network Error'}`);
+            }
+
             const events: PolymarketEvent[] = await response.json();
-            console.log(`Debug: Received ${events.length} raw events`);
+            console.log(`Debug: Received ${events.length} raw events from ${usedSource}`);
 
             // Map to our internal format
             return events.map(event => {

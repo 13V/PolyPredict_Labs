@@ -27,7 +27,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [fetchError, setFetchError] = useState(false);
+  const [fetchError, setFetchError] = useState<boolean | string>(false);
 
   useEffect(() => {
     async function loadBackgroundData() {
@@ -99,7 +99,7 @@ export default function Home() {
 
       } catch (e) {
         console.error("Critical Fetch Error:", e);
-        setFetchError(true);
+        setFetchError(e instanceof Error ? e.message : "Unknown error");
       } finally {
         setIsLoading(false);
       }
@@ -162,7 +162,8 @@ export default function Home() {
               <div className="h-[480px] w-full rounded-3xl bg-red-950/20 border border-red-900/50 flex items-center justify-center text-center p-8">
                 <div>
                   <h3 className="text-red-400 font-bold text-xl mb-2">Connection Failed</h3>
-                  <p className="text-gray-400 max-w-md mx-auto mb-6">Unable to fetch real-time market data. The network might be congested or the API is rate-limiting.</p>
+                  <p className="text-gray-400 max-w-md mx-auto mb-6">Error: {typeof fetchError === 'string' ? fetchError : 'Network Error'}</p>
+                  <p className="text-xs text-gray-500 mb-6">Try disabling ad-blockers or VPNs.</p>
                   <button onClick={() => window.location.reload()} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">
                     Try Again
                   </button>
@@ -265,6 +266,9 @@ export default function Home() {
                 Cryptocurrency investments are volatile and high-risk.
                 Always do your own research (DYOR).
               </p>
+            </div>
+            <div className="mb-4 text-xs font-mono text-gray-700">
+              v0.2.1-CLIENT (Live)
             </div>
             <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
               <a href="https://x.com/ProphetProtocol" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">Twitter</a>
