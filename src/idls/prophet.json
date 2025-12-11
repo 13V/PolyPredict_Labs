@@ -1,0 +1,261 @@
+{
+    "version": "0.1.0",
+    "name": "prophet",
+    "instructions": [
+        {
+            "name": "initializeMarket",
+            "accounts": [
+                {
+                    "name": "market",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "vaultToken",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "mint",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "authority",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "rent",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "question",
+                    "type": "string"
+                },
+                {
+                    "name": "endTimestamp",
+                    "type": "i64"
+                }
+            ]
+        },
+        {
+            "name": "placeVote",
+            "accounts": [
+                {
+                    "name": "market",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "vote",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "vaultToken",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "userToken",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "user",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "outcomeIndex",
+                    "type": "u8"
+                },
+                {
+                    "name": "amount",
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "resolveMarket",
+            "accounts": [
+                {
+                    "name": "market",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "authority",
+                    "isMut": true,
+                    "isSigner": true
+                }
+            ],
+            "args": [
+                {
+                    "name": "winnerIndex",
+                    "type": "u8"
+                }
+            ]
+        },
+        {
+            "name": "claimWinnings",
+            "accounts": [
+                {
+                    "name": "market",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "vote",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "vaultToken",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "userToken",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "user",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "tokenProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": []
+        }
+    ],
+    "accounts": [
+        {
+            "name": "Market",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "authority",
+                        "type": "publicKey"
+                    },
+                    {
+                        "name": "question",
+                        "type": "string"
+                    },
+                    {
+                        "name": "endTimestamp",
+                        "type": "i64"
+                    },
+                    {
+                        "name": "outcomesCount",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "totalPot",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "resolved",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "winnerIndex",
+                        "type": {
+                            "option": "u8"
+                        }
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Vote",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "user",
+                        "type": "publicKey"
+                    },
+                    {
+                        "name": "market",
+                        "type": "publicKey"
+                    },
+                    {
+                        "name": "outcomeIndex",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "claimed",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        }
+    ],
+    "errors": [
+        {
+            "code": 6000,
+            "name": "MarketEnded",
+            "msg": "Market has already ended."
+        },
+        {
+            "code": 6001,
+            "name": "MarketActive",
+            "msg": "Market is still active."
+        },
+        {
+            "code": 6002,
+            "name": "InsufficientFunds",
+            "msg": "Insufficient funds to place this bet."
+        },
+        {
+            "code": 6003,
+            "name": "InvalidOutcome",
+            "msg": "Invalid outcome selected."
+        }
+    ]
+}

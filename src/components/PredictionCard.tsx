@@ -9,6 +9,7 @@ import { getDeterministicPattern } from '@/utils/chartPatterns';
 import { fetchMarketResult } from '@/services/polymarket';
 import { Sparkline } from './Sparkline';
 import { ResolutionPanel } from './ResolutionPanel';
+import { useToast } from '@/context/ToastContext';
 
 interface PredictionCardProps {
     id: number;
@@ -18,8 +19,8 @@ interface PredictionCardProps {
     yesVotes: number;
     noVotes: number;
     totalVolume?: number;
-    outcomeLabels?: string[]; // Optional custom labels
-    status?: 'active' | 'resolving' | 'resolved'; // NEW: Status
+    outcomeLabels?: string[];
+    status?: 'active' | 'resolving' | 'resolved';
 }
 
 export const PredictionCard = ({
@@ -30,10 +31,12 @@ export const PredictionCard = ({
     yesVotes: initialYes,
     noVotes: initialNo,
     totalVolume,
-    outcomeLabels, // Destructure new prop
-    status = 'active' // Default to active
+    outcomeLabels,
+    status = 'active'
 }: PredictionCardProps) => {
     const { publicKey, connected } = useWallet();
+    const { toast } = useToast();
+
     // ... existing hooks ...
     const [yesVotes, setYesVotes] = useState(initialYes);
     const [noVotes, setNoVotes] = useState(initialNo);
@@ -58,8 +61,6 @@ export const PredictionCard = ({
         setIsChecking(false);
     }, [publicKey]);
 
-    // ... (inside component)
-
     const [resolvedOutcome, setResolvedOutcome] = useState<'yes' | 'no' | null>(null);
 
     // Load existing vote and vote counts on mount
@@ -72,83 +73,83 @@ export const PredictionCard = ({
             checkTokenBalance();
         }
 
-        // Check for global resolution (DAO or Oracle)
         const outcome = getResolutionStatus(id);
         if (outcome) {
             setResolvedOutcome(outcome);
         } else if (status === 'resolving') {
-            // AUTO-ORACLE: If confirming validation, ask Polymarket
             checkOracle();
         }
 
-        // Load vote counts from localStorage
         const counts = getVoteCounts(id);
         setYesVotes(initialYes + counts.yes);
         setNoVotes(initialNo + counts.no);
-    }, [publicKey, id, initialYes, initialNo, checkTokenBalance, status]); // Added status dependency
+    }, [publicKey, id, initialYes, initialNo, checkTokenBalance, status]);
 
     const checkOracle = async () => {
         const result = await fetchMarketResult(id);
         if (result) {
             console.log(`Oracle Resolved Market #${id}: ${result.toUpperCase()}`);
             setResolvedOutcome(result);
-            saveResolution(id, result); // Persist it so we don't fetch every time
+            saveResolution(id, result);
         }
     };
 
-    // Derived status: Prop or Resolved State
     const currentStatus = resolvedOutcome ? 'resolved' : status;
-
-    // ... handleVote ...
 
     const handleVoteClick = (choice: 'yes' | 'no') => {
         if (!connected || !publicKey) {
-            alert('Please connect your wallet first!');
+            toast.error('Please connect your wallet first!');
             return;
         }
         if (voted) return;
         if (!hasTokens) {
-            alert('Insufficient $PROPHET tokens!');
+            toast.error('Insufficient $PROPHET tokens! You need 1000+ to vote.');
             return;
         }
-        setBetMode(choice); // Activate Input Mode
+        setBetMode(choice);
     };
 
-    const confirmBet = async () => {
-        if (!betMode || !publicKey) return;
-
-        if (!stakeAmount || parseFloat(stakeAmount) <= 0) {
-            alert('Enter a valid amount');
+    const confirmBet = () => {
+        if (!betMode || !connected) {
+            toast.error('Please connect your wallet to confirm bet.');
             return;
         }
 
-        // Save vote (Mock Contract Call)
-        const vote = {
+        const choice = betMode;
+        const amount = parseFloat(stakeAmount) || 0;
+
+        if (amount <= 0) {
+            toast.error("Please enter a valid stake amount.");
+            return;
+        }
+
+        saveVote({
             predictionId: id,
-            choice: betMode,
-            walletAddress: publicKey.toString(),
+            choice: choice,
+            walletAddress: publicKey!.toString(),
             timestamp: Date.now(),
-            amount: parseFloat(stakeAmount) // Save amount
-        };
+            amount: amount
+        }, { publicKey, signTransaction: undefined, sendTransaction: undefined });
 
-        saveVote(vote);
+        setVoted(choice);
 
-        // Update local state
-        if (betMode === 'yes') {
+        if (choice === 'yes') {
             setYesVotes(prev => prev + 1);
         } else {
             setNoVotes(prev => prev + 1);
         }
-        setVoted(betMode);
-        setBetMode(null); // Reset UI
+
+        setBetMode(null);
+        toast.success(`Vote Placed: ${amount} on ${choice === 'yes' ? yesLabel : noLabel}`);
     };
 
     const totalVotes = yesVotes + noVotes;
     const yesPercentage = totalVotes > 0 ? (yesVotes / totalVotes) * 100 : 50;
     const noPercentage = totalVotes > 0 ? (noVotes / totalVotes) * 100 : 50;
-
-    // Generate a deterministic, unique sparkline shape that ends at the current price
     const sparkData = getDeterministicPattern(id, yesPercentage);
+
+    // Quick Bet Presets
+    const setPreset = (val: string) => setStakeAmount(val);
 
     return (
         <motion.div
@@ -159,7 +160,6 @@ export const PredictionCard = ({
                 : 'bg-gray-900/40 border border-white/5 hover:border-purple-500/30 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] hover:-translate-y-1'
                 }`}
         >
-            {/* Ambient Background Gradient (Subtle) */}
             <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="p-4 flex items-start justify-between">
                 <div className="flex gap-3">
@@ -187,14 +187,11 @@ export const PredictionCard = ({
                         </h3>
                     </div>
                 </div>
-
-                {/* Mini Sparkline */}
                 <div className="w-[60px] h-[30px] opacity-50 group-hover:opacity-100 transition-opacity">
                     <Sparkline data={sparkData} width={60} height={30} color={yesPercentage >= 50 ? '#10B981' : '#EF4444'} />
                 </div>
             </div>
 
-            {/* Middle: Stats */}
             <div className="px-4 pb-4">
                 <div className="flex items-end justify-between mb-2">
                     <span className={`text-2xl font-black ${yesPercentage >= 50 ? 'text-green-400' : 'text-red-400'}`}>
@@ -205,15 +202,12 @@ export const PredictionCard = ({
                         ${totalVolume ? totalVolume.toLocaleString() : (totalVotes * 10.5).toLocaleString()} Vol
                     </span>
                 </div>
-
-                {/* Progress Bar */}
                 <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden flex">
                     <div style={{ width: `${yesPercentage}%` }} className="h-full bg-green-500" />
                     <div style={{ width: `${noPercentage}%` }} className="h-full bg-red-500" />
                 </div>
             </div>
 
-            {/* Token Gating Warning (Only show if active) */}
             {!hasTokens && connected && status !== 'resolving' && (
                 <div className="mx-4 mb-2 text-center">
                     <p className="text-[10px] text-red-400 bg-red-900/20 py-1 rounded border border-red-500/20">
@@ -222,14 +216,12 @@ export const PredictionCard = ({
                 </div>
             )}
 
-            {/* Bottom Actions: Either Voting OR Resolution */}
             <div className="px-4 pb-4 mt-auto">
-                {/* Bottom Actions: Check Resolved state FIRST */}
                 {resolvedOutcome ? (
                     <div className="text-center">
                         <h4 className="text-sm font-bold mb-2">Market Resolved: {resolvedOutcome === 'yes' ? yesLabel : noLabel} Won!</h4>
                         {voted === resolvedOutcome ?
-                            <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full">Claim Winnings 💰 (~1.85x)</button> :
+                            <button onClick={() => toast.success('Claiming not implemented in V1!')} className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full">Claim Winnings 💰 (~1.85x)</button> :
                             <p className="text-red-500 font-bold">Rekt 💀</p>
                         }
                         <p className="text-xs text-gray-400 mt-1">(-10% tax)</p>
@@ -242,36 +234,49 @@ export const PredictionCard = ({
                         onResolve={(outcome) => console.log('Resolved:', outcome)}
                     />
                 ) : betMode ? (
-                    // BETTING INPUT MODE
-                    <div className="bg-gray-900/80 p-3 rounded-lg border border-gray-700">
-                        <div className="flex justify-between items-center mb-2">
+                    <div className="bg-gray-900/80 p-3 rounded-lg border border-gray-700 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                        <div className="flex justify-between items-center mb-3">
                             <span className={`text-xs font-bold uppercase ${betMode === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
                                 Bet on {betMode === 'yes' ? yesLabel : noLabel}
                             </span>
                             <button onClick={() => setBetMode(null)} className="text-gray-500 hover:text-white text-xs">✕</button>
                         </div>
 
-                        <div className="relative mb-2">
+                        <div className="relative mb-3">
                             <input
                                 type="number"
                                 placeholder="Amount"
                                 value={stakeAmount}
                                 onChange={(e) => setStakeAmount(e.target.value)}
-                                className="w-full bg-black/50 border border-gray-600 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500"
+                                className="w-full bg-black/50 border border-gray-600 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                autoFocus
                             />
-                            <span className="absolute right-2 top-1.5 text-xs text-gray-500 font-bold">$PROPHET</span>
+                            <span className="absolute right-3 top-2 text-xs text-gray-500 font-bold">$PROPHET</span>
+                        </div>
+
+                        {/* Quick Bet Presets */}
+                        <div className="flex gap-2 mb-3">
+                            {['100', '500', '1000'].map((val) => (
+                                <button
+                                    key={val}
+                                    onClick={() => setPreset(val)}
+                                    className="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded py-1 text-[10px] font-mono text-gray-300 transition-colors"
+                                >
+                                    {val}
+                                </button>
+                            ))}
+                            <button onClick={() => setPreset('5000')} className="flex-1 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-500/30 rounded py-1 text-[10px] font-mono text-purple-300 transition-colors">MAX</button>
                         </div>
 
                         <button
                             onClick={confirmBet}
-                            className={`w-full py-1.5 rounded text-xs font-bold text-white transition-colors ${betMode === 'yes' ? 'bg-green-600 hover:bg-green-500' : 'bg-red-600 hover:bg-red-500'
+                            className={`w-full py-2 rounded text-xs font-bold text-white transition-all shadow-lg ${betMode === 'yes' ? 'bg-green-600 hover:bg-green-500 shadow-green-900/20' : 'bg-red-600 hover:bg-red-500 shadow-red-900/20'
                                 }`}
                         >
                             Confirm Bet
                         </button>
                     </div>
                 ) : (
-                    // STANDARD VOTE BUTTONS
                     <div className="grid grid-cols-2 gap-2">
                         <button
                             onClick={() => handleVoteClick('yes')}

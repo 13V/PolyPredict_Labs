@@ -7,7 +7,7 @@ pub mod errors;
 use state::*;
 use errors::*;
 
-declare_id!("PrphEt1111111111111111111111111111111111111");
+declare_id!("aarqjMf425M1LBzMwLxZvvbUTdFvePzTHksUAxq");
 
 #[program]
 pub mod prophet {

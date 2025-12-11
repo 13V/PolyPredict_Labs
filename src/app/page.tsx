@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, Twitter, Send, Copy, Check, Plus } from "lucide-react";
 import { CreateMarketModal } from '@/components/CreateMarketModal';
 import { UserPositions } from '@/components/UserPositions';
+import { HowItWorks } from "@/components/HowItWorks";
 
 import { fetchPolymarketTrending } from '@/services/polymarket';
 import { generateSyntheticMarkets } from '@/data/synthetic';
@@ -229,35 +230,10 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Educational/Trust Footer Section (Condensed) */}
-          <div className="grid md:grid-cols-2 gap-6 pt-8 border-t border-gray-800">
-            <div className="p-6 rounded-xl bg-gray-900/50 border border-gray-800">
-              <h3 className="text-lg font-bold text-white mb-2">How it works</h3>
-              <p className="text-gray-400 text-sm mb-4">You're trading on the outcome of future events. Share prices between $0.00 and $1.00 reflect the probability of the event occurring.</p>
-              <button className="text-purple-400 text-sm font-bold hover:underline">Read Guide →</button>
-            </div>
-
-            <div className="p-6 rounded-xl bg-gray-900/50 border border-gray-800">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-white">Platform Stats</h3>
-                <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded border border-green-500/20">Live</span>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <div className="text-xs text-gray-500 uppercase tracking-wider">Volume</div>
-                  <div className="text-xl font-mono text-white">$4.2M</div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-500 uppercase tracking-wider">Traders</div>
-                  <div className="text-xl font-mono text-white">12.5K</div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-500 uppercase tracking-wider">TVL</div>
-                  <div className="text-xl font-mono text-white">$850K</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Educational Section */}
+          <section className="pt-8 border-t border-gray-800">
+            <HowItWorks />
+          </section>
         </div>
 
         {/* Footer */}

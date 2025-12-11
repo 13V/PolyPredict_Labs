@@ -155,18 +155,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps)
                                     </div>
 
                                     <button
-                                        onClick={() => {
-                                            if (!stakeAmount || !data?.id || !publicKey) return;
-                                            saveVote({
-                                                predictionId: data.id,
-                                                choice: betMode,
-                                                walletAddress: publicKey.toString(),
-                                                timestamp: Date.now(),
-                                                amount: parseFloat(stakeAmount)
-                                            });
-                                            alert(`Bet Placed! ${stakeAmount} $PROPHET on ${betMode.toUpperCase()}`);
-                                            setBetMode(null);
-                                        }}
+                                        onClick={handleConfirmBet}
                                         className={`w-full py-4 rounded-xl text-lg font-black uppercase tracking-widest text-white shadow-xl transition-transform active:scale-95 ${betMode === 'yes' ? 'bg-gradient-to-r from-green-600 to-green-500 hover:to-green-400 shadow-green-900/20' : 'bg-gradient-to-r from-red-600 to-red-500 hover:to-red-400 shadow-red-900/20'
                                             }`}
                                     >

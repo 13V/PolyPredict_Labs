@@ -8,6 +8,8 @@ import { clusterApiUrl } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
 
+import { ToastProvider } from '@/context/ToastContext';
+
 export const Providers: FC<{ children: ReactNode }> = ({ children }) => {
     // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
     const network = WalletAdapterNetwork.Devnet;
@@ -27,7 +29,9 @@ export const Providers: FC<{ children: ReactNode }> = ({ children }) => {
         <ConnectionProvider endpoint={endpoint}>
             <WalletProvider wallets={wallets} autoConnect>
                 <WalletModalProvider>
-                    {children}
+                    <ToastProvider>
+                        {children}
+                    </ToastProvider>
                 </WalletModalProvider>
             </WalletProvider>
         </ConnectionProvider>
