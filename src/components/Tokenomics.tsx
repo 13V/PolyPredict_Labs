@@ -47,7 +47,7 @@ export const Tokenomics = () => {
                         Tokenomics
                     </h2>
                     <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                        $OMEN is designed for long-term value with deflationary mechanics and real utility.
+                        $PROPHET is designed for long-term value with deflationary mechanics and real utility.
                     </p>
                 </motion.div>
 

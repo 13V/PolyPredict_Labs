@@ -22,7 +22,7 @@ export const TrustBadges = () => {
         {
             icon: Users,
             title: 'Community Driven',
-            description: 'Governed by $OMEN token holders',
+            description: 'Governed by $PROPHET token holders',
         },
     ];
 

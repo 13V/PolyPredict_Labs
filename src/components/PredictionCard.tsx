@@ -1,61 +1,49 @@
 'use client';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Wallet, Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Clock, Trophy } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { saveVote, getVote, getVoteCounts } from '@/utils/voteStorage';
+import { saveVote, getVote, getVoteCounts, getResolutionStatus, saveResolution } from '@/utils/voteStorage';
 import { hasMinimumTokens } from '@/utils/tokenGating';
+import { getDeterministicPattern } from '@/utils/chartPatterns';
+import { fetchMarketResult } from '@/services/polymarket';
+import { Sparkline } from './Sparkline';
+import { ResolutionPanel } from './ResolutionPanel';
 
 interface PredictionCardProps {
     id: number;
-    question: string;
     category: string;
-    deadline: string;
+    question: string;
+    timeLeft: string;
     yesVotes: number;
     noVotes: number;
+    totalVolume?: number;
+    outcomeLabels?: string[]; // Optional custom labels
+    status?: 'active' | 'resolving' | 'resolved'; // NEW: Status
 }
 
-export const PredictionCard: React.FC<PredictionCardProps> = ({
+export const PredictionCard = ({
     id,
-    question,
     category,
-    deadline,
+    question,
+    timeLeft,
     yesVotes: initialYes,
     noVotes: initialNo,
-}) => {
+    totalVolume,
+    outcomeLabels, // Destructure new prop
+    status = 'active' // Default to active
+}: PredictionCardProps) => {
     const { publicKey, connected } = useWallet();
+    // ... existing hooks ...
     const [yesVotes, setYesVotes] = useState(initialYes);
     const [noVotes, setNoVotes] = useState(initialNo);
     const [voted, setVoted] = useState<'yes' | 'no' | null>(null);
     const [hasTokens, setHasTokens] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
-    const [timeLeft, setTimeLeft] = useState('');
 
-    useEffect(() => {
-        // Simple countdown logic for demo purposes
-        // In a real app, parse the deadline string or use a timestamp
-        const calculateTimeLeft = () => {
-            const now = new Date();
-            const endOfDay = new Date();
-            endOfDay.setUTCHours(23, 59, 59, 999);
-
-            const diff = endOfDay.getTime() - now.getTime();
-
-            if (diff <= 0) return 'Ended';
-
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-            return `${hours}h ${minutes}m`;
-        };
-
-        setTimeLeft(calculateTimeLeft());
-        const timer = setInterval(() => {
-            setTimeLeft(calculateTimeLeft());
-        }, 60000);
-
-        return () => clearInterval(timer);
-    }, []);
+    // Default labels
+    const yesLabel = outcomeLabels?.[0] || 'YES';
+    const noLabel = outcomeLabels?.[1] || 'NO';
 
     const checkTokenBalance = useCallback(async () => {
         if (!publicKey) return;
@@ -66,6 +54,10 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         setIsChecking(false);
     }, [publicKey]);
 
+    // ... (inside component)
+
+    const [resolvedOutcome, setResolvedOutcome] = useState<'yes' | 'no' | null>(null);
+
     // Load existing vote and vote counts on mount
     useEffect(() => {
         if (publicKey) {
@@ -73,16 +65,37 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
             if (existingVote) {
                 setVoted(existingVote.choice);
             }
-
-            // Check token balance
             checkTokenBalance();
+        }
+
+        // Check for global resolution (DAO or Oracle)
+        const outcome = getResolutionStatus(id);
+        if (outcome) {
+            setResolvedOutcome(outcome);
+        } else if (status === 'resolving') {
+            // AUTO-ORACLE: If confirming validation, ask Polymarket
+            checkOracle();
         }
 
         // Load vote counts from localStorage
         const counts = getVoteCounts(id);
         setYesVotes(initialYes + counts.yes);
         setNoVotes(initialNo + counts.no);
-    }, [publicKey, id, initialYes, initialNo, checkTokenBalance]);
+    }, [publicKey, id, initialYes, initialNo, checkTokenBalance, status]); // Added status dependency
+
+    const checkOracle = async () => {
+        const result = await fetchMarketResult(id);
+        if (result) {
+            console.log(`Oracle Resolved Market #${id}: ${result.toUpperCase()}`);
+            setResolvedOutcome(result);
+            saveResolution(id, result); // Persist it so we don't fetch every time
+        }
+    };
+
+    // Derived status: Prop or Resolved State
+    const currentStatus = resolvedOutcome ? 'resolved' : status;
+
+    // ... handleVote ...
 
     const handleVote = async (choice: 'yes' | 'no') => {
         if (!connected || !publicKey) {
@@ -93,7 +106,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         if (voted) return; // Already voted
 
         if (!hasTokens) {
-            alert('You need to hold $OMEN tokens to vote!');
+            alert('You need to hold $PROPHET tokens to vote!');
             return;
         }
 
@@ -120,96 +133,125 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
     const yesPercentage = totalVotes > 0 ? (yesVotes / totalVotes) * 100 : 50;
     const noPercentage = totalVotes > 0 ? (noVotes / totalVotes) * 100 : 50;
 
+    // Generate a deterministic, unique sparkline shape that ends at the current price
+    const sparkData = getDeterministicPattern(id, yesPercentage);
+
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="group relative rounded-xl border border-gray-800 bg-gradient-to-br from-gray-900/90 to-gray-950/90 p-6 backdrop-blur-sm transition-all hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/20"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`group relative flex flex-col justify-between rounded-2xl transition-all overflow-hidden h-full backdrop-blur-xl ${status === 'resolving'
+                ? 'bg-blue-950/20 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.15)]'
+                : 'bg-gray-900/40 border border-white/5 hover:border-purple-500/30 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] hover:-translate-y-1'
+                }`}
         >
-            {/* Category Badge */}
-            <div className="mb-3 flex items-center justify-between">
-                <span className="rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-400 border border-purple-500/20">
-                    {category}
-                </span>
-                <div className="flex items-center gap-1 text-xs text-purple-300 bg-purple-900/20 px-2 py-1 rounded-md border border-purple-500/20">
-                    <Clock size={12} />
-                    <span>Ends in: {timeLeft}</span>
+            {/* Ambient Background Gradient (Subtle) */}
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="p-4 flex items-start justify-between">
+                <div className="flex gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
+                        {resolvedOutcome ? <Trophy className={resolvedOutcome === 'yes' ? 'text-green-500' : 'text-red-500'} size={20} /> :
+                            category === 'BTC' || category === 'CRYPTO' ? <span className="text-xl">₿</span> :
+                                category === 'ETH' ? <span className="text-xl">Ξ</span> :
+                                    category === 'SOL' ? <span className="text-xl">◎</span> :
+                                        <TrendingUp className="text-gray-400" size={20} />}
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{category}</span>
+                            <span className={`text-[10px] ${currentStatus === 'resolving' ? 'text-blue-400 font-bold animate-pulse' :
+                                currentStatus === 'resolved' ? 'text-amber-400 font-bold' :
+                                    'text-gray-600'
+                                }`}>
+                                • {currentStatus === 'resolving' ? 'AWAITING VERIFICATION' :
+                                    currentStatus === 'resolved' ? 'MARKET CLOSED' :
+                                        `Ends ${timeLeft}`}
+                            </span>
+                        </div>
+                        <h3 className="text-sm font-bold text-white leading-tight line-clamp-2 min-h-[40px]">
+                            {question}
+                        </h3>
+                    </div>
+                </div>
+
+                {/* Mini Sparkline */}
+                <div className="w-[60px] h-[30px] opacity-50 group-hover:opacity-100 transition-opacity">
+                    <Sparkline data={sparkData} width={60} height={30} color={yesPercentage >= 50 ? '#10B981' : '#EF4444'} />
                 </div>
             </div>
 
-            {/* Question */}
-            <h3 className="mb-4 text-lg font-bold text-white leading-tight">
-                {question}
-            </h3>
+            {/* Middle: Stats */}
+            <div className="px-4 pb-4">
+                <div className="flex items-end justify-between mb-2">
+                    <span className={`text-2xl font-black ${yesPercentage >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                        {yesPercentage.toFixed(0)}%
+                        <span className="text-xs font-normal text-gray-500 ml-1">chance</span>
+                    </span>
+                    <span className="text-xs text-gray-400 font-mono">
+                        ${totalVolume ? totalVolume.toLocaleString() : (totalVotes * 10.5).toLocaleString()} Vol
+                    </span>
+                </div>
 
-            {/* Vote Progress Bar */}
-            <div className="mb-4 h-2 w-full overflow-hidden rounded-full bg-gray-800">
-                <div className="flex h-full">
-                    <motion.div
-                        initial={{ width: '50%' }}
-                        animate={{ width: `${yesPercentage}%` }}
-                        className="bg-gradient-to-r from-green-500 to-green-400"
-                    />
-                    <motion.div
-                        initial={{ width: '50%' }}
-                        animate={{ width: `${noPercentage}%` }}
-                        className="bg-gradient-to-r from-red-400 to-red-500"
-                    />
+                {/* Progress Bar */}
+                <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden flex">
+                    <div style={{ width: `${yesPercentage}%` }} className="h-full bg-green-500" />
+                    <div style={{ width: `${noPercentage}%` }} className="h-full bg-red-500" />
                 </div>
             </div>
 
-            {/* Vote Stats */}
-            <div className="mb-4 flex justify-between text-sm">
-                <span className="text-green-400 flex items-center gap-1">
-                    <TrendingUp size={16} />
-                    {yesPercentage.toFixed(0)}% YES
-                </span>
-                <span className="text-gray-500">{totalVotes} votes</span>
-                <span className="text-red-400 flex items-center gap-1">
-                    <TrendingDown size={16} />
-                    {noPercentage.toFixed(0)}% NO
-                </span>
-            </div>
-
-            {/* Wallet Not Connected Warning */}
-            {!connected && (
-                <div className="mb-3 flex items-center gap-2 rounded-lg bg-yellow-900/20 border border-yellow-500/30 px-3 py-2 text-xs text-yellow-400">
-                    <Wallet size={14} />
-                    <span>Connect wallet to vote</span>
+            {/* Token Gating Warning (Only show if active) */}
+            {!hasTokens && connected && status !== 'resolving' && (
+                <div className="mx-4 mb-2 text-center">
+                    <p className="text-[10px] text-red-400 bg-red-900/20 py-1 rounded border border-red-500/20">
+                        ⚠ Must hold 1000+ $PROPHET to vote
+                    </p>
                 </div>
             )}
 
-            {/* Vote Buttons */}
-            <div className="flex gap-3">
-                <button
-                    onClick={() => handleVote('yes')}
-                    disabled={!connected || voted !== null || isChecking}
-                    className={`flex-1 rounded-lg py-3 font-bold transition-all ${voted === 'yes'
-                        ? 'bg-green-500 text-white'
-                        : voted === 'no'
-                            ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
-                            : !connected
-                                ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
-                                : 'bg-green-900/30 text-green-400 hover:bg-green-900/50 hover:scale-105'
-                        }`}
-                >
-                    {voted === 'yes' ? '✓ VOTED YES' : 'YES'}
-                </button>
-                <button
-                    onClick={() => handleVote('no')}
-                    disabled={!connected || voted !== null || isChecking}
-                    className={`flex-1 rounded-lg py-3 font-bold transition-all ${voted === 'no'
-                        ? 'bg-red-500 text-white'
-                        : voted === 'yes'
-                            ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
-                            : !connected
-                                ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
-                                : 'bg-red-900/30 text-red-400 hover:bg-red-900/50 hover:scale-105'
-                        }`}
-                >
-                    {voted === 'no' ? '✓ VOTED NO' : 'NO'}
-                </button>
+            {/* Bottom Actions: Either Voting OR Resolution */}
+            <div className="px-4 pb-4 mt-auto">
+                {/* Bottom Actions: Check Resolved state FIRST */}
+                {resolvedOutcome ? (
+                    <div className="text-center">
+                        <h4 className="text-sm font-bold mb-2">Market Resolved: {resolvedOutcome === 'yes' ? yesLabel : noLabel} Won!</h4>
+                        {voted === resolvedOutcome ?
+                            <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full">Claim Winnings 💰 (~1.85x)</button> :
+                            <p className="text-red-500 font-bold">Rekt 💀</p>
+                        }
+                        <p className="text-xs text-gray-400 mt-1">(-10% tax)</p>
+                    </div>
+                ) : status === 'resolving' ? (
+                    <ResolutionPanel
+                        id={id}
+                        yesLabel={yesLabel}
+                        noLabel={noLabel}
+                        onResolve={(outcome) => console.log('Resolved:', outcome)}
+                    />
+                ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            onClick={() => handleVote('yes')}
+                            disabled={!connected || voted !== null || !hasTokens}
+                            className={`py-2 rounded-lg text-xs font-bold transition-colors border ${!hasTokens && connected
+                                ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed'
+                                : 'bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-black border-green-500/20'
+                                }`}
+                        >
+                            {yesLabel} {yesPercentage.toFixed(0)}¢
+                        </button>
+                        <button
+                            onClick={() => handleVote('no')}
+                            disabled={!connected || voted !== null || !hasTokens}
+                            className={`py-2 rounded-lg text-xs font-bold transition-colors border ${!hasTokens && connected
+                                ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed'
+                                : 'bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border-red-500/20'
+                                }`}
+                        >
+                            {noLabel} {noPercentage.toFixed(0)}¢
+                        </button>
+                    </div>
+                )}
             </div>
-        </motion.div>
+        </motion.div >
     );
 };

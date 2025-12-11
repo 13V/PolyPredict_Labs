@@ -6,12 +6,12 @@ import { Providers } from "@/components/Providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "OMEN | Predict the Future, Earn Rewards",
-  description: "The first memecoin with real utility. Vote on crypto predictions, prove you're an oracle, and earn $OMEN rewards. Fair launch on Pump.fun.",
-  keywords: ["memecoin", "crypto prediction", "solana", "pump.fun", "OMEN", "earn crypto"],
+  title: "PROPHET | Predict the Future, Earn Rewards",
+  description: "The first memecoin with real utility. Vote on crypto predictions, prove you're an oracle, and earn $PROPHET rewards. Fair launch on Pump.fun.",
+  keywords: ["memecoin", "crypto prediction", "solana", "pump.fun", "PROPHET", "earn crypto"],
   openGraph: {
-    title: "OMEN | Predict the Future, Earn Rewards",
-    description: "Vote on crypto predictions and earn $OMEN rewards. Join the revolution.",
+    title: "PROPHET | Predict the Future, Earn Rewards",
+    description: "Vote on crypto predictions and earn $PROPHET rewards. Join the revolution.",
     type: "website",
     locale: "en_US",
     images: [
@@ -19,15 +19,15 @@ export const metadata: Metadata = {
         url: "/og-image.png", // We'll need to generate this
         width: 1200,
         height: 630,
-        alt: "OMEN Prediction Protocol",
+        alt: "PROPHET Prediction Protocol",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "OMEN | Predict the Future",
-    description: "Vote on crypto predictions and earn $OMEN rewards.",
-    creator: "@OmenProtocol", // Replace with actual handle
+    title: "PROPHET | Predict the Future",
+    description: "Vote on crypto predictions and earn $PROPHET rewards.",
+    creator: "@ProphetProtocol", // Replace with actual handle
   },
 };
 
@@ -37,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} bg-gray-950 text-white min-h-screen`}>
         <Providers>
           {children}

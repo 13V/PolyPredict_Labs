@@ -5,7 +5,7 @@ export interface PredictionOutcome {
     closedBy: string;
 }
 
-const OUTCOMES_KEY = 'omen_prediction_outcomes';
+const OUTCOMES_KEY = 'prophet_prediction_outcomes';
 
 /**
  * Close a prediction and set its outcome

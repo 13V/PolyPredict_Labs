@@ -5,7 +5,7 @@ export interface Vote {
     timestamp: number;
 }
 
-const VOTES_KEY = 'omen_votes';
+const VOTES_KEY = 'prophet_votes';
 
 /**
  * Save a vote to localStorage
@@ -68,4 +68,36 @@ export function getVoteCounts(predictionId: number): { yes: number; no: number }
  */
 export function clearAllVotes(): void {
     localStorage.removeItem(VOTES_KEY);
+    localStorage.removeItem('prophet_resolutions');
+}
+
+// --- Resolution Storage ---
+
+const RESOLUTIONS_KEY = 'prophet_resolutions';
+
+export interface Resolution {
+    predictionId: number;
+    outcome: 'yes' | 'no';
+    timestamp: number;
+    stakedAmount: number;
+}
+
+export function saveResolution(resolution: Resolution): void {
+    const resolutions = getAllResolutions();
+    resolutions.push(resolution);
+    localStorage.setItem(RESOLUTIONS_KEY, JSON.stringify(resolutions));
+}
+
+export function getAllResolutions(): Resolution[] {
+    if (typeof window === 'undefined') return [];
+    const json = localStorage.getItem(RESOLUTIONS_KEY);
+    return json ? JSON.parse(json) : [];
+}
+
+export function getResolutionStatus(predictionId: number): 'yes' | 'no' | null {
+    const resolutions = getAllResolutions();
+    // For MVP: If ANYONE verified it, it's resolved.
+    // In production: We would count votes.
+    const match = resolutions.find(r => r.predictionId === predictionId);
+    return match ? match.outcome : null;
 }

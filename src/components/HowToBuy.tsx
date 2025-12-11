@@ -19,12 +19,12 @@ export const HowToBuy = () => {
         {
             icon: ArrowRight,
             title: 'Go to Pump.fun',
-            description: 'Visit pump.fun and search for $OMEN token. Connect your wallet.',
+            description: 'Visit pump.fun and search for $PROPHET token. Connect your wallet.',
             color: 'from-green-500 to-emerald-500',
         },
         {
             icon: CheckCircle,
-            title: 'Swap SOL for $OMEN',
+            title: 'Swap SOL for $PROPHET',
             description: 'Enter the amount of SOL you want to swap and confirm the transaction.',
             color: 'from-yellow-500 to-orange-500',
         },
@@ -40,7 +40,7 @@ export const HowToBuy = () => {
                     className="text-center mb-16"
                 >
                     <h2 className="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-                        How to Buy $OMEN
+                        How to Buy $PROPHET
                     </h2>
                     <p className="text-xl text-gray-400 max-w-2xl mx-auto">
                         Get your tokens in 4 simple steps

@@ -57,7 +57,7 @@ export default function AdminPage() {
 
     const loadData = () => {
         setOutcomes(getAllOutcomes());
-        setAllRewards(calculateAllRewards(1000)); // 1000 $OMEN per prediction
+        setAllRewards(calculateAllRewards(1000)); // 1000 $PROPHET per prediction
         setTotalVotes(getAllVotes().length);
     };
 
@@ -121,7 +121,7 @@ export default function AdminPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-white mb-2">OMEN Admin Panel</h1>
+                        <h1 className="text-4xl font-bold text-white mb-2">PROPHET Admin Panel</h1>
                         <p className="text-gray-400">Manage predictions and calculate rewards</p>
                     </div>
                     <WalletConnect />
@@ -169,7 +169,7 @@ export default function AdminPage() {
                     >
                         <DollarSign className="w-8 h-8 text-yellow-400 mb-2" />
                         <div className="text-3xl font-bold text-white">{totalRewardPool.toLocaleString()}</div>
-                        <div className="text-sm text-gray-400">$OMEN Rewards</div>
+                        <div className="text-sm text-gray-400">$PROPHET Rewards</div>
                     </motion.div>
                 </div>
 
@@ -216,7 +216,7 @@ export default function AdminPage() {
 
                                         {rewardData && (
                                             <div className="text-sm text-gray-400">
-                                                Winners: {rewardData.totalWinners} | Reward per winner: {rewardData.rewardPerWinner.toFixed(2)} $OMEN
+                                                Winners: {rewardData.totalWinners} | Reward per winner: {rewardData.rewardPerWinner.toFixed(2)} $PROPHET
                                             </div>
                                         )}
                                     </div>
