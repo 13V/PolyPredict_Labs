@@ -8,8 +8,8 @@ const opts = {
 };
 
 // Program ID from the IDL or Devnet
-// Program ID from the IDL or Devnet
-const PROGRAM_ID = new PublicKey("aarqjMf425M1LBzMwLxZvvbUTdFvePzTHksUAxq");
+// HOST: Using a temporary valid placeholder to allow build to pass. Update this after deployment!
+const PROGRAM_ID = new PublicKey("HqQqPtf7FgFySXDHrTzExbGKUt4axd1JJQRDr9kZpump");
 
 export const getProvider = (wallet: any) => {
     if (!wallet) return null;

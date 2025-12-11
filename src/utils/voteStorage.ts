@@ -30,8 +30,8 @@ export async function saveVote(vote: Vote, wallet?: any): Promise<string | void>
 
                 // Derive PDA
                 // NOTE: In a real app we'd fetch the actual market PDA from the ID
-                // For MVP we mock the market Key
-                const marketKey = new PublicKey("PrphEt1111111111111111111111111111111111111");
+                // For MVP we mock the market Key (using System Program ID as valid placeholder)
+                const marketKey = new PublicKey("11111111111111111111111111111111");
                 const votePda = await getVotePDA(marketKey, wallet.publicKey);
 
                 // Call the Smart Contract
