@@ -209,45 +209,68 @@ export async function fetchMarketResult(id: number): Promise<'yes' | 'no' | null
 }
 
 /**
- * Smart Fetcher: Specifically hunts for 50 markets ending < 24h
- * Loops through pages until it satisfies the requirement.
+ * Smart Fetcher: hunts for markets ending < 24h.
+ * FALLBACK: If not enough daily markets are found, it fills the rest with standard trending markets.
  */
 export async function fetchDailyMarkets(requiredCount = 50): Promise<any[]> {
     let collected: any[] = [];
     let offset = 0;
-    const batchSize = 100; // API Limit usually
-    const maxPages = 20; // Scan 2000 items to ensure we find 50 daily ones
+    const batchSize = 100;
+    const maxPages = 20; // Scan up to 2000 items
 
     console.log(`Starting prioritized search for ${requiredCount} daily markets...`);
 
-    for (let i = 0; i < maxPages; i++) {
-        // Fetch batch
-        const batch = await fetchPolymarketTrending(batchSize, offset);
+    try {
+        for (let i = 0; i < maxPages; i++) {
+            // Fetch batch
+            const batch = await fetchPolymarketTrending(batchSize, offset);
 
-        if (batch.length === 0) break; // End of data
+            if (batch.length === 0) break; // End of data
 
-        // Filter this batch for < 24h
-        const dailyInBatch = batch.filter(m => {
-            if (!m.endDate) return false;
-            const end = new Date(m.endDate).getTime();
-            const now = Date.now();
-            const hoursLeft = (end - now) / (1000 * 60 * 60);
-            return hoursLeft > 0 && hoursLeft <= 24;
-        });
+            // Filter this batch for < 24h
+            const dailyInBatch = batch.filter(m => {
+                if (!m.endDate) return false;
+                const end = new Date(m.endDate).getTime();
+                const now = Date.now();
+                const hoursLeft = (end - now) / (1000 * 60 * 60);
+                return hoursLeft > 0 && hoursLeft <= 24;
+            });
 
-        // Add unique items
-        for (const item of dailyInBatch) {
-            if (!collected.find(c => c.id === item.id)) {
-                collected.push(item);
+            // Add unique items
+            for (const item of dailyInBatch) {
+                if (!collected.find(c => c.id === item.id)) {
+                    collected.push(item);
+                }
             }
+
+            console.log(`Page ${i + 1}: Found ${dailyInBatch.length} daily markets. Total: ${collected.length}/${requiredCount}`);
+
+            if (collected.length >= requiredCount) break;
+
+            offset += batchSize;
+            await delay(200); // Polite rate limit
         }
+    } catch (e) {
+        console.warn("Error during strict scan loop:", e);
+    }
 
-        console.log(`Page ${i + 1}: Found ${dailyInBatch.length} daily markets. Total: ${collected.length}/${requiredCount}`);
+    // --- FALLBACK MECHANISM ---
+    if (collected.length < requiredCount) {
+        console.warn(`Strict filter found only ${collected.length} markets. Filling with trending...`);
+        try {
+            // Fetch standard trending to fill the gaps
+            const fallbackLimit = requiredCount - collected.length + 20; // Fetch a bit extra
+            const trending = await fetchPolymarketTrending(fallbackLimit, 0);
 
-        if (collected.length >= requiredCount) break;
-
-        offset += batchSize;
-        await delay(200); // Polite rate limit
+            for (const item of trending) {
+                if (collected.length >= requiredCount) break;
+                if (!collected.find(c => c.id === item.id)) {
+                    collected.push(item);
+                }
+            }
+        } catch (e) {
+            console.error("Fallback fetch failed:", e);
+        }
     }
 
     // Sort by volume descending to ensure quality

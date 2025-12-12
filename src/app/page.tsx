@@ -47,10 +47,8 @@ export default function Home() {
         const dailyMarkets = await fetchDailyMarkets(50);
 
         if (dailyMarkets.length === 0) {
-          console.warn("API returned 0 events.");
-          setFetchError(true);
-          setIsLoading(false);
-          return;
+          console.warn("API returned 0 events even after fallback.");
+          // Don't error out, just show empty state or user markets
         }
 
         // 4. Merge with User Markets (Keep these, they are real user input)
@@ -61,7 +59,12 @@ export default function Home() {
 
         console.log(`Displaying ${mergedList.length} markets total.`);
         setPredictions(mergedList);
-        setFetchError(false);
+
+        if (mergedList.length === 0) {
+          setFetchError("No markets found. Try disabling VPN.");
+        } else {
+          setFetchError(false);
+        }
 
       } catch (e) {
         console.error("Critical Fetch Error:", e);
