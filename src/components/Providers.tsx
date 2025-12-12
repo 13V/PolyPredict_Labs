@@ -7,6 +7,11 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
+// Polyfill Buffer for Solana Web3.js support on client
+import { Buffer } from 'buffer';
+if (typeof window !== 'undefined' && !window.Buffer) {
+    window.Buffer = Buffer;
+}
 
 import { ToastProvider } from '@/context/ToastContext';
 
