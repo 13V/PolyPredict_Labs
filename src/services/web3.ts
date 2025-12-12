@@ -9,7 +9,7 @@ const opts = {
 
 // Program ID from the IDL or Devnet
 // HOST: Using a temporary valid placeholder to allow build to pass. Update this after deployment!
-export const PROGRAM_ID = new PublicKey("HqQqPtf7FgFySXDHrTzExbGKUt4axd1JJQRDr9kZpump");
+export const PROGRAM_ID = new PublicKey("8f4FusHQaT2KxwpZzRNTV6TpdaEu68bcLFfJKBwZ3koE");
 
 export const USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"); // Devnet USDC
 const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
