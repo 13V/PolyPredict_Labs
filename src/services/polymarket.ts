@@ -20,18 +20,14 @@ export interface PolymarketEvent {
 // Use internal API to bypass CORS
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function fetchPolymarketTrending(limit = 50, offset = 0) {
+export async function fetchPolymarketTrending(limit = 50, offset = 0, sortBy = 'liquidity', ascending = false) {
     const maxRetries = 3;
     let attempt = 0;
 
     while (attempt < maxRetries) {
         try {
             // STRATEGY: Client-Side Fetch via Public CORS Proxy
-            // STRATEGY: Client-Side Proxy Priority
-            // Reason: Vercel Data Center IPs are blocked. Edge IPs might be blocked.
-            // User IPs (via Proxy) are the most reliable.
-
-            const gammaUrl = `https://gamma-api.polymarket.com/events?active=true&closed=false&order=liquidity&ascending=false&limit=${limit}&offset=${offset}`;
+            const gammaUrl = `https://gamma-api.polymarket.com/events?active=true&closed=false&order=${sortBy}&ascending=${ascending}&limit=${limit}&offset=${offset}`;
             let response;
             let usedSource = 'Client-Proxy';
 
@@ -222,17 +218,23 @@ export async function fetchDailyMarkets(requiredCount = 50): Promise<any[]> {
 
     try {
         for (let i = 0; i < maxPages; i++) {
-            // Fetch batch
-            const batch = await fetchPolymarketTrending(batchSize, offset);
+            // Strategy: FETCH BY END DATE (Ascending) to find markets closing soon
+            // Filter: Must have some volume > $100 to be worth showing
+            const batch = await fetchPolymarketTrending(batchSize, offset, 'endDate', true);
 
             if (batch.length === 0) break; // End of data
 
-            // Filter this batch for < 24h
+            // Filter this batch
             const dailyInBatch = batch.filter(m => {
+                // Must have volume to be relevant (avoid garbage spam)
+                if (m.totalVolume < 100) return false;
+
                 if (!m.endDate) return false;
                 const end = new Date(m.endDate).getTime();
                 const now = Date.now();
                 const hoursLeft = (end - now) / (1000 * 60 * 60);
+
+                // Must be ending in future, but within 24h
                 return hoursLeft > 0 && hoursLeft <= 24;
             });
 
@@ -243,7 +245,7 @@ export async function fetchDailyMarkets(requiredCount = 50): Promise<any[]> {
                 }
             }
 
-            console.log(`Page ${i + 1}: Found ${dailyInBatch.length} daily markets. Total: ${collected.length}/${requiredCount}`);
+            console.log(`Page ${i + 1}: Found ${dailyInBatch.length} valid daily markets. Total: ${collected.length}/${requiredCount}`);
 
             if (collected.length >= requiredCount) break;
 
