@@ -14,6 +14,7 @@ if (typeof window !== 'undefined' && !window.Buffer) {
 }
 
 import { BetSuccessProvider } from '@/context/BetSuccessContext';
+import { ToastProvider } from '@/context/ToastContext';
 
 // ...
 
