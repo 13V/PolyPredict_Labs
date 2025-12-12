@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, Twitter, Send, Copy, Check, Plus } from "lucide-react";
 import { CreateMarketModal } from '@/components/CreateMarketModal';
 import { UserPositions } from '@/components/UserPositions';
+import { MobileNav } from '@/components/MobileNav';
 import { HowItWorks } from "@/components/HowItWorks";
 
 import { fetchPolymarketTrending } from '@/services/polymarket';
@@ -298,6 +299,11 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <MobileNav
+        onOpenSearch={() => setActiveCategory('all')}
+        onOpenMyBets={() => setIsPositionsOpen(true)}
+        onScrollTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      />
     </main >
   );
 }
