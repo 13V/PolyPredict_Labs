@@ -7,6 +7,7 @@ import { Sparkline } from './Sparkline';
 import { useState } from 'react';
 import { saveVote } from '@/utils/voteStorage';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { useToast } from '@/context/ToastContext';
 
 interface FeaturedMarketProps {
     data?: {
@@ -23,9 +24,39 @@ interface FeaturedMarketProps {
 }
 
 export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps) => {
-    const { publicKey, connected } = useWallet();
+    const { publicKey, connected, wallet } = useWallet();
+    const { showToast } = useToast();
     const [betMode, setBetMode] = useState<'yes' | 'no' | null>(null);
     const [stakeAmount, setStakeAmount] = useState('');
+
+    const handleConfirmBet = async () => {
+        if (!connected || !publicKey) {
+            showToast('Connect wallet to vote!', 'error');
+            return;
+        }
+
+        if (!stakeAmount || parseFloat(stakeAmount) <= 0) {
+            showToast('Enter a valid stake amount', 'error');
+            return;
+        }
+
+        try {
+            await saveVote({
+                predictionId: data?.id || 999999, // Fallback for featured ID
+                choice: betMode as 'yes' | 'no',
+                walletAddress: publicKey.toString(),
+                timestamp: Date.now(),
+                amount: parseFloat(stakeAmount)
+            }, wallet?.adapter); // Pass adapter for signing
+
+            showToast(`Successfully bet ${stakeAmount} on ${betMode?.toUpperCase()}`, 'success');
+            setBetMode(null);
+            setStakeAmount('');
+        } catch (e) {
+            console.error(e);
+            showToast('Failed to place vote', 'error');
+        }
+    };
     // Determine Yes % (default 85 if no data)
     const yesPercentage = data ? ((data.yesVotes / (data.yesVotes + data.noVotes)) * 100) : 85;
     const yesPrice = Math.floor(yesPercentage);
