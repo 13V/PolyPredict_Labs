@@ -49,7 +49,7 @@ export const UserPositions = ({ isOpen, onClose }: UserPositionsProps) => {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed inset-y-0 right-0 w-full max-w-md bg-[#0f172a] border-l border-gray-800 shadow-2xl z-[70] flex flex-col"
+                        className="fixed inset-y-0 right-0 w-full md:max-w-md bg-[#0f172a] border-l border-gray-800 shadow-2xl z-[70] flex flex-col"
                     >
                         {/* Header */}
                         <div className="p-6 border-b border-gray-800 flex items-center justify-between bg-gray-900/50">

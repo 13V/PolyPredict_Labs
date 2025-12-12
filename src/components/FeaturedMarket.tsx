@@ -84,60 +84,60 @@ export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps)
             {/* Animated Grid Texture Overlay */}
             <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
 
-            <div className="relative grid lg:grid-cols-5 gap-0 min-h-[480px]">
+            <div className="relative grid lg:grid-cols-5 gap-0 min-h-[auto] lg:min-h-[480px]">
                 {/* Left: Chart & Info (3 cols) */}
-                <div className="lg:col-span-3 p-6 md:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/5 relative">
+                <div className="lg:col-span-3 p-5 md:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/5 relative">
 
                     {/* Floating Badge */}
-                    <div className="absolute top-10 right-10 flex items-center gap-3">
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold animate-pulse">
+                    <div className="absolute top-5 right-5 md:top-10 md:right-10 flex items-center gap-3">
+                        <div className="flex items-center gap-2 px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] md:text-xs font-bold animate-pulse">
                             <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
                             LIVE
                         </div>
                     </div>
 
-                    <div className="z-10">
-                        <div className="flex items-center gap-3 mb-6">
-                            <span className="bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold px-3 py-1 rounded-sm flex items-center gap-2 tracking-wider">
+                    <div className="z-10 mt-8 md:mt-0">
+                        <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6 flex-wrap">
+                            <span className="bg-purple-500/10 border border-purple-500/30 text-purple-300 text-[10px] md:text-xs font-mono font-bold px-2 py-1 md:px-3 md:py-1 rounded-sm flex items-center gap-2 tracking-wider">
                                 <TrendingUp size={12} /> #1 TRENDING
                             </span>
-                            <span className="text-gray-500 text-sm font-mono tracking-wide uppercase">
+                            <span className="text-gray-500 text-xs md:text-sm font-mono tracking-wide uppercase">
                                 {data?.category || 'Politics'} • Ends {data?.timeLeft || 'Today'}
                             </span>
                         </div>
 
-                        <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-white mb-6 leading-[1.1] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+                        <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-white mb-4 md:mb-6 leading-[1.1] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
                             {data?.question || "Will Bitcoin close higher today?"}
                         </h2>
 
-                        <div className="flex flex-wrap items-center gap-8 mt-4 text-sm text-gray-400 font-mono">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-green-500/10 rounded-lg text-green-400">
-                                    <Activity size={18} />
+                        <div className="flex flex-wrap items-center gap-4 md:gap-8 mt-2 md:mt-4 text-sm text-gray-400 font-mono">
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <div className="p-1.5 md:p-2 bg-green-500/10 rounded-lg text-green-400">
+                                    <Activity size={16} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-xs text-gray-500 uppercase">Volume</span>
-                                    <span className="text-white font-bold">${data?.totalVolume ? data.totalVolume.toLocaleString() : '4.2m'}</span>
+                                    <span className="text-[10px] md:text-xs text-gray-500 uppercase">Volume</span>
+                                    <span className="text-white font-bold text-xs md:text-base">${data?.totalVolume ? data.totalVolume.toLocaleString() : '4.2m'}</span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                                    <Users size={18} />
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <div className="p-1.5 md:p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                                    <Users size={16} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-xs text-gray-500 uppercase">Traders</span>
-                                    <span className="text-white font-bold">12.5k</span>
+                                    <span className="text-[10px] md:text-xs text-gray-500 uppercase">Traders</span>
+                                    <span className="text-white font-bold text-xs md:text-base">12.5k</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Big Chart Area */}
-                    <div className="mt-12">
-                        <div className="flex items-end gap-4 mb-4">
-                            <div className="text-6xl font-black text-white tracking-tighter">{yesPrice}%</div>
-                            <div className="text-green-400 font-mono text-lg mb-2 flex items-center">
-                                <ArrowUpRight size={20} />
+                    <div className="mt-8 md:mt-12">
+                        <div className="flex items-end gap-3 md:gap-4 mb-4">
+                            <div className="text-4xl md:text-6xl font-black text-white tracking-tighter">{yesPrice}%</div>
+                            <div className="text-green-400 font-mono text-sm md:text-lg mb-1 md:mb-2 flex items-center">
+                                <ArrowUpRight size={16} className="md:w-5 md:h-5" />
                                 +{(data?.question.length ? (data.question.length % 15) + 1.5 : 12.4).toFixed(1)}% today
                             </div>
                         </div>
@@ -152,18 +152,18 @@ export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps)
                 </div>
 
                 {/* Right: Trading Interface (2 cols) */}
-                <div className="lg:col-span-2 p-6 md:p-10 bg-white/[0.02] backdrop-blur-md flex flex-col justify-center gap-8 relative overflow-hidden">
+                <div className="lg:col-span-2 p-5 md:p-10 bg-white/[0.02] backdrop-blur-md flex flex-col justify-center gap-6 md:gap-8 relative overflow-hidden">
                     {/* Glass Reflection */}
                     <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
                     <div className="space-y-6 z-10">
                         <div className="space-y-2">
-                            <div className="flex justify-between text-sm font-bold text-gray-400 uppercase tracking-widest">
+                            <div className="flex justify-between text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">
                                 <span>Order Book</span>
                                 <span>Spread: 1¢</span>
                             </div>
                             {/* Mock Order Book Visual */}
-                            <div className="flex gap-1 h-2 w-full rounded-full overflow-hidden bg-gray-800">
+                            <div className="flex gap-1 h-1.5 md:h-2 w-full rounded-full overflow-hidden bg-gray-800">
                                 <motion.div
                                     initial={{ width: '50%' }}
                                     animate={{ width: `${yesPercentage}%` }}
@@ -175,12 +175,12 @@ export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps)
 
                         <div className="grid grid-cols-1 gap-4">
                             {betMode ? (
-                                <div className="bg-gray-800/80 p-6 rounded-2xl border border-gray-700 animate-in fade-in slide-in-from-bottom-4">
+                                <div className="bg-gray-800/80 p-4 md:p-6 rounded-2xl border border-gray-700 animate-in fade-in slide-in-from-bottom-4">
                                     <div className="flex justify-between items-center mb-4">
-                                        <h3 className={`text-xl font-black uppercase tracking-tight ${betMode === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
+                                        <h3 className={`text-lg md:text-xl font-black uppercase tracking-tight ${betMode === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
                                             Bet on {betMode === 'yes' ? 'YES' : 'NO'}
                                         </h3>
-                                        <button onClick={() => setBetMode(null)} className="text-gray-500 hover:text-white">✕</button>
+                                        <button onClick={() => setBetMode(null)} className="text-gray-500 hover:text-white p-2">✕</button>
                                     </div>
 
                                     <div className="relative mb-4">
@@ -189,40 +189,40 @@ export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps)
                                             placeholder="Enter Amount"
                                             value={stakeAmount}
                                             onChange={(e) => setStakeAmount(e.target.value)}
-                                            className="w-full bg-black/40 border-2 border-gray-600 focus:border-purple-500 rounded-xl px-4 py-3 text-lg text-white placeholder-gray-600 outline-none transition-all"
+                                            className="w-full bg-black/40 border-2 border-gray-600 focus:border-purple-500 rounded-xl px-4 py-3 text-base md:text-lg text-white placeholder-gray-600 outline-none transition-all"
                                             autoFocus
                                         />
-                                        <span className="absolute right-4 top-4 text-sm font-bold text-gray-400">$PROPHET</span>
+                                        <span className="absolute right-4 top-4 text-xs md:text-sm font-bold text-gray-400">$PROPHET</span>
                                     </div>
 
                                     <button
                                         onClick={handleConfirmBet}
-                                        className={`w-full py-4 rounded-xl text-lg font-black uppercase tracking-widest text-white shadow-xl transition-transform active:scale-95 ${betMode === 'yes' ? 'bg-gradient-to-r from-green-600 to-green-500 hover:to-green-400 shadow-green-900/20' : 'bg-gradient-to-r from-red-600 to-red-500 hover:to-red-400 shadow-red-900/20'
+                                        className={`w-full py-3 md:py-4 rounded-xl text-base md:text-lg font-black uppercase tracking-widest text-white shadow-xl transition-transform active:scale-95 ${betMode === 'yes' ? 'bg-gradient-to-r from-green-600 to-green-500 hover:to-green-400 shadow-green-900/20' : 'bg-gradient-to-r from-red-600 to-red-500 hover:to-red-400 shadow-red-900/20'
                                             }`}
                                     >
                                         CONFIRM BET
                                     </button>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-3 md:gap-4">
                                     <button
                                         onClick={() => connected ? setBetMode('yes') : alert('Connect Wallet!')}
-                                        className="group relative overflow-hidden p-6 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/50 rounded-2xl transition-all duration-300 active:scale-95"
+                                        className="group relative overflow-hidden p-4 md:p-6 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/50 rounded-2xl transition-all duration-300 active:scale-95"
                                     >
                                         <div className="relative z-10 flex flex-col items-center gap-1">
-                                            <span className="text-green-400 font-black text-2xl tracking-tight">YES</span>
-                                            <span className="text-white font-mono text-sm group-hover:scale-110 transition-transform bg-green-500/20 px-2 py-0.5 rounded">{yesPrice}¢</span>
+                                            <span className="text-green-400 font-black text-xl md:text-2xl tracking-tight">YES</span>
+                                            <span className="text-white font-mono text-xs md:text-sm group-hover:scale-110 transition-transform bg-green-500/20 px-2 py-0.5 rounded">{yesPrice}¢</span>
                                         </div>
                                         <div className="absolute inset-0 bg-green-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </button>
 
                                     <button
                                         onClick={() => connected ? setBetMode('no') : alert('Connect Wallet!')}
-                                        className="group relative overflow-hidden p-6 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/50 rounded-2xl transition-all duration-300 active:scale-95"
+                                        className="group relative overflow-hidden p-4 md:p-6 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/50 rounded-2xl transition-all duration-300 active:scale-95"
                                     >
                                         <div className="relative z-10 flex flex-col items-center gap-1">
-                                            <span className="text-red-400 font-black text-2xl tracking-tight">NO</span>
-                                            <span className="text-white font-mono text-sm group-hover:scale-110 transition-transform bg-red-500/20 px-2 py-0.5 rounded">{noPrice}¢</span>
+                                            <span className="text-red-400 font-black text-xl md:text-2xl tracking-tight">NO</span>
+                                            <span className="text-white font-mono text-xs md:text-sm group-hover:scale-110 transition-transform bg-red-500/20 px-2 py-0.5 rounded">{noPrice}¢</span>
                                         </div>
                                         <div className="absolute inset-0 bg-red-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </button>
@@ -230,10 +230,10 @@ export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps)
                             )}
                         </div>
 
-                        <div className="pt-6 border-t border-white/5 text-center">
+                        <div className="pt-4 md:pt-6 border-t border-white/5 text-center">
                             <button
                                 onClick={onOpenCreateModal} // Use the specific prop
-                                className="text-gray-400 hover:text-white text-xs uppercase tracking-widest font-bold transition-colors flex items-center justify-center gap-2 group"
+                                className="text-gray-400 hover:text-white text-[10px] md:text-xs uppercase tracking-widest font-bold transition-colors flex items-center justify-center gap-2 group"
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-gray-600 group-hover:bg-purple-500 transition-colors" />
                                 Create Your Own Market
