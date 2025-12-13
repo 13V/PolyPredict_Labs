@@ -288,7 +288,7 @@ export const PredictionCard = ({
                     <div className="grid grid-cols-2 gap-2">
                         <button
                             onClick={() => handleVoteClick('yes')}
-                            className={`py-2 rounded-lg text-xs font-bold transition-colors border ${!hasTokens && connected
+                            className={`py-2 rounded-lg text-xs font-bold transition-all active:scale-95 border ${!hasTokens && connected
                                 ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed opacity-50'
                                 : 'bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-black border-green-500/20'
                                 }`}
@@ -297,7 +297,7 @@ export const PredictionCard = ({
                         </button>
                         <button
                             onClick={() => handleVoteClick('no')}
-                            className={`py-2 rounded-lg text-xs font-bold transition-colors border ${!hasTokens && connected
+                            className={`py-2 rounded-lg text-xs font-bold transition-all active:scale-95 border ${!hasTokens && connected
                                 ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed opacity-50'
                                 : 'bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border-red-500/20'
                                 }`}
