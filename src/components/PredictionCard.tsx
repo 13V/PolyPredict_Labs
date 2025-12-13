@@ -11,6 +11,8 @@ import { Sparkline } from './Sparkline';
 import { ResolutionPanel } from './ResolutionPanel';
 import { useToast } from '@/context/ToastContext';
 import { useBetSuccess } from '@/context/BetSuccessContext';
+import { useHaptic } from '@/hooks/useHaptic';
+
 
 interface PredictionCardProps {
     id: number;
@@ -38,6 +40,8 @@ export const PredictionCard = ({
     const { publicKey, connected } = useWallet();
     const { toast } = useToast();
     const { showBetSuccess } = useBetSuccess();
+    const { trigger: haptic } = useHaptic();
+
 
     // ... existing hooks ...
     const [yesVotes, setYesVotes] = useState(initialYes);
@@ -99,6 +103,7 @@ export const PredictionCard = ({
     const currentStatus = resolvedOutcome ? 'resolved' : status;
 
     const handleVoteClick = (choice: 'yes' | 'no') => {
+        haptic('selection');
         if (!connected || !publicKey) {
             toast.error('Please connect your wallet first!');
             return;
@@ -116,6 +121,8 @@ export const PredictionCard = ({
             toast.error('Please connect your wallet to confirm bet.');
             return;
         }
+
+        haptic('success');
 
         const choice = betMode;
         const amount = parseFloat(stakeAmount) || 0;

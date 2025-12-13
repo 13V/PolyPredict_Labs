@@ -23,6 +23,19 @@ export const metadata: Metadata = {
       },
     ],
   },
+  manifest: "/manifest.json",
+  themeColor: "#020617",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "PROPHET",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false, // Prevent zooming for app-like feel
+  },
   twitter: {
     card: "summary_large_image",
     title: "PROPHET | Predict the Future",

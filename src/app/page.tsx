@@ -132,10 +132,17 @@ export default function Home() {
             </div>
 
             {isLoading ? (
-              <div className="h-[480px] w-full rounded-3xl bg-gray-900/50 animate-pulse border border-gray-800 flex items-center justify-center">
-                <div className="text-purple-500/50 flex flex-col items-center gap-4">
-                  <Sparkles className="animate-spin" size={48} />
-                  <span className="font-mono text-sm">Synchronizing with Polymarket...</span>
+              <div className="h-[480px] w-full rounded-3xl bg-gray-900/20 border border-gray-800 overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+                <div className="p-10 space-y-8 h-full flex flex-col justify-center">
+                  <div className="space-y-4">
+                    <div className="h-4 w-32 bg-gray-800 rounded animate-pulse" />
+                    <div className="h-12 w-3/4 bg-gray-800 rounded animate-pulse" />
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="h-20 w-full bg-gray-800 rounded animate-pulse" />
+                    <div className="h-20 w-full bg-gray-800 rounded animate-pulse" />
+                  </div>
                 </div>
               </div>
             ) : fetchError ? (
