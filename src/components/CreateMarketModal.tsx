@@ -218,6 +218,7 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
                             )}
                         </div>
                     </motion.div>
+                )}
             </div>
         </AnimatePresence>
     );
