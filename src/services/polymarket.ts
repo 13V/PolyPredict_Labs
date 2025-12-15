@@ -140,6 +140,14 @@ export async function fetchPolymarketTrending(limit = 50, offset = 0, sortBy = '
                     }
                 }
 
+                // --- STRICT QUALITY FILTER ---
+                // 1. Binary Markets Only: Multi-outcome markets (e.g. 10 horses) display poorly as binary.
+                if (outcomes.length !== 2) return null;
+
+                // 2. Dead Market Filter: If odds are 0% or 100%, it's likely resolved or dead. Boring for active betting.
+                // We want playable markets.
+                if (yesPrice <= 0.01 || yesPrice >= 0.99) return null;
+
                 return {
                     id: parseInt(market.id) || parseInt(event.id) || Math.random() * 100000,
                     question: event.title,
@@ -296,6 +304,12 @@ export async function fetchDailyMarkets(requiredCount = 50): Promise<any[]> {
                 let added = 0;
                 for (const item of fillBatch) {
                     if (item.totalVolume < 100) continue; // Basic quality
+
+                    // DATE FILTER for Refill:
+                    // Prevent long-term markets (e.g. 2026) from filling the quota just because they have volume.
+                    if (!item.endDate) continue;
+                    const hoursLeft = (new Date(item.endDate).getTime() - Date.now()) / (1000 * 60 * 60);
+                    if (hoursLeft > 48 || hoursLeft <= 0) continue;
 
                     // Force Category Match logic to be consistent
                     item.category = cat;
