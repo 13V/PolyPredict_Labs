@@ -1,4 +1,4 @@
-import { getProgram, getVotePDA, getATA, USDC_MINT } from '@/services/web3';
+import { getProgram, getVotePDA, getATA, BETTING_MINT } from '@/services/web3';
 import { PublicKey } from '@solana/web3.js';
 import * as anchor from '@project-serum/anchor';
 import { web3 } from '@project-serum/anchor';
@@ -37,8 +37,8 @@ export async function saveVote(vote: Vote, wallet?: any): Promise<string | void>
                 const votePda = await getVotePDA(marketKey, wallet.publicKey);
 
                 // Derive Token Accounts
-                const userToken = await getATA(wallet.publicKey, USDC_MINT);
-                const vaultToken = await getATA(marketKey, USDC_MINT);
+                const userToken = await getATA(wallet.publicKey, BETTING_MINT);
+                const vaultToken = await getATA(marketKey, BETTING_MINT);
 
                 // IMPORTANT: In production, we need a way to ensure the Vault ATA exists. 
                 // The `initializeMarket` instruction usually creates it.

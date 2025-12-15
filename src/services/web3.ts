@@ -11,7 +11,9 @@ const opts = {
 // HOST: Using a temporary valid placeholder to allow build to pass. Update this after deployment!
 export const PROGRAM_ID = new PublicKey("8f4FusHQaT2KxwpZzRNTV6TpdaEu68bcLFfJKBwZ3koE");
 
-export const USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"); // Devnet USDC
+// Token used for betting (PROPHET)
+export const BETTING_MINT = new PublicKey("HqQqPtf7FgFySXDHrTzExbGKUt4axd1JJQRDr9kZpump");
+// export const USDC_MINT = ... (Deprecated)
 const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 
