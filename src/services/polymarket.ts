@@ -20,14 +20,18 @@ export interface PolymarketEvent {
 // Use internal API to bypass CORS
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function fetchPolymarketTrending(limit = 50, offset = 0, sortBy = 'liquidity', ascending = false) {
+export async function fetchPolymarketTrending(limit = 50, offset = 0, sortBy = 'liquidity', ascending = false, tag?: string) {
     const maxRetries = 3;
     let attempt = 0;
 
     while (attempt < maxRetries) {
         try {
             // STRATEGY: Client-Side Fetch via Public CORS Proxy
-            const gammaUrl = `https://gamma-api.polymarket.com/events?active=true&closed=false&order=${sortBy}&ascending=${ascending}&limit=${limit}&offset=${offset}`;
+            let gammaUrl = `https://gamma-api.polymarket.com/events?active=true&closed=false&order=${sortBy}&ascending=${ascending}&limit=${limit}&offset=${offset}`;
+            if (tag) {
+                gammaUrl += `&tag_slug=${tag}`;
+            }
+
             let response;
             let usedSource = 'Client-Proxy';
 
@@ -50,7 +54,7 @@ export async function fetchPolymarketTrending(limit = 50, offset = 0, sortBy = '
                     // Priority 3: Internal API (Likely blocked, but worth a shot)
                     usedSource = 'Internal-API';
                     console.log('Fallback to Internal API...');
-                    const internalUrl = `/api/markets?limit=${limit}&offset=${offset}`;
+                    const internalUrl = `/api/markets?limit=${limit}&offset=${offset}`; // Tags not supported on simple fallback
                     response = await fetch(internalUrl);
                 }
             }
@@ -242,71 +246,72 @@ export async function fetchMarketResult(id: number): Promise<'yes' | 'no' | null
  */
 export async function fetchDailyMarkets(requiredCount = 50): Promise<any[]> {
     let collected: any[] = [];
+
+    // 1. MAIN DEEP SCAN (Find highest volume ending soon)
+    const deepScanLimit = 30; // Pages to scan for general high volume
     let offset = 0;
     const batchSize = 100;
-    const maxPages = 50; // Scan up to 5000 items (User Requested Deep Scan)
 
-    console.log(`Starting prioritized search for ${requiredCount} daily markets...`);
-
+    console.log(`Phase 1: Deep Scan...`);
     try {
-        for (let i = 0; i < maxPages; i++) {
-            // Strategy: FETCH BY END DATE (Ascending) to find markets closing soon
-            // Filter: Must have some volume > $1000 to be worth showing (Increased threshold for quality)
+        for (let i = 0; i < deepScanLimit; i++) {
             const batch = await fetchPolymarketTrending(batchSize, offset, 'endDate', true);
+            if (batch.length === 0) break;
 
-            if (batch.length === 0) break; // End of data
-
-            // Filter this batch
-            const dailyInBatch = batch.filter(m => {
-                // Must have significant volume (Avoids junk)
+            const valid = batch.filter(m => {
                 if (m.totalVolume < 1000) return false;
-
                 if (!m.endDate) return false;
-                const end = new Date(m.endDate).getTime();
-                const now = Date.now();
-                const hoursLeft = (end - now) / (1000 * 60 * 60);
-
-                // Must be ending in future, but within 24h
+                const hoursLeft = (new Date(m.endDate).getTime() - Date.now()) / (1000 * 60 * 60);
                 return hoursLeft > 0 && hoursLeft <= 24;
             });
 
-            // Add unique items
-            for (const item of dailyInBatch) {
-                if (!collected.find(c => c.id === item.id)) {
-                    collected.push(item);
-                }
+            for (const item of valid) {
+                if (!collected.find(c => c.id === item.id)) collected.push(item);
             }
-
-            console.log(`Page ${i + 1}: Found ${dailyInBatch.length} valid daily markets. Total: ${collected.length}/${requiredCount}`);
-
-            if (collected.length >= requiredCount) break;
-
             offset += batchSize;
-            await delay(150); // Polite rate limit
+            if (collected.length >= 40) break; // Don't overfill yet
+            await delay(100);
         }
-    } catch (e) {
-        console.warn("Error during strict scan loop:", e);
-    }
+    } catch (e) { console.warn("Deep scan error:", e); }
 
-    // --- FALLBACK MECHANISM ---
-    if (collected.length < requiredCount) {
-        console.warn(`Strict filter found only ${collected.length} markets. Filling with trending...`);
-        try {
-            // Fetch standard trending to fill the gaps
-            const fallbackLimit = requiredCount - collected.length + 20; // Fetch a bit extra
-            const trending = await fetchPolymarketTrending(fallbackLimit, 0);
+    // 2. CATEGORY QUOTA CHECK & FILL
+    // We want at least 5 for filtered buckets: POLITICS, SPORTS, CRYPTO
+    const categories: ('POLITICS' | 'SPORTS' | 'CRYPTO')[] = ['POLITICS', 'SPORTS', 'CRYPTO'];
+    const buckets: Record<string, number> = { POLITICS: 0, SPORTS: 0, CRYPTO: 0 };
+    collected.forEach(m => { if (buckets[m.category] !== undefined) buckets[m.category]++; });
 
-            for (const item of trending) {
-                if (collected.length >= requiredCount) break;
-                if (!collected.find(c => c.id === item.id)) {
-                    collected.push(item);
+    console.log("Category Counts before fill:", buckets);
+
+    for (const cat of categories) {
+        if (buckets[cat] < 6) { // User wants 5, we fetch 6 to be safe
+            console.log(`Refilling ${cat} (Current: ${buckets[cat]})...`);
+            try {
+                // Targeted fetch by tag
+                const tag = cat.toLowerCase(); // 'politics', 'sports', 'crypto' work as tags
+                // We fetch 'volume' sorted to get best items
+                // Note: We might NOT filter strictly by 24h here if it's too empty, 
+                // but let's try to stick to quality. 
+                const fillBatch = await fetchPolymarketTrending(20, 0, 'volume', false, tag);
+
+                let added = 0;
+                for (const item of fillBatch) {
+                    if (item.totalVolume < 100) continue; // Basic quality
+
+                    // Force Category Match logic to be consistent
+                    item.category = cat;
+
+                    if (!collected.find(c => c.id === item.id)) {
+                        collected.push(item);
+                        added++;
+                        if (buckets[cat] + added >= 6) break;
+                    }
                 }
+            } catch (e) {
+                console.warn(`Failed refilling ${cat}:`, e);
             }
-        } catch (e) {
-            console.error("Fallback fetch failed:", e);
         }
     }
 
-    // Sort by volume descending to ensure quality and consistency for all users
-    return collected.sort((a, b) => b.totalVolume - a.totalVolume).slice(0, requiredCount);
+    // Sort by volume descending
+    return collected.sort((a, b) => b.totalVolume - a.totalVolume).slice(0, 60);
 }

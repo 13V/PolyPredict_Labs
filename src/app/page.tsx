@@ -177,7 +177,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-white">Trending Now</h2>
             </div>
             <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-4 md:pb-0 md:overflow-visible -mx-4 px-4 md:mx-0 md:px-0">
-              {predictions.slice(0, 4).map((prediction, index) => (
+              {predictions.slice(0, 5).map((prediction, index) => (
                 <motion.div
                   key={prediction.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -201,7 +201,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-white">Sports & Competition</h2>
             </div>
             <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-4 md:pb-0 md:overflow-visible -mx-4 px-4 md:mx-0 md:px-0">
-              {predictions.filter(p => p.category === 'SPORTS').slice(0, 4).map((prediction, index) => (
+              {predictions.filter(p => p.category === 'SPORTS').slice(0, 5).map((prediction, index) => (
                 <motion.div key={prediction.id} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="h-full min-w-[85vw] md:min-w-0 snap-center">
                   <PredictionCard {...prediction} />
                 </motion.div>
@@ -218,7 +218,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-white">Political Landscape</h2>
             </div>
             <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-4 md:pb-0 md:overflow-visible -mx-4 px-4 md:mx-0 md:px-0">
-              {predictions.filter(p => p.category === 'POLITICS').slice(0, 4).map((prediction, index) => (
+              {predictions.filter(p => p.category === 'POLITICS').slice(0, 5).map((prediction, index) => (
                 <motion.div key={prediction.id} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="h-full min-w-[85vw] md:min-w-0 snap-center">
                   <PredictionCard {...prediction} />
                 </motion.div>
@@ -235,7 +235,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-white">Crypto & Finance</h2>
             </div>
             <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-4 md:pb-0 md:overflow-visible -mx-4 px-4 md:mx-0 md:px-0">
-              {predictions.filter(p => p.category === 'CRYPTO').slice(0, 4).map((prediction, index) => (
+              {predictions.filter(p => p.category === 'CRYPTO').slice(0, 5).map((prediction, index) => (
                 <motion.div key={prediction.id} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="h-full min-w-[85vw] md:min-w-0 snap-center">
                   <PredictionCard {...prediction} />
                 </motion.div>
