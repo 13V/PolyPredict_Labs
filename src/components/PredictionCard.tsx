@@ -50,6 +50,7 @@ export const PredictionCard = ({
     const [stakeAmount, setStakeAmount] = useState('');
     const [showAllOutcomes, setShowAllOutcomes] = useState(false);
     const [pythData, setPythData] = useState<number[] | null>(null);
+    const [pythPrice, setPythPrice] = useState<number | null>(null);
 
     // Lifecycle Logic
     const isExpired = Date.now() > endTime * 1000;
@@ -64,7 +65,16 @@ export const PredictionCard = ({
             else if (q.includes('solana') || q.includes('sol')) symbol = 'SOL';
 
             if (symbol) {
-                getPythSparkline(symbol).then(setPythData);
+                const fetchPyth = () => {
+                    getPythSparkline(symbol).then(setPythData);
+                    import('@/services/pyth').then(m => {
+                        m.getPythPrices([symbol]).then(prices => setPythPrice(prices[symbol]));
+                    });
+                };
+
+                fetchPyth();
+                const interval = setInterval(fetchPyth, 10000); // 10s polling
+                return () => clearInterval(interval);
             }
         }
     }, [category, question]);
@@ -210,6 +220,12 @@ export const PredictionCard = ({
                             <CheckCircle2 size={10} />
                             RESOLVED
                         </span>}
+                        {pythPrice && !resolved && (
+                            <span className="ml-auto text-xs font-mono font-bold text-white flex items-center gap-1.5 bg-white/5 border border-white/10 px-2 py-0.5 rounded-md animate-in fade-in zoom-in duration-500">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                                ${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                        )}
                     </div>
                     <h3 className={`font-outfit font-bold text-lg leading-tight transition-colors ${resolved ? 'text-gray-400' : 'text-white'}`}>
                         {question}

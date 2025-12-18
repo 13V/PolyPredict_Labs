@@ -33,6 +33,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
     const [betMode, setBetMode] = useState<'yes' | 'no' | null>(null);
     const [stakeAmount, setStakeAmount] = useState('');
     const [pythData, setPythData] = useState<number[] | null>(null);
+    const [pythPrice, setPythPrice] = useState<number | null>(null);
 
     // Pyth Integration
     useEffect(() => {
@@ -44,7 +45,16 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
             else if (q.includes('solana') || q.includes('sol')) symbol = 'SOL';
 
             if (symbol) {
-                getPythSparkline(symbol).then(setPythData);
+                const fetchPyth = () => {
+                    getPythSparkline(symbol).then(setPythData);
+                    import('@/services/pyth').then(m => {
+                        m.getPythPrices([symbol]).then(prices => setPythPrice(prices[symbol]));
+                    });
+                };
+
+                fetchPyth();
+                const interval = setInterval(fetchPyth, 10000); // 10s polling
+                return () => clearInterval(interval);
             }
         }
     }, [data]);
@@ -128,6 +138,12 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
 
                     {/* Floating Badge */}
                     <div className="absolute top-5 right-5 md:top-10 md:right-10 flex items-center gap-3">
+                        {pythPrice && (
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white text-xs font-mono font-bold animate-in fade-in slide-in-from-right-4">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                ${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                        )}
                         {isExpired ? (
                             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-500/10 border border-gray-500/20 text-gray-400 text-xs font-bold uppercase tracking-widest">
                                 <span className="w-1.5 h-1.5 rounded-full bg-gray-600" />
