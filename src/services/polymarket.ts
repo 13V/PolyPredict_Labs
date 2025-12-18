@@ -178,8 +178,11 @@ export async function fetchPolymarketTrending(limit = 50, offset = 0, sortBy = '
     return [];
 }
 
-function classifyCategory(slug: string): 'CRYPTO' | 'POLITICS' | 'SPORTS' | 'NEWS' {
+function classifyCategory(slug: string): 'CRYPTO' | 'POLITICS' | 'SPORTS' | 'NEWS' | 'ESPORTS' {
     const s = slug.toLowerCase();
+
+    // 0. Esports (Specific games & terms)
+    if (s.includes('valorant') || s.includes('lol') || s.includes('league') || s.includes('counter-strike') || s.includes('csgo') || s.includes('dota') || s.includes('esports') || s.includes('iem') || s.includes('blast') || s.includes('pgl') || s.includes('vct') || s.includes('major') || s.includes('pro league')) return 'ESPORTS';
 
     // 1. Politics (Highest Priority - Specific Names & Terms)
     if (s.includes('trump') || s.includes('biden') || s.includes('harris') || s.includes('election') || s.includes('republican') || s.includes('democrat') || s.includes('senate') || s.includes('house') || s.includes('president') || s.includes('nominee') || s.includes('cabinet') || s.includes('confirm') || s.includes('vote') || s.includes('policy') || s.includes('poll') || s.includes('approval') || s.includes('regulation') || s.includes('law') || s.includes('court') || s.includes('supreme') || s.includes('congress') || s.includes('parliament') || s.includes('minister') || s.includes('war') || s.includes('israel') || s.includes('ukraine') || s.includes('china') || s.includes('nato') || s.includes('un ') || s.includes('musk') || s.includes('rfk') || s.includes('vivek')) return 'POLITICS';

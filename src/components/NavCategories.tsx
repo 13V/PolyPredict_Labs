@@ -1,13 +1,14 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Newspaper, Coins, Trophy, Globe, Zap, CheckCircle2 } from 'lucide-react';
+import { Newspaper, Coins, Trophy, Globe, Zap, CheckCircle2, Gamepad2 } from 'lucide-react';
 
 const CATEGORIES = [
     { id: 'all', label: 'All Markets', icon: Zap },
     { id: 'crypto', label: 'Crypto', icon: Coins },
     { id: 'politics', label: 'Politics', icon: Globe },
     { id: 'sports', label: 'Sports', icon: Trophy },
+    { id: 'esports', label: 'Esports', icon: Gamepad2 },
     { id: 'news', label: 'News', icon: Newspaper },
     { id: 'resolved', label: 'Resolved', icon: CheckCircle2 },
 ];

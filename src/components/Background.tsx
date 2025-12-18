@@ -12,6 +12,7 @@ const CATEGORY_COLORS: Record<string, string[]> = {
     crypto: ['#06b6d4', '#3b82f6', '#0891b2'],
     politics: ['#ef4444', '#3b82f6', '#991b1b'],
     sports: ['#f59e0b', '#ea580c', '#d97706'],
+    esports: ['#ec4899', '#db2777', '#be185d'],
     news: ['#10b981', '#059669', '#047857'],
 };
 
