@@ -101,9 +101,14 @@ export const PredictionCard = ({
     const timeLeft = () => {
         const diff = endTime * 1000 - Date.now();
         if (diff <= 0) return 'Ended';
+
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        return days > 0 ? `${days}d ${hours}h` : `${hours}h`;
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (days > 0) return `${days}d ${hours}h`;
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        return `${minutes}m`;
     };
 
     return (

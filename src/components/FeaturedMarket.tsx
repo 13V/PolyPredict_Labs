@@ -26,19 +26,19 @@ interface FeaturedMarketProps {
 
 export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps) => {
     const { publicKey, connected, wallet } = useWallet();
-    const { showToast } = useToast();
+    const toast = useToast();
     const { showBetSuccess } = useBetSuccess();
     const [betMode, setBetMode] = useState<'yes' | 'no' | null>(null);
     const [stakeAmount, setStakeAmount] = useState('');
 
     const handleConfirmBet = async () => {
         if (!connected || !publicKey) {
-            showToast('Connect wallet to vote!', 'error');
+            toast.error('Connect wallet to vote!');
             return;
         }
 
         if (!stakeAmount || parseFloat(stakeAmount) <= 0) {
-            showToast('Enter a valid stake amount', 'error');
+            toast.error('Enter a valid stake amount');
             return;
         }
 
@@ -51,7 +51,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps)
                 amount: parseFloat(stakeAmount)
             }, wallet?.adapter); // Pass adapter for signing
 
-            // showToast(`Successfully bet ${stakeAmount} on ${betMode?.toUpperCase()}`, 'success'); 
+            // toast.success(`Successfully bet ${stakeAmount} on ${betMode?.toUpperCase()}`); 
             // Replaced with Modal:
             showBetSuccess({
                 amount: parseFloat(stakeAmount),
@@ -64,11 +64,12 @@ export const FeaturedMarket = ({ data, onOpenCreateModal }: FeaturedMarketProps)
             setStakeAmount('');
         } catch (e) {
             console.error(e);
-            showToast('Failed to place vote', 'error');
+            toast.error('Failed to place vote');
         }
     };
-    // Determine Yes % (default 85 if no data)
-    const yesPercentage = data ? ((data.yesVotes / (data.yesVotes + data.noVotes)) * 100) : 85;
+    // Determine Yes % (default 50 if no data or 0 votes)
+    const totalVotes = data ? (data.yesVotes + data.noVotes) : 0;
+    const yesPercentage = totalVotes > 0 ? ((data!.yesVotes / totalVotes) * 100) : 50;
     const yesPrice = Math.floor(yesPercentage);
     const noPrice = 100 - yesPrice;
 

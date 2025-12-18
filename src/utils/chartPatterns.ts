@@ -55,14 +55,18 @@ export function getDeterministicPattern(id: number, targetEndValue: number): num
     // 2. Calculate shift
     const shift = targetEndValue - lastValue;
 
-    // 3. Shift all points
-    const shiftedPattern = basePattern.map(val => {
-        const newVal = val + shift;
+    // 3. Shift all points and add some organic noise
+    const shiftedPattern = basePattern.map((val, i) => {
+        // Add more noise to the middle of the pattern, less to the ends
+        const noiseFactor = Math.sin((i / basePattern.length) * Math.PI);
+        const noise = (Math.sin(id + i) * 2 + Math.cos(id * i) * 1) * noiseFactor;
+
+        const newVal = val + shift + noise;
         // Clamp between 0 and 100 to stay within logical bounds
-        return Math.max(0, Math.min(100, newVal));
+        return Math.max(2, Math.min(98, newVal)); // Keep away from extreme edges for beauty
     });
 
-    // 4. Force exact correlation on last point just in case clamping messed it up slightly, 
+    // 4. Force exact correlation on last point just in case clamping or noise messed it up slightly, 
     // ensuring the "current price" matches the end of the line.
     shiftedPattern[shiftedPattern.length - 1] = targetEndValue;
 
