@@ -1,7 +1,84 @@
 {
-    "version": "0.1.0",
+    "version": "1.0.0",
     "name": "prophet",
     "instructions": [
+        {
+            "name": "initializeConfig",
+            "accounts": [
+                {
+                    "name": "config",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "authority",
+                    "isMut": true,
+                    "isSigner": true
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false
+                }
+            ],
+            "args": [
+                {
+                    "name": "devVault",
+                    "type": "publicKey"
+                },
+                {
+                    "name": "prophetTokenMint",
+                    "type": "publicKey"
+                }
+            ]
+        },
+        {
+            "name": "updateConfig",
+            "accounts": [
+                {
+                    "name": "config",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "authority",
+                    "isMut": false,
+                    "isSigner": true
+                }
+            ],
+            "args": [
+                {
+                    "name": "devVault",
+                    "type": {
+                        "option": "publicKey"
+                    }
+                },
+                {
+                    "name": "prophetTokenMint",
+                    "type": {
+                        "option": "publicKey"
+                    }
+                },
+                {
+                    "name": "burnFeeBps",
+                    "type": {
+                        "option": "u16"
+                    }
+                },
+                {
+                    "name": "devFeeBps",
+                    "type": {
+                        "option": "u16"
+                    }
+                },
+                {
+                    "name": "creatorFeeBps",
+                    "type": {
+                        "option": "u16"
+                    }
+                }
+            ]
+        },
         {
             "name": "initializeMarket",
             "accounts": [
@@ -11,12 +88,7 @@
                     "isSigner": false
                 },
                 {
-                    "name": "vaultToken",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "mint",
+                    "name": "config",
                     "isMut": false,
                     "isSigner": false
                 },
@@ -24,6 +96,16 @@
                     "name": "authority",
                     "isMut": true,
                     "isSigner": true
+                },
+                {
+                    "name": "vaultTokenAccount",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "mint",
+                    "isMut": false,
+                    "isSigner": false
                 },
                 {
                     "name": "systemProgram",
@@ -43,12 +125,51 @@
             ],
             "args": [
                 {
+                    "name": "marketId",
+                    "type": "u64"
+                },
+                {
+                    "name": "endTime",
+                    "type": "i64"
+                },
+                {
                     "name": "question",
                     "type": "string"
                 },
                 {
-                    "name": "endTimestamp",
-                    "type": "i64"
+                    "name": "outcomeCount",
+                    "type": "u8"
+                },
+                {
+                    "name": "outcomeNames",
+                    "type": {
+                        "array": [
+                            "string",
+                            8
+                        ]
+                    }
+                },
+                {
+                    "name": "oracleKey",
+                    "type": {
+                        "option": "publicKey"
+                    }
+                },
+                {
+                    "name": "minBet",
+                    "type": "u64"
+                },
+                {
+                    "name": "maxBet",
+                    "type": "u64"
+                },
+                {
+                    "name": "metadataUrl",
+                    "type": "string"
+                },
+                {
+                    "name": "polymarketId",
+                    "type": "string"
                 }
             ]
         },
@@ -61,17 +182,7 @@
                     "isSigner": false
                 },
                 {
-                    "name": "vote",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "vaultToken",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "userToken",
+                    "name": "voteRecord",
                     "isMut": true,
                     "isSigner": false
                 },
@@ -81,24 +192,34 @@
                     "isSigner": true
                 },
                 {
-                    "name": "systemProgram",
-                    "isMut": false,
+                    "name": "userTokenAccount",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "vaultTokenAccount",
+                    "isMut": true,
                     "isSigner": false
                 },
                 {
                     "name": "tokenProgram",
                     "isMut": false,
                     "isSigner": false
+                },
+                {
+                    "name": "systemProgram",
+                    "isMut": false,
+                    "isSigner": false
                 }
             ],
             "args": [
                 {
-                    "name": "outcomeIndex",
-                    "type": "u8"
-                },
-                {
                     "name": "amount",
                     "type": "u64"
+                },
+                {
+                    "name": "outcomeIndex",
+                    "type": "u8"
                 }
             ]
         },
@@ -118,7 +239,28 @@
             ],
             "args": [
                 {
-                    "name": "winnerIndex",
+                    "name": "outcomeIndex",
+                    "type": "u8"
+                }
+            ]
+        },
+        {
+            "name": "resolveViaOracle",
+            "accounts": [
+                {
+                    "name": "market",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "authority",
+                    "isMut": false,
+                    "isSigner": true
+                }
+            ],
+            "args": [
+                {
+                    "name": "outcomeIndex",
                     "type": "u8"
                 }
             ]
@@ -132,24 +274,44 @@
                     "isSigner": false
                 },
                 {
-                    "name": "vote",
+                    "name": "voteRecord",
                     "isMut": true,
                     "isSigner": false
                 },
                 {
-                    "name": "vaultToken",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "userToken",
-                    "isMut": true,
+                    "name": "config",
+                    "isMut": false,
                     "isSigner": false
                 },
                 {
                     "name": "user",
                     "isMut": true,
                     "isSigner": true
+                },
+                {
+                    "name": "userTokenAccount",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "vaultTokenAccount",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "creatorTokenAccount",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "devTokenAccount",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "mint",
+                    "isMut": true,
+                    "isSigner": false
                 },
                 {
                     "name": "tokenProgram",
@@ -162,7 +324,7 @@
     ],
     "accounts": [
         {
-            "name": "Market",
+            "name": "GlobalConfig",
             "type": {
                 "kind": "struct",
                 "fields": [
@@ -171,30 +333,24 @@
                         "type": "publicKey"
                     },
                     {
-                        "name": "question",
-                        "type": "string"
+                        "name": "devVault",
+                        "type": "publicKey"
                     },
                     {
-                        "name": "endTimestamp",
-                        "type": "i64"
+                        "name": "prophetTokenMint",
+                        "type": "publicKey"
                     },
                     {
-                        "name": "outcomesCount",
-                        "type": "u8"
+                        "name": "burnFeeBps",
+                        "type": "u16"
                     },
                     {
-                        "name": "totalPot",
-                        "type": "u64"
+                        "name": "devFeeBps",
+                        "type": "u16"
                     },
                     {
-                        "name": "resolved",
-                        "type": "bool"
-                    },
-                    {
-                        "name": "winnerIndex",
-                        "type": {
-                            "option": "u8"
-                        }
+                        "name": "creatorFeeBps",
+                        "type": "u16"
                     },
                     {
                         "name": "bump",
@@ -204,7 +360,105 @@
             }
         },
         {
-            "name": "Vote",
+            "name": "Market",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "authority",
+                        "type": "publicKey"
+                    },
+                    {
+                        "name": "marketId",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "endTime",
+                        "type": "i64"
+                    },
+                    {
+                        "name": "question",
+                        "type": "string"
+                    },
+                    {
+                        "name": "resolved",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "winningOutcome",
+                        "type": {
+                            "option": "u8"
+                        }
+                    },
+                    {
+                        "name": "totals",
+                        "type": {
+                            "array": [
+                                "u64",
+                                8
+                            ]
+                        }
+                    },
+                    {
+                        "name": "outcomeCount",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "totalLiquidity",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "feesDistributed",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "paused",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "cancelled",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "outcomeNames",
+                        "type": {
+                            "array": [
+                                "string",
+                                8
+                            ]
+                        }
+                    },
+                    {
+                        "name": "oracleKey",
+                        "type": {
+                            "option": "publicKey"
+                        }
+                    },
+                    {
+                        "name": "minBet",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "maxBet",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "metadataUrl",
+                        "type": "string"
+                    },
+                    {
+                        "name": "polymarketId",
+                        "type": "string"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "VoteRecord",
             "type": {
                 "kind": "struct",
                 "fields": [
@@ -236,46 +490,123 @@
             }
         }
     ],
+    "events": [
+        {
+            "name": "VotePlacedEvent",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "publicKey",
+                    "index": false
+                },
+                {
+                    "name": "market",
+                    "type": "publicKey",
+                    "index": false
+                },
+                {
+                    "name": "outcomeIndex",
+                    "type": "u8",
+                    "index": false
+                },
+                {
+                    "name": "amount",
+                    "type": "u64",
+                    "index": false
+                }
+            ]
+        }
+    ],
     "errors": [
         {
             "code": 6000,
-            "name": "MarketEnded",
-            "msg": "Market has already ended."
+            "name": "AlreadyResolved",
+            "msg": "Market is already resolved."
         },
         {
             "code": 6001,
-            "name": "MarketActive",
-            "msg": "Market is still active."
+            "name": "MarketClosed",
+            "msg": "Market has ended."
         },
         {
             "code": 6002,
-            "name": "InsufficientFunds",
-            "msg": "Insufficient funds to place this bet."
+            "name": "InvalidOutcomeIndex",
+            "msg": "Invalid outcome index."
         },
         {
             "code": 6003,
-            "name": "InvalidOutcome",
-            "msg": "Invalid outcome selected."
+            "name": "InvalidOutcomeCount",
+            "msg": "Outcome count must be between 1 and 8."
         },
         {
             "code": 6004,
-            "name": "AlreadyClaimed",
-            "msg": "User has already claimed winnings."
+            "name": "MarketPaused",
+            "msg": "Market is currently paused."
         },
         {
             "code": 6005,
-            "name": "Unauthorized",
-            "msg": "Unauthorized access."
+            "name": "MultipleOutcomesNotSupported",
+            "msg": "Multiple outcomes not supported."
         },
         {
             "code": 6006,
-            "name": "MathOverflow",
-            "msg": "Math overflow."
+            "name": "NotResolved",
+            "msg": "Market not resolved yet."
         },
         {
             "code": 6007,
-            "name": "OutcomeNotSet",
-            "msg": "Market outcome has not been set."
+            "name": "AlreadyClaimed",
+            "msg": "Already claimed winnings."
+        },
+        {
+            "code": 6008,
+            "name": "Loser",
+            "msg": "User did not bet on the winning outcome."
+        },
+        {
+            "code": 6009,
+            "name": "FeesAlreadyDistributed",
+            "msg": "Fees already distributed."
+        },
+        {
+            "code": 6010,
+            "name": "FeesNotDistributed",
+            "msg": "Fees not distributed yet."
+        },
+        {
+            "code": 6011,
+            "name": "MarketCancelled",
+            "msg": "Market was cancelled."
+        },
+        {
+            "code": 6012,
+            "name": "BetTooSmall",
+            "msg": "Bet amount is below minimum."
+        },
+        {
+            "code": 6013,
+            "name": "BetTooLarge",
+            "msg": "Bet amount exceeds maximum."
+        },
+        {
+            "code": 6014,
+            "name": "NoActiveBet",
+            "msg": "No active bet found for user."
+        },
+        {
+            "code": 6015,
+            "name": "InvalidMint",
+            "msg": "Invalid mint. Only Prophet Token is allowed."
+        },
+        {
+            "code": 6016,
+            "name": "SweepTooEarly",
+            "msg": "Sweep can only occur 30 days after market resolution."
+        },
+        {
+            "code": 6017,
+            "name": "NoDustToSweep",
+            "msg": "No dust tokens found to sweep."
         }
     ]
 }

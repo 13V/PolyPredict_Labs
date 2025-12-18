@@ -8,11 +8,10 @@ const opts = {
 };
 
 // Program ID from the IDL or Devnet
-// HOST: Using a temporary valid placeholder to allow build to pass. Update this after deployment!
-export const PROGRAM_ID = new PublicKey('8VKvD2RaKok4tJ4pibwqZ2xvh3YkqbBd6BGKaDHUAP5r');
+export const PROGRAM_ID = new PublicKey('DcNb3pYGVqo1AdMdJGycDpRPb6d1nPsg3z4x5T714YW');
 
 // Token used for betting (PROPHET)
-export const BETTING_MINT = new PublicKey("HqQqPtf7FgFySXDHrTzExbGKUt4axd1JJQRDr9kZpump");
+export const BETTING_MINT = new PublicKey("CQxyEsYC2MiFDYVVfYnF7oAGbCVBQEoGu2bLa7THIwp66");
 // export const USDC_MINT = ... (Deprecated)
 const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');

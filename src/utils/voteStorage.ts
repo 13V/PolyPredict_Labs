@@ -4,11 +4,12 @@ import { BN, web3 } from '@project-serum/anchor';
 
 export interface Vote {
     predictionId: number;
-    choice: 'yes' | 'no';
+    choice: 'yes' | 'no' | 'multi'; // Allow multi-outcome
+    outcomeIndex?: number; // Specific outcome index
     walletAddress: string;
     timestamp: number;
-    amount?: number; // Optional stake amount
-    txHash?: string; // Blockchain Transaction Hash
+    amount?: number;
+    txHash?: string;
 }
 
 const VOTES_KEY = 'prophet_votes';
@@ -26,7 +27,7 @@ export async function saveVote(vote: Vote, wallet?: any): Promise<string | void>
 
             if (program) {
                 // Determine outcome index
-                const outcomeIndex = vote.choice === 'yes' ? 0 : 1;
+                const outcomeIndex = vote.outcomeIndex ?? (vote.choice === 'yes' ? 0 : 1);
                 const amount = vote.amount || 0;
 
                 // Derive PDA

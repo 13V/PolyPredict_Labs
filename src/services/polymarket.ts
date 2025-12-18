@@ -152,13 +152,13 @@ export async function fetchPolymarketTrending(limit = 50, offset = 0, sortBy = '
                     id: parseInt(market.id) || parseInt(event.id) || Math.random() * 100000,
                     question: market.question || event.title,
                     category: classifyCategory(event.slug),
-                    endDate: market.endDate,
-                    outcomeLabels: outcomes,
-                    timeLeft: formatDate(market.endDate),
-                    yesVotes: yesVotes,
-                    noVotes: noVotes,
-                    totalVolume: totalVolume,
-                    isHot: totalVolume > 100000, // Tag as hot if volume > $100k
+                    endTime: Math.floor(new Date(market.endDate).getTime() / 1000),
+                    outcomes: outcomes,
+                    totals: [yesVotes, noVotes, ...new Array(outcomes.length - 2).fill(0)], // Mocking totals for multi-outcome demo
+                    totalLiquidity: totalVolume,
+                    resolved: false,
+                    isHot: totalVolume > 100000,
+                    polymarketId: market.id
                 };
             }).filter(item => item !== null);
 
@@ -267,9 +267,9 @@ export async function fetchDailyMarkets(requiredCount = 50): Promise<any[]> {
             if (batch.length === 0) break;
 
             const valid = batch.filter(m => {
-                if (m.totalVolume < 1000) return false;
-                if (!m.endDate) return false;
-                const hoursLeft = (new Date(m.endDate).getTime() - Date.now()) / (1000 * 60 * 60);
+                if (m.totalLiquidity < 1000) return false;
+                if (!m.endTime) return false;
+                const hoursLeft = (m.endTime * 1000 - Date.now()) / (1000 * 60 * 60);
                 return hoursLeft > 0 && hoursLeft <= 24;
             });
 
@@ -303,12 +303,12 @@ export async function fetchDailyMarkets(requiredCount = 50): Promise<any[]> {
 
                 let added = 0;
                 for (const item of fillBatch) {
-                    if (item.totalVolume < 100) continue; // Basic quality
+                    if (item.totalLiquidity < 100) continue; // Basic quality
 
                     // DATE FILTER for Refill:
                     // Prevent long-term markets (e.g. 2026) from filling the quota just because they have volume.
-                    if (!item.endDate) continue;
-                    const hoursLeft = (new Date(item.endDate).getTime() - Date.now()) / (1000 * 60 * 60);
+                    if (!item.endTime) continue;
+                    const hoursLeft = (item.endTime * 1000 - Date.now()) / (1000 * 60 * 60);
                     if (hoursLeft > 48 || hoursLeft <= 0) continue;
 
                     // Force Category Match logic to be consistent

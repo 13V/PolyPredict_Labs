@@ -1,319 +1,246 @@
 'use client';
-import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Wallet, Clock, Trophy } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp, TrendingDown, Wallet, Clock, Trophy, ChevronRight, BarChart3 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { saveVote, getVote, getVoteCounts, getResolutionStatus, saveResolution } from '@/utils/voteStorage';
-import { hasMinimumTokens } from '@/utils/tokenGating';
+import { saveVote, getVote } from '@/utils/voteStorage';
 import { getDeterministicPattern } from '@/utils/chartPatterns';
-import { fetchMarketResult } from '@/services/polymarket';
 import { Sparkline } from './Sparkline';
-import { ResolutionPanel } from './ResolutionPanel';
 import { useToast } from '@/context/ToastContext';
-import { useBetSuccess } from '@/context/BetSuccessContext';
 import { useHaptic } from '@/hooks/useHaptic';
-
 
 interface PredictionCardProps {
     id: number;
     category: string;
     question: string;
-    timeLeft: string;
-    yesVotes: number;
-    noVotes: number;
-    totalVolume?: number;
-    outcomeLabels?: string[];
-    status?: 'active' | 'resolving' | 'resolved';
+    endTime: number;
+    outcomes: string[];
+    totals: number[];
+    totalLiquidity: number;
+    resolved: boolean;
+    winningOutcome?: number;
+    polymarketId?: string;
+    isHot?: boolean;
 }
 
 export const PredictionCard = ({
     id,
     category,
     question,
-    timeLeft,
-    yesVotes: initialYes,
-    noVotes: initialNo,
-    totalVolume,
-    outcomeLabels,
-    status = 'active'
+    endTime,
+    outcomes,
+    totals,
+    totalLiquidity,
+    resolved,
+    winningOutcome,
+    polymarketId,
+    isHot
 }: PredictionCardProps) => {
     const { publicKey, connected } = useWallet();
-    const { toast } = useToast();
-    const { showBetSuccess } = useBetSuccess();
+    const toast = useToast();
     const { trigger: haptic } = useHaptic();
 
-
-    // ... existing hooks ...
-    const [yesVotes, setYesVotes] = useState(initialYes);
-    const [noVotes, setNoVotes] = useState(initialNo);
-    const [voted, setVoted] = useState<'yes' | 'no' | null>(null);
-    const [hasTokens, setHasTokens] = useState(false);
-    const [isChecking, setIsChecking] = useState(false);
-
-    // Betting UI State
-    const [betMode, setBetMode] = useState<'yes' | 'no' | null>(null);
+    const [votedIndex, setVotedIndex] = useState<number | null>(null);
+    const [betMode, setBetMode] = useState<number | null>(null);
     const [stakeAmount, setStakeAmount] = useState('');
+    const [showAllOutcomes, setShowAllOutcomes] = useState(false);
 
-    // Default labels
-    const yesLabel = outcomeLabels?.[0] || 'YES';
-    const noLabel = outcomeLabels?.[1] || 'NO';
+    // Derived data
+    const totalVotes = totals.reduce((a, b) => a + b, 0);
+    const outcomeProbabilities = totals.map(t => totalVotes > 0 ? (t / totalVotes) * 100 : 100 / outcomes.length);
 
-    const checkTokenBalance = useCallback(async () => {
-        if (!publicKey) return;
+    // Sort outcomes by probability for the preview
+    const sortedIndices = outcomes.map((_, i) => i).sort((a, b) => outcomes[b] ? (totals[b] - totals[a]) : 0);
+    const topOutcomes = showAllOutcomes ? sortedIndices : sortedIndices.slice(0, 2);
 
-        setIsChecking(true);
-        const hasMin = await hasMinimumTokens(publicKey.toString());
-        setHasTokens(hasMin);
-        setIsChecking(false);
-    }, [publicKey]);
-
-    const [resolvedOutcome, setResolvedOutcome] = useState<'yes' | 'no' | null>(null);
-
-    // Load existing vote and vote counts on mount
     useEffect(() => {
         if (publicKey) {
             const existingVote = getVote(id, publicKey.toString());
-            if (existingVote) {
-                setVoted(existingVote.choice);
+            if (existingVote && existingVote.outcomeIndex !== undefined) {
+                setVotedIndex(existingVote.outcomeIndex);
             }
-            checkTokenBalance();
         }
+    }, [publicKey, id]);
 
-        const outcome = getResolutionStatus(id);
-        if (outcome) {
-            setResolvedOutcome(outcome);
-        } else if (status === 'resolving') {
-            checkOracle();
-        }
-
-        const counts = getVoteCounts(id);
-        setYesVotes(initialYes + counts.yes);
-        setNoVotes(initialNo + counts.no);
-    }, [publicKey, id, initialYes, initialNo, checkTokenBalance, status]);
-
-    const checkOracle = async () => {
-        const result = await fetchMarketResult(id);
-        if (result) {
-            console.log(`Oracle Resolved Market #${id}: ${result.toUpperCase()}`);
-            setResolvedOutcome(result);
-            saveResolution(id, result);
-        }
-    };
-
-    const currentStatus = resolvedOutcome ? 'resolved' : status;
-
-    const handleVoteClick = (choice: 'yes' | 'no') => {
+    const handleOutcomeClick = (index: number) => {
         haptic('selection');
         if (!connected || !publicKey) {
-            toast.error('Please connect your wallet first!');
+            toast.error('Connect wallet to place a bet');
             return;
         }
-        if (voted) return;
-        if (!hasTokens) {
-            toast.error('Insufficient $PROPHET tokens! You need 1000+ to vote.');
-            return;
-        }
-        setBetMode(choice);
+        if (resolved) return;
+        setBetMode(index);
     };
 
     const confirmBet = () => {
-        if (!betMode || !connected) {
-            toast.error('Please connect your wallet to confirm bet.');
+        if (betMode === null || !connected) return;
+
+        const amount = parseFloat(stakeAmount);
+        if (isNaN(amount) || amount <= 0) {
+            toast.error("Enter a valid amount");
             return;
         }
 
         haptic('success');
-
-        const choice = betMode;
-        const amount = parseFloat(stakeAmount) || 0;
-
-        if (amount <= 0) {
-            toast.error("Please enter a valid stake amount.");
-            return;
-        }
-
+        // In V2, we'll call the actual Solana program here. 
+        // For now, we update local state to show the "voted" UI.
         saveVote({
             predictionId: id,
-            choice: choice,
+            choice: 'multi',
+            outcomeIndex: betMode,
             walletAddress: publicKey!.toString(),
             timestamp: Date.now(),
             amount: amount
         }, { publicKey, signTransaction: undefined, sendTransaction: undefined });
 
-        setVoted(choice);
-
-        if (choice === 'yes') {
-            setYesVotes(prev => prev + 1);
-        } else {
-            setNoVotes(prev => prev + 1);
-        }
-
+        setVotedIndex(betMode);
         setBetMode(null);
-        // toast.success(`Vote Placed: ${amount} on ${choice === 'yes' ? yesLabel : noLabel}`);
-        showBetSuccess({
-            amount: amount,
-            outcome: choice,
-            question: question,
-            payoutMultiplier: 1.85 // Dynamic later
-        });
+        toast.success(`Bet placed on ${outcomes[betMode]}`);
     };
 
-    const totalVotes = yesVotes + noVotes;
-    const yesPercentage = totalVotes > 0 ? (yesVotes / totalVotes) * 100 : 50;
-    const noPercentage = totalVotes > 0 ? (noVotes / totalVotes) * 100 : 50;
-    const sparkData = getDeterministicPattern(id, yesPercentage);
-
-    // Quick Bet Presets
-    const setPreset = (val: string) => setStakeAmount(val);
+    const timeLeft = () => {
+        const diff = endTime * 1000 - Date.now();
+        if (diff <= 0) return 'Ended';
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        return days > 0 ? `${days}d ${hours}h` : `${hours}h`;
+    };
 
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className={`group relative flex flex-col justify-between rounded-2xl transition-all overflow-hidden h-full backdrop-blur-xl ${status === 'resolving'
-                ? 'bg-blue-950/20 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.15)]'
-                : 'bg-gray-900/40 border border-white/5 hover:border-purple-500/30 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] hover:-translate-y-1'
+            layout
+            className={`glass glass-hover rounded-2xl p-5 flex flex-col gap-4 transition-all duration-300 relative overflow-hidden group ${isHot ? 'border-orange-500/30 shadow-[0_0_20px_rgba(249,115,22,0.1)]' : ''
                 }`}
         >
-            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="p-4 flex items-start justify-between">
-                <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
-                        {resolvedOutcome ? <Trophy className={resolvedOutcome === 'yes' ? 'text-green-500' : 'text-red-500'} size={20} /> :
-                            category === 'BTC' || category === 'CRYPTO' ? <span className="text-xl">₿</span> :
-                                category === 'ETH' ? <span className="text-xl">Ξ</span> :
-                                    category === 'SOL' ? <span className="text-xl">◎</span> :
-                                        <TrendingUp className="text-gray-400" size={20} />}
+            {/* Header */}
+            <div className="flex justify-between items-start gap-3">
+                <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">{category}</span>
+                        {isHot && <span className="text-[10px] font-bold text-orange-500 animate-pulse">🔥 HOT</span>}
                     </div>
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{category}</span>
-                            <span className={`text-[10px] ${currentStatus === 'resolving' ? 'text-blue-400 font-bold animate-pulse' :
-                                currentStatus === 'resolved' ? 'text-amber-400 font-bold' :
-                                    'text-gray-600'
-                                }`}>
-                                • {currentStatus === 'resolving' ? 'AWAITING VERIFICATION' :
-                                    currentStatus === 'resolved' ? 'MARKET CLOSED' :
-                                        `Ends ${timeLeft}`}
-                            </span>
-                        </div>
-                        <h3 className="text-sm font-bold text-white leading-tight line-clamp-2 min-h-[40px]">
-                            {question}
-                        </h3>
-                    </div>
+                    <h3 className="font-outfit font-bold text-lg leading-tight text-slate-100 group-hover:text-white transition-colors">
+                        {question}
+                    </h3>
                 </div>
-                <div className="w-[60px] h-[30px] opacity-50 group-hover:opacity-100 transition-opacity">
-                    <Sparkline data={sparkData} width={60} height={30} color={yesPercentage >= 50 ? '#10B981' : '#EF4444'} />
+                <div className="shrink-0 w-12 h-6 opacity-40 group-hover:opacity-100 transition-opacity">
+                    <Sparkline data={getDeterministicPattern(id, outcomeProbabilities[0])} width={48} height={24} color="#a855f7" />
                 </div>
             </div>
 
-            <div className="px-4 pb-4">
-                <div className="flex items-end justify-between mb-2">
-                    <span className={`text-2xl font-black ${yesPercentage >= 50 ? 'text-green-400' : 'text-red-400'}`}>
-                        {yesPercentage.toFixed(0)}%
-                        <span className="text-xs font-normal text-gray-500 ml-1">chance</span>
-                    </span>
-                    <span className="text-xs text-gray-400 font-mono">
-                        ${totalVolume ? totalVolume.toLocaleString() : (totalVotes * 10.5).toLocaleString()} Vol
-                    </span>
+            {/* Info Bar */}
+            <div className="flex items-center gap-4 text-[11px] font-medium text-slate-400">
+                <div className="flex items-center gap-1">
+                    <Clock size={12} className="text-purple-500" />
+                    <span>{timeLeft()}</span>
                 </div>
-                <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden flex">
-                    <div style={{ width: `${yesPercentage}%` }} className="h-full bg-green-500" />
-                    <div style={{ width: `${noPercentage}%` }} className="h-full bg-red-500" />
+                <div className="flex items-center gap-1">
+                    <BarChart3 size={12} className="text-blue-500" />
+                    <span>${totalLiquidity.toLocaleString()} Vol</span>
                 </div>
             </div>
 
-            {!hasTokens && connected && status !== 'resolving' && (
-                <div className="mx-4 mb-2 text-center">
-                    <p className="text-[10px] text-red-400 bg-red-900/20 py-1 rounded border border-red-500/20">
-                        ⚠ Must hold 1000+ $PROPHET to vote
-                    </p>
-                </div>
-            )}
+            {/* Outcomes */}
+            <div className="flex flex-col gap-2 relative">
+                <AnimatePresence mode="popLayout">
+                    {topOutcomes.map((idx) => (
+                        <motion.button
+                            key={idx}
+                            layout
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 10 }}
+                            onClick={() => handleOutcomeClick(idx)}
+                            className={`w-full group/btn relative h-12 rounded-xl border transition-all flex items-center justify-between px-4 overflow-hidden ${votedIndex === idx
+                                ? 'bg-purple-500/20 border-purple-500/50'
+                                : 'bg-white/5 border-white/5 hover:border-white/20'
+                                } ${resolved && winningOutcome !== idx ? 'opacity-40' : ''}`}
+                        >
+                            {/* Progress Bar Background */}
+                            <div
+                                className={`absolute inset-0 opacity-10 transition-all ${votedIndex === idx ? 'bg-purple-500' : 'bg-slate-400'}`}
+                                style={{ width: `${outcomeProbabilities[idx]}%` }}
+                            />
 
-            <div className="px-4 pb-4 mt-auto">
-                {resolvedOutcome ? (
-                    <div className="text-center">
-                        <h4 className="text-sm font-bold mb-2">Market Resolved: {resolvedOutcome === 'yes' ? yesLabel : noLabel} Won!</h4>
-                        {voted === resolvedOutcome ?
-                            <button onClick={() => toast.success('Claiming not implemented in V1!')} className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full">Claim Winnings 💰 (~1.85x)</button> :
-                            <p className="text-red-500 font-bold">Rekt 💀</p>
-                        }
-                        <p className="text-xs text-gray-400 mt-1">(-10% tax)</p>
-                    </div>
-                ) : status === 'resolving' ? (
-                    <ResolutionPanel
-                        id={id}
-                        yesLabel={yesLabel}
-                        noLabel={noLabel}
-                        onResolve={(outcome) => console.log('Resolved:', outcome)}
-                    />
-                ) : betMode ? (
-                    <div className="bg-gray-900/80 p-3 rounded-lg border border-gray-700 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                        <div className="flex justify-between items-center mb-3">
-                            <span className={`text-xs font-bold uppercase ${betMode === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
-                                Bet on {betMode === 'yes' ? yesLabel : noLabel}
-                            </span>
-                            <button onClick={() => setBetMode(null)} className="text-gray-500 hover:text-white text-xs">✕</button>
+                            <div className="relative z-10 flex items-center gap-2">
+                                {resolved && winningOutcome === idx && <Trophy size={14} className="text-amber-400" />}
+                                <span className={`text-sm font-bold ${votedIndex === idx ? 'text-purple-400' : 'text-slate-200'}`}>
+                                    {outcomes[idx]}
+                                </span>
+                            </div>
+
+                            <div className="relative z-10 flex items-center gap-2">
+                                <span className="text-xs font-mono font-bold text-slate-400">
+                                    {outcomeProbabilities[idx].toFixed(0)}%
+                                </span>
+                                <ChevronRight size={14} className="text-slate-600 group-hover/btn:translate-x-1 transition-transform" />
+                            </div>
+                        </motion.button>
+                    ))}
+                </AnimatePresence>
+
+                {outcomes.length > 2 && (
+                    <button
+                        onClick={() => setShowAllOutcomes(!showAllOutcomes)}
+                        className="text-[10px] font-bold text-slate-500 hover:text-slate-300 transition-colors py-1 self-center"
+                    >
+                        {showAllOutcomes ? 'Show Less' : `+ ${outcomes.length - 2} More Outcomes`}
+                    </button>
+                )}
+            </div>
+
+            {/* Bet Modal Overlay */}
+            <AnimatePresence>
+                {betMode !== null && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute inset-x-0 bottom-0 bg-slate-900 border-t border-white/10 p-5 flex flex-col gap-4 z-20 shadow-2xl"
+                    >
+                        <div className="flex justify-between items-center">
+                            <span className="text-xs font-bold text-slate-400 uppercase">Stake on {outcomes[betMode]}</span>
+                            <button onClick={() => setBetMode(null)} className="text-slate-500 hover:text-white">✕</button>
                         </div>
-
-                        <div className="relative mb-3">
+                        <div className="relative">
                             <input
+                                autoFocus
                                 type="number"
-                                placeholder="Amount"
                                 value={stakeAmount}
                                 onChange={(e) => setStakeAmount(e.target.value)}
-                                className="w-full bg-black/50 border border-gray-600 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors"
-                                autoFocus
+                                placeholder="0.00"
+                                className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 font-mono font-bold text-xl focus:border-purple-500 focus:outline-none transition-all"
                             />
-                            <span className="absolute right-3 top-2 text-xs text-gray-500 font-bold">$PROPHET</span>
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">$PROPHET</span>
                         </div>
-
-                        {/* Quick Bet Presets */}
-                        <div className="flex gap-2 mb-3">
-                            {['100', '500', '1000'].map((val) => (
+                        <div className="grid grid-cols-4 gap-2">
+                            {['100', '500', '1k', '5k'].map(val => (
                                 <button
                                     key={val}
-                                    onClick={() => setPreset(val)}
-                                    className="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded py-1 text-[10px] font-mono text-gray-300 transition-colors"
+                                    onClick={() => setStakeAmount(val.replace('k', '000'))}
+                                    className="h-8 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold text-slate-400 transition-colors"
                                 >
                                     {val}
                                 </button>
                             ))}
-                            <button onClick={() => setPreset('5000')} className="flex-1 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-500/30 rounded py-1 text-[10px] font-mono text-purple-300 transition-colors">MAX</button>
                         </div>
-
                         <button
                             onClick={confirmBet}
-                            className={`w-full py-2 rounded text-xs font-bold text-white transition-all shadow-lg ${betMode === 'yes' ? 'bg-green-600 hover:bg-green-500 shadow-green-900/20' : 'bg-red-600 hover:bg-red-500 shadow-red-900/20'
-                                }`}
+                            className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-xl font-bold text-sm shadow-lg shadow-purple-500/20 active:scale-[0.98] transition-all"
                         >
-                            Confirm Bet
+                            Confirm Prediction
                         </button>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                        <button
-                            onClick={() => handleVoteClick('yes')}
-                            className={`py-2 rounded-lg text-xs font-bold transition-all active:scale-95 border ${!hasTokens && connected
-                                ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed opacity-50'
-                                : 'bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-black border-green-500/20'
-                                }`}
-                        >
-                            {yesLabel} {yesPercentage.toFixed(0)}¢
-                        </button>
-                        <button
-                            onClick={() => handleVoteClick('no')}
-                            className={`py-2 rounded-lg text-xs font-bold transition-all active:scale-95 border ${!hasTokens && connected
-                                ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed opacity-50'
-                                : 'bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border-red-500/20'
-                                }`}
-                        >
-                            {noLabel} {noPercentage.toFixed(0)}¢
-                        </button>
-                    </div>
+                    </motion.div>
                 )}
-            </div>
-        </motion.div >
+            </AnimatePresence>
+
+            {/* Footer / Status */}
+            {resolved && (
+                <div className="pt-2 border-t border-white/5 flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">Resolved</span>
+                    <button className="text-[10px] font-bold text-green-400 hover:underline">Claim Winnings</button>
+                </div>
+            )}
+        </motion.div>
     );
 };

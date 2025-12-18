@@ -1,47 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-  title: "PROPHET | Predict the Future, Earn Rewards",
-  description: "The first memecoin with real utility. Vote on crypto predictions, prove you're an oracle, and earn $PROPHET rewards. Fair launch on Pump.fun.",
-  keywords: ["memecoin", "crypto prediction", "solana", "pump.fun", "PROPHET", "earn crypto"],
-  openGraph: {
-    title: "PROPHET | Predict the Future, Earn Rewards",
-    description: "Vote on crypto predictions and earn $PROPHET rewards. Join the revolution.",
-    type: "website",
-    locale: "en_US",
-    images: [
-      {
-        url: "/og-image.png", // We'll need to generate this
-        width: 1200,
-        height: 630,
-        alt: "PROPHET Prediction Protocol",
-      },
-    ],
-  },
-  manifest: "/manifest.json",
+  title: "PROPHET | The Future is Prediction",
+  description: "The premier multi-outcome prediction protocol. Stake $PROPHET, predict events, and prove your foresight.",
+  keywords: ["prediction market", "prophet protocol", "solana", "betting", "crypto"],
   themeColor: "#020617",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "PROPHET",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false, // Prevent zooming for app-like feel
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "PROPHET | Predict the Future",
-    description: "Vote on crypto predictions and earn $PROPHET rewards.",
-    creator: "@ProphetProtocol", // Replace with actual handle
-  },
 };
 
 export default function RootLayout({
@@ -50,9 +19,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-gray-950 text-white min-h-screen`}>
+    <html lang="en" className={`${inter.variable} ${outfit.variable}`} suppressHydrationWarning>
+      <body className="font-sans antialiased text-white selection:bg-purple-500/30">
         <Providers>
+          <div className="fixed inset-0 bg-[#020617] -z-20" />
+          <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/10 via-[#020617] to-[#020617] -z-10" />
           {children}
         </Providers>
       </body>
