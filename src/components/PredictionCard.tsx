@@ -287,29 +287,29 @@ export const PredictionCard = ({
                             <CheckCircle2 size={10} />
                             RESOLVED
                         </span>}
-                        {pythPrice && !resolved && (
-                            <div className="ml-auto flex items-center gap-2">
-                                <div className="flex flex-col items-end">
-                                    <span className="text-[10px] text-gray-500 uppercase font-black tracking-tighter">Current Price</span>
-                                    <span className="text-sm font-mono font-bold text-white flex items-center gap-1.5 bg-white/5 border border-white/20 px-2 py-0.5 rounded-md shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-                                        ${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </span>
-                                </div>
-                            </div>
-                        )}
                     </div>
                     <h3 className={`font-outfit font-bold text-lg leading-tight transition-colors ${resolved ? 'text-gray-400' : 'text-white'}`}>
                         {question}
                     </h3>
                 </div>
-                <div className="shrink-0 w-14 h-8 opacity-60 group-hover:opacity-100 transition-all duration-500">
-                    <Sparkline
-                        data={pythData || getDeterministicPattern(id, outcomeProbabilities[0])}
-                        width={56}
-                        height={32}
-                        color={resolved ? '#4b5563' : theme.color}
-                    />
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                    <div className="w-14 h-8 opacity-60 group-hover:opacity-100 transition-all duration-500">
+                        <Sparkline
+                            data={pythData || getDeterministicPattern(id, outcomeProbabilities[0])}
+                            width={56}
+                            height={32}
+                            color={resolved ? '#4b5563' : theme.color}
+                        />
+                    </div>
+                    {isCrypto && (
+                        <div className="flex flex-col items-end">
+                            <span className="text-[9px] text-gray-500 uppercase font-black tracking-tighter">Live Price</span>
+                            <span className="text-xs font-mono font-bold text-white flex items-center gap-1 bg-white/5 border border-white/10 px-2 py-0.5 rounded shadow-lg">
+                                <span className={`w-1.5 h-1.5 rounded-full ${pythPrice ? 'bg-green-500 animate-pulse' : 'bg-gray-600'} shadow-[0_0_8px_rgba(34,197,94,0.3)]`} />
+                                {pythPrice ? `$${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '---'}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
 
