@@ -146,11 +146,11 @@ export const PredictionCard = ({
                 };
 
                 initFetch();
-                const interval = setInterval(pollPrice, 15000);
+                const interval = setInterval(pollPrice, 5000);
                 return () => clearInterval(interval);
             }
         }
-    }, [category, question]);
+    }, [category, question, isCrypto, slug]);
 
     // Dynamic Category Coloring (Professional Themes)
     const getCategoryTheme = (cat: string) => {
@@ -177,7 +177,7 @@ export const PredictionCard = ({
                 setVotedIndex(existingVote.outcomeIndex);
             }
         }
-    }, [publicKey, id]);
+    }, [publicKey, id, isCrypto, slug]);
 
     // Automatic Settlement Timer
     useEffect(() => {

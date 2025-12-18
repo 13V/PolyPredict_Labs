@@ -3,7 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, TrendingUp, Users, MessageSquare, ShieldCheck, Share2 } from 'lucide-react';
 import { Sparkline } from './Sparkline';
-import { getPythSparkline, getPythPrices } from '@/services/pyth';
+import { getPythPrices } from '@/services/pyth';
+import { getCoinGeckoSparkline } from '@/services/coingecko';
 import { useState, useEffect } from 'react';
 
 interface MarketWarRoomProps {
@@ -63,21 +64,32 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
             else if (q.includes('solana') || q.includes('sol')) symbol = 'SOL';
 
             if (symbol) {
-                const fetchPyth = async () => {
+                // Initial Fetch: Sparkline (once) and Price
+                const initFetch = async () => {
                     try {
                         const [sparkline, prices] = await Promise.all([
-                            getPythSparkline(symbol),
+                            getCoinGeckoSparkline(symbol),
                             getPythPrices([symbol])
                         ]);
-                        setPythData(sparkline);
+                        if (sparkline.length > 0) setPythData(sparkline);
                         if (prices[symbol]) setPythPrice(prices[symbol]);
                     } catch (e) {
-                        console.error('WarRoom Pyth fetch error:', e);
+                        console.error('WarRoom initial fetch error:', e);
                     }
                 };
 
-                fetchPyth();
-                const interval = setInterval(fetchPyth, 15000); // 15s polling
+                // Polling: Only Price (every 5s)
+                const pollPrice = async () => {
+                    try {
+                        const prices = await getPythPrices([symbol]);
+                        if (prices[symbol]) setPythPrice(prices[symbol]);
+                    } catch (e) {
+                        console.error('WarRoom Pyth polling error:', e);
+                    }
+                };
+
+                initFetch();
+                const interval = setInterval(pollPrice, 5000);
                 return () => clearInterval(interval);
             }
         }
