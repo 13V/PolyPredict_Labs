@@ -23,41 +23,49 @@ export interface PythPrice {
  * Fetches latest prices from Pyth Hermes API
  */
 export async function getPythPrices(symbols: string[]): Promise<Record<string, number>> {
+    // Normalize IDs: ensure no 0x prefix for the URL query
     const ids = symbols
-        .map(s => PRICE_FEED_IDS[s.toUpperCase()])
-        .filter(Boolean);
+        .map(s => {
+            const id = PRICE_FEED_IDS[s.toUpperCase()];
+            return id ? id.replace('0x', '') : null;
+        })
+        .filter(Boolean) as string[];
 
     if (ids.length === 0) return {};
 
     try {
-        const url = `https://hermes.pyth.network/v2/updates/price/latest?ids[]=${ids.join('&ids[]=')}`;
+        const url = `https://hermes.pyth.network/v2/updates/price/latest?ids[]=${ids.sort().join('&ids[]=')}`;
         console.log(`[Pyth] Fetching: ${url}`);
         const response = await fetch(url);
         if (!response.ok) {
-            console.error(`%c[Pyth] API failure: ${response.status}`, 'background: #ef4444; color: white; font-weight: bold; padding: 2px 5px; border-radius: 3px;');
-            throw new Error('Pyth API failure');
+            console.error(`[Pyth] API failure: ${response.status}`);
+            return {};
         }
 
         const data = await response.json();
         const prices: Record<string, number> = {};
 
         if (!data.parsed) {
-            console.warn('%c[Pyth] No parsed data from Hermes', 'background: #f59e0b; color: white; font-weight: bold; padding: 2px 5px; border-radius: 3px;', data);
+            console.warn('[Pyth] No parsed data from Hermes', data);
             return {};
         }
 
         // Hermes returns an array of price updates
         data.parsed.forEach((update: any) => {
-            const feedId = update.id;
-            const symbol = Object.keys(PRICE_FEED_IDS).find(s => PRICE_FEED_IDS[s] === feedId);
+            // Normalize both for comparison (remove 0x prefix if present)
+            const feedId = update.id.replace('0x', '');
+            const symbol = Object.keys(PRICE_FEED_IDS).find(s =>
+                PRICE_FEED_IDS[s].replace('0x', '') === feedId
+            );
+
             if (symbol) {
                 const p = update.price;
                 // Price is (price * 10^expo)
                 const priceNum = parseFloat(p.price) * Math.pow(10, p.expo);
                 prices[symbol] = priceNum;
                 console.log(
-                    `%c[Pyth] Updated ${symbol}: $${priceNum.toLocaleString()}`,
-                    'background: #10b981; color: white; font-weight: bold; padding: 2px 5px; border-radius: 3px;'
+                    `%c[Pyth] ${symbol}: $${priceNum.toLocaleString()}`,
+                    'background: #10b981; color: white; font-weight: bold; padding: 2px 3px;'
                 );
             }
         });

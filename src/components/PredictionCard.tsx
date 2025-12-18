@@ -70,9 +70,15 @@ export const PredictionCard = ({
         const matchAt = fullSource.match(/at\s+(\d{2,3}k|\d{4,})/);
         if (matchAt) return `$${matchAt[1]}`;
 
-        // 3. Fallback to any large numbers or "k" shorthand
-        const matchK = fullSource.match(/(\d{2,3}k)|(\d{5,})/i);
-        if (matchK) return `$${matchK[0]}`;
+        // 3. Fallback to numbers, but EXCLUDE timestamps (e.g. > 1,000,000,000)
+        const matchDigits = fullSource.match(/(\d{2,3}k)|(\d{4,})/gi);
+        if (matchDigits) {
+            for (const m of matchDigits) {
+                const val = m.toLowerCase().includes('k') ? parseFloat(m) * 1000 : parseFloat(m);
+                // Numbers between 1 and 1 Billion are likely prices. Above that are likely timestamps.
+                if (val > 1 && val < 1000000000) return `$${m}`;
+            }
+        }
 
         return null;
     };
@@ -364,11 +370,16 @@ export const PredictionCard = ({
                                     {resolved && winningOutcome === idx && <Trophy size={14} className="text-amber-400" />}
                                     <span className={`text-sm font-bold ${votedIndex === idx ? 'text-purple-400' : 'text-slate-200'}`}>
                                         {outcomes[idx]}
-                                        {priceTarget && (outcomes[idx].toLowerCase() === 'up' || outcomes[idx].toLowerCase() === 'down') && (
-                                            <span className="ml-1 text-[10px] text-gray-500 font-normal">
-                                                {outcomes[idx].toLowerCase() === 'up' ? '>' : '<'} {priceTarget}
-                                            </span>
-                                        )}
+                                        {priceTarget && (
+                                            outcomes[idx].toLowerCase().includes('up') ||
+                                            outcomes[idx].toLowerCase().includes('down') ||
+                                            outcomes[idx].toLowerCase().includes('yes') ||
+                                            outcomes[idx].toLowerCase().includes('no')
+                                        ) && (
+                                                <span className="ml-1 text-[10px] text-gray-500 font-normal">
+                                                    {(outcomes[idx].toLowerCase().includes('up') || outcomes[idx].toLowerCase().includes('yes')) ? '>' : '<'} {priceTarget}
+                                                </span>
+                                            )}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
