@@ -35,6 +35,9 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
     const [pythData, setPythData] = useState<number[] | null>(null);
     const [pythPrice, setPythPrice] = useState<number | null>(null);
 
+    // Extraction Logic for "Up/Down" markets
+    const priceTarget = data?.question?.match(/\$(\d{1,3}(,\d{3})*(\.\d+)?)/)?.[0];
+
     // Pyth Integration
     useEffect(() => {
         if (data?.category?.toLowerCase().includes('crypto') || data?.question?.toLowerCase().includes('bitcoin')) {
@@ -136,12 +139,14 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                 {/* Left: Chart & Info (3 cols) */}
                 <div className="lg:col-span-3 p-5 md:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/5 relative">
 
-                    {/* Floating Badge */}
                     <div className="absolute top-5 right-5 md:top-10 md:right-10 flex items-center gap-3">
                         {pythPrice && (
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white text-xs font-mono font-bold animate-in fade-in slide-in-from-right-4">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                ${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            <div className="flex flex-col items-end mr-2">
+                                <span className="text-[10px] text-gray-500 uppercase font-black tracking-tighter">Current Price</span>
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/20 text-white text-sm font-mono font-bold shadow-2xl animate-in fade-in slide-in-from-right-4">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+                                    ${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </div>
                             </div>
                         )}
                         {isExpired ? (
@@ -156,155 +161,161 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                             </div>
                         )}
                     </div>
+                </div>
 
-                    <div className="z-10 mt-8 md:mt-0">
-                        <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6 flex-wrap">
-                            <span className="bg-white/5 border border-white/10 text-white text-[10px] md:text-xs font-mono font-bold px-2 py-1 md:px-3 md:py-1 rounded-sm flex items-center gap-2 tracking-widest uppercase">
-                                <TrendingUp size={12} className={theme.text} /> #1 TRENDING
-                            </span>
-                            <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${theme.text}`}>
-                                {data?.category || 'Politics'} • Ends {data?.timeLeft || 'Today'}
-                            </span>
-                        </div>
-
-                        <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-4 md:mb-8 leading-[1.05] tracking-tight">
-                            {data?.question || "Will Bitcoin close higher today?"}
-                        </h2>
-
-                        <div className="flex flex-wrap items-center gap-4 md:gap-10 mt-2 md:mt-4 text-[10px] md:text-xs text-gray-400 font-bold tracking-widest uppercase">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white/5 border border-white/10 rounded-lg">
-                                    <Activity size={16} className={theme.text} />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-gray-600">Volume</span>
-                                    <span className="text-white">${data?.totalVolume ? data.totalVolume.toLocaleString() : '4.2M'}</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white/5 border border-white/10 rounded-lg">
-                                    <Users size={16} className="text-blue-500" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-gray-600">Traders</span>
-                                    <span className="text-white">12.5K</span>
-                                </div>
-                            </div>
-                        </div>
+                <div className="z-10 mt-8 md:mt-0">
+                    <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6 flex-wrap">
+                        <span className="bg-white/5 border border-white/10 text-white text-[10px] md:text-xs font-mono font-bold px-2 py-1 md:px-3 md:py-1 rounded-sm flex items-center gap-2 tracking-widest uppercase">
+                            <TrendingUp size={12} className={theme.text} /> #1 TRENDING
+                        </span>
+                        <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${theme.text}`}>
+                            {data?.category || 'Politics'} • Ends {data?.timeLeft || 'Today'}
+                        </span>
                     </div>
 
-                    {/* Big Chart Area */}
-                    <div className="mt-8 md:mt-16">
-                        <div className="flex items-end gap-3 md:gap-4 mb-6">
-                            <div className="text-5xl md:text-7xl font-black text-white tracking-tighter">{yesPrice}%</div>
-                            <div className="text-green-400 font-bold text-sm md:text-lg mb-2 flex items-center gap-1">
-                                <ArrowUpRight size={18} />
-                                +{(data?.question.length ? (data.question.length % 15) + 1.5 : 12.4).toFixed(1)}% TODAY
+                    <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-4 md:mb-8 leading-[1.05] tracking-tight">
+                        {data?.question || "Will Bitcoin close higher today?"}
+                    </h2>
+
+                    <div className="flex flex-wrap items-center gap-4 md:gap-10 mt-2 md:mt-4 text-[10px] md:text-xs text-gray-400 font-bold tracking-widest uppercase">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white/5 border border-white/10 rounded-lg">
+                                <Activity size={16} className={theme.text} />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-gray-600">Volume</span>
+                                <span className="text-white">${data?.totalVolume ? data.totalVolume.toLocaleString() : '4.2M'}</span>
                             </div>
                         </div>
-
-                        {/* Seamless Chart Container */}
-                        <div className="h-[100px] md:h-[140px] w-full relative overflow-hidden mask-linear-fade">
-                            <Sparkline data={pythData || bigChartData} width={800} height={140} color={theme.color} />
-                            {/* Gradient Overlay for Fade */}
-                            <div
-                                className="absolute inset-x-0 bottom-0 h-1/2 opacity-30 pointer-events-none"
-                                style={{ background: `linear-gradient(to top, ${theme.color}, transparent)` }}
-                            />
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white/5 border border-white/10 rounded-lg">
+                                <Users size={16} className="text-blue-500" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-gray-600">Traders</span>
+                                <span className="text-white">12.5K</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Right: Trading Interface (2 cols) */}
-                <div className="lg:col-span-2 p-5 md:p-10 bg-white/[0.02] backdrop-blur-md flex flex-col justify-center gap-6 md:gap-8 relative overflow-hidden">
-                    {/* Glass Reflection */}
-                    <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-                    <div className="space-y-6 z-10">
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">
-                                <span>Order Book</span>
-                                <span>Spread: 1¢</span>
-                            </div>
-                            {/* Mock Order Book Visual */}
-                            <div className="flex gap-1 h-1.5 md:h-2 w-full rounded-full overflow-hidden bg-gray-800">
-                                <motion.div
-                                    initial={{ width: '50%' }}
-                                    animate={{ width: `${yesPercentage}%` }}
-                                    className="h-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]"
-                                />
-                                <div className="h-full flex-1 bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
-                            </div>
+                {/* Big Chart Area */}
+                <div className="mt-8 md:mt-16">
+                    <div className="flex items-end gap-3 md:gap-4 mb-6">
+                        <div className="text-5xl md:text-7xl font-black text-white tracking-tighter">{yesPrice}%</div>
+                        <div className="text-green-400 font-bold text-sm md:text-lg mb-2 flex items-center gap-1">
+                            <ArrowUpRight size={18} />
+                            +{(data?.question.length ? (data.question.length % 15) + 1.5 : 12.4).toFixed(1)}% TODAY
                         </div>
+                    </div>
 
-                        <div className="grid grid-cols-1 gap-4">
-                            {betMode ? (
-                                <div className="bg-gray-800/80 p-4 md:p-6 rounded-2xl border border-gray-700 animate-in fade-in slide-in-from-bottom-4">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h3 className={`text-lg md:text-xl font-black uppercase tracking-tight ${betMode === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
-                                            Bet on {betMode === 'yes' ? 'YES' : 'NO'}
-                                        </h3>
-                                        <button onClick={() => setBetMode(null)} className="text-gray-500 hover:text-white p-2">✕</button>
-                                    </div>
+                    {/* Seamless Chart Container */}
+                    <div className="h-[100px] md:h-[140px] w-full relative overflow-hidden mask-linear-fade">
+                        <Sparkline data={pythData || bigChartData} width={800} height={140} color={theme.color} />
+                        {/* Gradient Overlay for Fade */}
+                        <div
+                            className="absolute inset-x-0 bottom-0 h-1/2 opacity-30 pointer-events-none"
+                            style={{ background: `linear-gradient(to top, ${theme.color}, transparent)` }}
+                        />
+                    </div>
+                </div>
+            </div>
 
-                                    <div className="relative mb-4">
-                                        <input
-                                            type="number"
-                                            placeholder="Enter Amount"
-                                            value={stakeAmount}
-                                            onChange={(e) => setStakeAmount(e.target.value)}
-                                            className="w-full bg-black/40 border-2 border-gray-600 focus:border-purple-500 rounded-xl px-4 py-3 text-base md:text-lg text-white placeholder-gray-600 outline-none transition-all"
-                                            autoFocus
-                                        />
-                                        <span className="absolute right-4 top-4 text-xs md:text-sm font-bold text-gray-400">$PROPHET</span>
-                                    </div>
+            {/* Right: Trading Interface (2 cols) */}
+            <div className="lg:col-span-2 p-5 md:p-10 bg-white/[0.02] backdrop-blur-md flex flex-col justify-center gap-6 md:gap-8 relative overflow-hidden">
+                {/* Glass Reflection */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                                    <button
-                                        onClick={handleConfirmBet}
-                                        className={`w-full py-3 md:py-4 rounded-xl text-base md:text-lg font-black uppercase tracking-widest text-white shadow-xl transition-transform active:scale-95 ${betMode === 'yes' ? 'bg-gradient-to-r from-green-600 to-green-500 hover:to-green-400 shadow-green-900/20' : 'bg-gradient-to-r from-red-600 to-red-500 hover:to-red-400 shadow-red-900/20'
-                                            }`}
-                                    >
-                                        CONFIRM BET
-                                    </button>
+                <div className="space-y-6 z-10">
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">
+                            <span>Order Book</span>
+                            <span>Spread: 1¢</span>
+                        </div>
+                        {/* Mock Order Book Visual */}
+                        <div className="flex gap-1 h-1.5 md:h-2 w-full rounded-full overflow-hidden bg-gray-800">
+                            <motion.div
+                                initial={{ width: '50%' }}
+                                animate={{ width: `${yesPercentage}%` }}
+                                className="h-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]"
+                            />
+                            <div className="h-full flex-1 bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                        {betMode ? (
+                            <div className="bg-gray-800/80 p-4 md:p-6 rounded-2xl border border-gray-700 animate-in fade-in slide-in-from-bottom-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className={`text-lg md:text-xl font-black uppercase tracking-tight ${betMode === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
+                                        Bet on {betMode === 'yes' ? 'YES' : 'NO'}
+                                    </h3>
+                                    <button onClick={() => setBetMode(null)} className="text-gray-500 hover:text-white p-2">✕</button>
                                 </div>
-                            ) : (
-                                <div className="grid grid-cols-2 gap-3 md:gap-4">
-                                    <button
-                                        disabled={isExpired}
-                                        onClick={(e) => { e.stopPropagation(); connected ? setBetMode('yes') : alert('Connect Wallet!'); }}
-                                        className={`group relative overflow-hidden p-4 md:p-6 bg-green-500/10 ${isExpired ? 'cursor-not-allowed opacity-40' : 'hover:bg-green-500/20 border-green-500/20 hover:border-green-500/50'} rounded-2xl transition-all duration-300 active:scale-95`}
-                                    >
-                                        <div className="relative z-10 flex flex-col items-center gap-1">
-                                            <span className="text-green-400 font-black text-xl md:text-2xl tracking-tight">YES</span>
-                                            <span className="text-white font-mono text-xs md:text-sm group-hover:scale-110 transition-transform bg-green-500/20 px-2 py-0.5 rounded">{yesPrice}¢</span>
-                                        </div>
-                                        <div className="absolute inset-0 bg-green-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </button>
 
-                                    <button
-                                        disabled={isExpired}
-                                        onClick={(e) => { e.stopPropagation(); connected ? setBetMode('no') : alert('Connect Wallet!'); }}
-                                        className={`group relative overflow-hidden p-4 md:p-6 bg-red-500/10 ${isExpired ? 'cursor-not-allowed opacity-40' : 'hover:bg-red-500/20 border-red-500/20 hover:border-red-500/50'} rounded-2xl transition-all duration-300 active:scale-95`}
-                                    >
-                                        <div className="relative z-10 flex flex-col items-center gap-1">
-                                            <span className="text-red-400 font-black text-xl md:text-2xl tracking-tight">NO</span>
-                                            <span className="text-white font-mono text-xs md:text-sm group-hover:scale-110 transition-transform bg-red-500/20 px-2 py-0.5 rounded">{noPrice}¢</span>
-                                        </div>
-                                        <div className="absolute inset-0 bg-red-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </button>
+                                <div className="relative mb-4">
+                                    <input
+                                        type="number"
+                                        placeholder="Enter Amount"
+                                        value={stakeAmount}
+                                        onChange={(e) => setStakeAmount(e.target.value)}
+                                        className="w-full bg-black/40 border-2 border-gray-600 focus:border-purple-500 rounded-xl px-4 py-3 text-base md:text-lg text-white placeholder-gray-600 outline-none transition-all"
+                                        autoFocus
+                                    />
+                                    <span className="absolute right-4 top-4 text-xs md:text-sm font-bold text-gray-400">$PROPHET</span>
                                 </div>
-                            )}
-                        </div>
 
-                        <div className="pt-4 md:pt-6 border-t border-white/5 text-center">
-                            <button
-                                onClick={onOpenCreateModal} // Use the specific prop
-                                className="text-gray-400 hover:text-white text-[10px] md:text-xs uppercase tracking-widest font-bold transition-colors flex items-center justify-center gap-2 group"
-                            >
-                                <span className="w-1.5 h-1.5 rounded-full bg-gray-600 group-hover:bg-purple-500 transition-colors" />
-                                Create Your Own Market
-                            </button>
-                        </div>
+                                <button
+                                    onClick={handleConfirmBet}
+                                    className={`w-full py-3 md:py-4 rounded-xl text-base md:text-lg font-black uppercase tracking-widest text-white shadow-xl transition-transform active:scale-95 ${betMode === 'yes' ? 'bg-gradient-to-r from-green-600 to-green-500 hover:to-green-400 shadow-green-900/20' : 'bg-gradient-to-r from-red-600 to-red-500 hover:to-red-400 shadow-red-900/20'
+                                        }`}
+                                >
+                                    CONFIRM BET
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 gap-3 md:gap-4">
+                                <button
+                                    disabled={isExpired}
+                                    onClick={(e) => { e.stopPropagation(); connected ? setBetMode('yes') : alert('Connect Wallet!'); }}
+                                    className={`group relative overflow-hidden p-4 md:p-6 bg-green-500/10 ${isExpired ? 'cursor-not-allowed opacity-40' : 'hover:bg-green-500/20 border-green-500/20 hover:border-green-500/50'} rounded-2xl transition-all duration-300 active:scale-95`}
+                                >
+                                    <div className="relative z-10 flex flex-col items-center gap-1">
+                                        <span className="text-green-400 font-black text-xl md:text-2xl tracking-tight">
+                                            YES
+                                            {priceTarget && <span className="block text-[10px] md:text-xs text-green-500/50 font-bold mt-1 tracking-widest">{">"} {priceTarget}</span>}
+                                        </span>
+                                        <span className="text-white font-mono text-xs md:text-sm group-hover:scale-110 transition-transform bg-green-500/20 px-2 py-0.5 rounded">{yesPrice}¢</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-green-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </button>
+
+                                <button
+                                    disabled={isExpired}
+                                    onClick={(e) => { e.stopPropagation(); connected ? setBetMode('no') : alert('Connect Wallet!'); }}
+                                    className={`group relative overflow-hidden p-4 md:p-6 bg-red-500/10 ${isExpired ? 'cursor-not-allowed opacity-40' : 'hover:bg-red-500/20 border-red-500/20 hover:border-red-500/50'} rounded-2xl transition-all duration-300 active:scale-95`}
+                                >
+                                    <div className="relative z-10 flex flex-col items-center gap-1">
+                                        <span className="text-red-400 font-black text-xl md:text-2xl tracking-tight">
+                                            NO
+                                            {priceTarget && <span className="block text-[10px] md:text-xs text-red-500/50 font-bold mt-1 tracking-widest">{"<"} {priceTarget}</span>}
+                                        </span>
+                                        <span className="text-white font-mono text-xs md:text-sm group-hover:scale-110 transition-transform bg-red-500/20 px-2 py-0.5 rounded">{noPrice}¢</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-red-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="pt-4 md:pt-6 border-t border-white/5 text-center">
+                        <button
+                            onClick={onOpenCreateModal} // Use the specific prop
+                            className="text-gray-400 hover:text-white text-[10px] md:text-xs uppercase tracking-widest font-bold transition-colors flex items-center justify-center gap-2 group"
+                        >
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-600 group-hover:bg-purple-500 transition-colors" />
+                            Create Your Own Market
+                        </button>
                     </div>
                 </div>
             </div>

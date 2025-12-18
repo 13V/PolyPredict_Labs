@@ -3,6 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, TrendingUp, Users, MessageSquare, ShieldCheck, Share2 } from 'lucide-react';
 import { Sparkline } from './Sparkline';
+import { getPythSparkline } from '@/services/pyth';
+import { useState, useEffect } from 'react';
 
 interface MarketWarRoomProps {
     isOpen: boolean;
@@ -11,6 +13,38 @@ interface MarketWarRoomProps {
 }
 
 export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) => {
+    const [pythPrice, setPythPrice] = useState<number | null>(null);
+    const [pythData, setPythData] = useState<number[] | null>(null);
+
+    // Extraction Logic for "Up/Down" markets
+    const priceTarget = market?.question?.match(/\$(\d{1,3}(,\d{3})*(\.\d+)?)/)?.[0];
+
+    // Pyth Integration
+    useEffect(() => {
+        if (!isOpen || !market) return;
+
+        if (market.category?.toLowerCase().includes('crypto') || market.question?.toLowerCase().includes('bitcoin')) {
+            const q = market.question?.toLowerCase() || '';
+            let symbol = '';
+            if (q.includes('bitcoin') || q.includes('btc')) symbol = 'BTC';
+            else if (q.includes('ethereum') || q.includes('eth')) symbol = 'ETH';
+            else if (q.includes('solana') || q.includes('sol')) symbol = 'SOL';
+
+            if (symbol) {
+                const fetchPyth = () => {
+                    getPythSparkline(symbol).then(setPythData);
+                    import('@/services/pyth').then(m => {
+                        m.getPythPrices([symbol]).then(prices => setPythPrice(prices[symbol]));
+                    });
+                };
+
+                fetchPyth();
+                const interval = setInterval(fetchPyth, 10000); // 10s polling
+                return () => clearInterval(interval);
+            }
+        }
+    }, [isOpen, market]);
+
     if (!market) return null;
 
     // Dynamic Category Coloring (Professional Themes)
@@ -82,13 +116,20 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                                 <div className="p-8 h-full flex flex-col">
                                     <div className="flex justify-between items-end mb-auto">
                                         <div>
-                                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-tighter">Current Odds</p>
-                                            <p className="text-4xl font-black text-white">74% <span className="text-sm text-green-400 ml-2">↑ 4.2%</span></p>
+                                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-tighter">Current Oracle Price</p>
+                                            <p className="text-4xl font-black text-white">
+                                                {pythPrice ? `$${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '74%'}
+                                                {pythPrice ? (
+                                                    <span className="text-sm text-green-400 ml-2 animate-pulse">● LIVE</span>
+                                                ) : (
+                                                    <span className="text-sm text-green-400 ml-2">↑ 4.2%</span>
+                                                )}
+                                            </p>
                                         </div>
                                         <TrendingUp style={{ color: resolved ? '#4b5563' : theme.color }} size={32} />
                                     </div>
                                     <div className="h-48 w-full">
-                                        <Sparkline data={market.sparklineData || [30, 40, 35, 50, 45, 60, 55, 74]} width={800} height={120} color={resolved ? '#4b5563' : theme.color} />
+                                        <Sparkline data={pythData || market.sparklineData || [30, 40, 35, 50, 45, 60, 55, 74]} width={800} height={120} color={resolved ? '#4b5563' : theme.color} />
                                     </div>
                                 </div>
                             </div>
@@ -140,7 +181,14 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                                                 <div className="relative z-10 flex justify-between items-center">
                                                     <div>
                                                         <p className="text-[10px] font-black text-gray-500 uppercase mb-1">Outcome {i + 1}</p>
-                                                        <p className="text-xl font-bold text-white">{outcome}</p>
+                                                        <p className="text-xl font-bold text-white">
+                                                            {outcome}
+                                                            {priceTarget && (outcome.toLowerCase() === 'up' || outcome.toLowerCase() === 'down' || outcome.toLowerCase() === 'yes' || outcome.toLowerCase() === 'no') && (
+                                                                <span className="ml-2 text-xs text-gray-500 font-normal">
+                                                                    {(outcome.toLowerCase() === 'up' || outcome.toLowerCase() === 'yes') ? '>' : '<'} {priceTarget}
+                                                                </span>
+                                                            )}
+                                                        </p>
                                                     </div>
                                                     <div className="text-right">
                                                         <p className={`text-xs font-mono ${resolved ? 'text-gray-500' : theme.text}`}>Wins: {multiplier}x</p>

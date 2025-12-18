@@ -6,10 +6,10 @@
 // Mapping of common symbols to Pyth Price Feed IDs (Hermes API)
 // Full list: https://pyth.network/developers/price-feed-ids
 const PRICE_FEED_IDS: Record<string, string> = {
-    'BTC': '0xe62df6c8b4a27e162e37299c9085c18197112c888b6c6d3c03839" + "f3393b1c55b',
-    'ETH': '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480" + "874592eca2d2',
-    'SOL': '0xef0d8b6fda2ce37293426f65b2af33e291f7ee5af255cf319035" + "03e4c14a00a8',
-    'USDC': '0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798" + "d1f905273e65',
+    'BTC': '0xe62df6c8b4a27e162e37299c9085c18197112c888b6c6d3c03839f3393b1c55b',
+    'ETH': '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874592eca2d2',
+    'SOL': '0xef0d8b6fda2ce37293426f65b2af33e291f7ee5af255cf31903503e4c14a00a8',
+    'USDC': '0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f905273e65',
 };
 
 export interface PythPrice {

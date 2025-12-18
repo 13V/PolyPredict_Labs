@@ -52,6 +52,9 @@ export const PredictionCard = ({
     const [pythData, setPythData] = useState<number[] | null>(null);
     const [pythPrice, setPythPrice] = useState<number | null>(null);
 
+    // Extraction Logic for "Up/Down" markets
+    const priceTarget = question.match(/\$(\d{1,3}(,\d{3})*(\.\d+)?)/)?.[0];
+
     // Lifecycle Logic
     const isExpired = Date.now() > endTime * 1000;
 
@@ -221,10 +224,15 @@ export const PredictionCard = ({
                             RESOLVED
                         </span>}
                         {pythPrice && !resolved && (
-                            <span className="ml-auto text-xs font-mono font-bold text-white flex items-center gap-1.5 bg-white/5 border border-white/10 px-2 py-0.5 rounded-md animate-in fade-in zoom-in duration-500">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-                                ${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </span>
+                            <div className="ml-auto flex items-center gap-2">
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[10px] text-gray-500 uppercase font-black tracking-tighter">Current Price</span>
+                                    <span className="text-sm font-mono font-bold text-white flex items-center gap-1.5 bg-white/5 border border-white/20 px-2 py-0.5 rounded-md shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                                        ${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </span>
+                                </div>
+                            </div>
                         )}
                     </div>
                     <h3 className={`font-outfit font-bold text-lg leading-tight transition-colors ${resolved ? 'text-gray-400' : 'text-white'}`}>
@@ -287,6 +295,11 @@ export const PredictionCard = ({
                                     {resolved && winningOutcome === idx && <Trophy size={14} className="text-amber-400" />}
                                     <span className={`text-sm font-bold ${votedIndex === idx ? 'text-purple-400' : 'text-slate-200'}`}>
                                         {outcomes[idx]}
+                                        {priceTarget && (outcomes[idx].toLowerCase() === 'up' || outcomes[idx].toLowerCase() === 'down') && (
+                                            <span className="ml-1 text-[10px] text-gray-500 font-normal">
+                                                {outcomes[idx].toLowerCase() === 'up' ? '>' : '<'} {priceTarget}
+                                            </span>
+                                        )}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
