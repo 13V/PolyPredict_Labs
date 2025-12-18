@@ -219,7 +219,10 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
 
                                     return market.outcomes?.map((outcome: string, i: number) => {
                                         const prob = total > 0 ? (totals[i] / total) * 100 : 50;
-                                        const multiplier = prob > 0 ? (100 / prob).toFixed(2) : '0.00';
+                                        // Apply 10% fee on winnings: (Raw - 1) * 0.9 + 1
+                                        const rawMultiplier = prob > 0 ? (100 / prob) : 0;
+                                        const taxedMultiplier = rawMultiplier > 1 ? ((rawMultiplier - 1) * 0.9 + 1) : rawMultiplier;
+                                        const multiplier = taxedMultiplier.toFixed(2);
 
                                         return (
                                             <button
