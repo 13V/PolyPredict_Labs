@@ -8,7 +8,8 @@ import { getDeterministicPattern } from '@/utils/chartPatterns';
 import { Sparkline } from './Sparkline';
 import { useToast } from '@/context/ToastContext';
 import { useHaptic } from '@/hooks/useHaptic';
-import { getPythSparkline, getPythPrices } from '@/services/pyth';
+import { getPythPrices } from '@/services/pyth';
+import { getCoinGeckoSparkline } from '@/services/coingecko';
 
 interface PredictionCardProps {
     id: number;
@@ -78,6 +79,16 @@ export const PredictionCard = ({
 
     const priceTarget = findTarget();
 
+    // UNIVERSAL PROBE: Log all props once per ID to see what Polymarket is sending
+    useEffect(() => {
+        console.log(
+            `%c[PROBE ${id}] %c${question}`,
+            'background: #333; color: #fff; font-weight: bold; padding: 2px 5px;',
+            'color: #999;',
+            { category, slug, eventTitle, outcomes, polymarketId }
+        );
+    }, [id, question, category, slug, eventTitle, outcomes, polymarketId]);
+
     const isCrypto = category.toLowerCase().includes('crypto') ||
         question.toLowerCase().match(/bitcoin|btc|ethereum|eth|solana|sol|price/i) ||
         slug?.toLowerCase().match(/bitcoin|btc|ethereum|eth|solana|sol|price/i);
@@ -104,21 +115,32 @@ export const PredictionCard = ({
             else if (q.includes('solana') || q.includes('sol')) symbol = 'SOL';
 
             if (symbol) {
-                const fetchPyth = async () => {
+                // Initial Fetch: Sparkline (once) and Price
+                const initFetch = async () => {
                     try {
                         const [sparkline, prices] = await Promise.all([
-                            getPythSparkline(symbol),
+                            getCoinGeckoSparkline(symbol),
                             getPythPrices([symbol])
                         ]);
-                        setPythData(sparkline);
+                        if (sparkline.length > 0) setPythData(sparkline);
                         if (prices[symbol]) setPythPrice(prices[symbol]);
                     } catch (e) {
-                        console.error('Pyth fetch error:', e);
+                        console.error('Initial pricing fetch error:', e);
                     }
                 };
 
-                fetchPyth();
-                const interval = setInterval(fetchPyth, 15000); // 15s polling
+                // Polling: Only Price (every 15s)
+                const pollPrice = async () => {
+                    try {
+                        const prices = await getPythPrices([symbol]);
+                        if (prices[symbol]) setPythPrice(prices[symbol]);
+                    } catch (e) {
+                        console.error('Pyth polling error:', e);
+                    }
+                };
+
+                initFetch();
+                const interval = setInterval(pollPrice, 15000);
                 return () => clearInterval(interval);
             }
         }
