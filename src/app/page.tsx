@@ -134,7 +134,30 @@ export default function Home() {
         });
 
         // Unique filter by id to prevent duplicates
-        const unique = mergedList.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+        const uniqueById = mergedList.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+
+        // Aggressive Deduplication for "Up or Down" markets
+        // Filter out multiple markets for the same asset/date to prevent spam and rate limits
+        const unique = uniqueById.filter((v, i, a) => {
+          const isCrypto = v.category === 'CRYPTO' || v.question.includes('Bitcoin') || v.question.includes('Ethereum');
+          if (!isCrypto) return true;
+
+          // Create a "signature" for natural deduplication
+          // e.g. "bitcoin-dec-18-2025"
+          const dateStr = new Date(v.endTime * 1000).toDateString();
+          const asset = v.question.toLowerCase().includes('bitcoin') ? 'btc'
+            : v.question.toLowerCase().includes('ethereum') ? 'eth'
+              : v.question.toLowerCase().includes('solana') ? 'sol' : v.question;
+
+          // Only keep the first valid occurrence of this Asset + Date combo
+          return a.findIndex(t => {
+            const tDate = new Date(t.endTime * 1000).toDateString();
+            const tAsset = t.question.toLowerCase().includes('bitcoin') ? 'btc'
+              : t.question.toLowerCase().includes('ethereum') ? 'eth'
+                : t.question.toLowerCase().includes('solana') ? 'sol' : t.question;
+            return tAsset === asset && tDate === dateStr;
+          }) === i;
+        });
 
         setPredictions(unique);
         setFetchError(unique.length === 0 ? "No markets found." : false);

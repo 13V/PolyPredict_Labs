@@ -117,9 +117,12 @@ export const PredictionCard = ({
             else if (full.includes('solana') || full.includes('sol')) asset = 'Solana';
 
             // Extract Time (e.g. 9PM, 10:00AM, December 19)
+            // Extract Time (e.g. 9PM, 10:00AM, December 19)
             // Improved match for ET timezones and ranges
             const timeMatch = full.match(/(\d{1,2}(:\d{2})?\s*(AM|PM)(\s*ET)?)|((December|January|February|March|April|May|June|July|August|September|October|November)\s+\d{1,2})/i);
-            const timeStr = timeMatch ? ` by ${timeMatch[0]}` : '';
+            const rawTime = timeMatch ? timeMatch[0] : '';
+            // Proper capitalization for months (e.g. december -> December)
+            const timeStr = rawTime ? ` by ${rawTime.charAt(0).toUpperCase() + rawTime.slice(1)}` : '';
 
             if (priceTarget) {
                 return `${asset} above or under ${priceTarget}${timeStr}?`;
@@ -135,7 +138,7 @@ export const PredictionCard = ({
             // Render as: "Bitcoin Greater or Less than $84,320?" (User Request)
             if (!priceTarget) {
                 if (openPrice) {
-                    return `${asset} Greater or Less than $${openPrice.toLocaleString()}?`;
+                    return `${asset} Greater or Less than $${openPrice.toLocaleString()}${timeStr}?`;
                 }
                 return `${asset} Greater or Less than Daily Open${timeStr}?`;
             }
