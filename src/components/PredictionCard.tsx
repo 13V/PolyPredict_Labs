@@ -349,10 +349,10 @@ export const PredictionCard = ({
                         {displayTitle}
                     </h3>
                     {/* DEBUG OVERLAY - Temporary for identifying extraction issues */}
-                    <div className="mt-1 flex gap-2 text-[8px] font-mono text-gray-600 uppercase">
-                        <span>DESC: {description ? 'YES' : 'NO'}</span>
-                        <span>TARGET: {priceTarget || 'NONE'}</span>
-                        <span>SLUG: {slug ? 'YES' : 'NO'}</span>
+                    <div className="mt-1 flex flex-col gap-1 text-[8px] font-mono text-gray-600 uppercase break-all leading-tight bg-white/5 p-1 rounded">
+                        <span>DESC: {description?.slice(0, 100) || 'NONE'}</span>
+                        <span>SLUG: {slug?.slice(0, 50) || 'NONE'}</span>
+                        <span>TARGET: {priceTarget || 'FAILED'}</span>
                     </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">
