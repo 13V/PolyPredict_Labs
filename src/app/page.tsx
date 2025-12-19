@@ -96,7 +96,7 @@ export default function Home() {
           const program = getProgram(dummyWallet);
           if (program) {
             const accounts = await program.account.market.all();
-            onChainMarkets = accounts.map(acc => {
+            onChainMarkets = accounts.map((acc: any) => {
               const m = acc.account;
               return {
                 id: m.marketId.toNumber(),
@@ -312,11 +312,11 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-900 border border-white/5 rounded-lg text-[10px] font-mono group">
-                <span className="text-gray-500 uppercase">CA:</span>
+              <div className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-gray-900 border border-white/5 rounded-lg text-[9px] md:text-[10px] font-mono group">
+                <span className="hidden md:inline text-gray-500 uppercase">CA:</span>
                 <span className="text-gray-400">{CONTRACT_ADDRESS.slice(0, 4)}...{CONTRACT_ADDRESS.slice(-4)}</span>
-                <button onClick={copyToClipboard} className="text-purple-500 hover:text-purple-400 transition-colors">
-                  {copied ? <Check size={12} /> : <Copy size={12} />}
+                <button onClick={copyToClipboard} className="text-purple-500 hover:text-purple-400 transition-colors p-1">
+                  {copied ? <Check size={10} className="md:w-3 md:h-3" /> : <Copy size={10} className="md:w-3 md:h-3" />}
                 </button>
               </div>
 
@@ -324,9 +324,9 @@ export default function Home() {
                 href={`https://pump.fun/${CONTRACT_ADDRESS}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-[10px] font-black uppercase tracking-tighter px-4 py-2 rounded-full shadow-lg shadow-purple-500/20 active:scale-95 transition-all"
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-[9px] md:text-[10px] font-black uppercase tracking-tighter px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-lg shadow-purple-500/20 active:scale-95 transition-all outline-none"
               >
-                Buy $PROPHET
+                Buy <span className="hidden md:inline">$PROPHET</span>
               </a>
 
               <button
@@ -337,7 +337,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setIsPositionsOpen(true)}
-                className="text-sm font-bold text-gray-400 hover:text-white transition-colors flex items-center gap-2"
+                className="text-xs md:text-sm font-bold text-gray-400 hover:text-white transition-colors flex items-center gap-2"
               >
                 My Bets
               </button>
