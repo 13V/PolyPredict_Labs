@@ -23,7 +23,7 @@ import { realSnapshot } from '@/data/real_snapshot';
 import { getUserMarkets, resolveUserMarket } from '@/utils/marketStorage';
 import { saveResolution, getResolutionStatus } from '@/utils/voteStorage';
 
-const CONTRACT_ADDRESS = 'HqQqPtf7FgFySXDHrTzExbGKUt4axd1JJQRDr9kZpump';
+const CONTRACT_ADDRESS = 'COMING SOON';
 
 export default function Home() {
   const { publicKey } = useWallet();
@@ -314,15 +314,15 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-gray-900 border border-white/5 rounded-lg text-[9px] md:text-[10px] font-mono group">
                 <span className="hidden md:inline text-gray-500 uppercase">CA:</span>
-                <span className="text-gray-400">{CONTRACT_ADDRESS.slice(0, 4)}...{CONTRACT_ADDRESS.slice(-4)}</span>
+                <span className="text-gray-400">{CONTRACT_ADDRESS === 'COMING SOON' ? CONTRACT_ADDRESS : `${CONTRACT_ADDRESS.slice(0, 4)}...${CONTRACT_ADDRESS.slice(-4)}`}</span>
                 <button onClick={copyToClipboard} className="text-purple-500 hover:text-purple-400 transition-colors p-1">
                   {copied ? <Check size={10} className="md:w-3 md:h-3" /> : <Copy size={10} className="md:w-3 md:h-3" />}
                 </button>
               </div>
 
               <a
-                href={`https://pump.fun/${CONTRACT_ADDRESS}`}
-                target="_blank"
+                href={CONTRACT_ADDRESS === 'COMING SOON' ? '#' : `https://pump.fun/${CONTRACT_ADDRESS}`}
+                target={CONTRACT_ADDRESS === 'COMING SOON' ? '_self' : '_blank'}
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-[9px] md:text-[10px] font-black uppercase tracking-tighter px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-lg shadow-purple-500/20 active:scale-95 transition-all outline-none"
               >
@@ -505,9 +505,11 @@ export default function Home() {
               <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-mono group">
                 <span className="text-gray-500 uppercase">Contract:</span>
                 <span className="text-gray-300">{CONTRACT_ADDRESS}</span>
-                <button onClick={copyToClipboard} className="text-purple-500 hover:text-purple-400 transition-colors ml-1 p-1">
-                  {copied ? <Check size={12} /> : <Copy size={12} />}
-                </button>
+                {CONTRACT_ADDRESS !== 'COMING SOON' && (
+                  <button onClick={copyToClipboard} className="text-purple-500 hover:text-purple-400 transition-colors ml-1 p-1">
+                    {copied ? <Check size={12} /> : <Copy size={12} />}
+                  </button>
+                )}
               </div>
 
               <div className="space-y-4 max-w-2xl px-4">
@@ -520,7 +522,7 @@ export default function Home() {
               </div>
 
               <div className="flex items-center gap-8 mt-4">
-                <a href={`https://pump.fun/${CONTRACT_ADDRESS}`} target="_blank" rel="noopener" className="text-xs font-black text-gray-500 hover:text-purple-400 transition-colors uppercase tracking-widest">Pump.fun</a>
+                <a href={CONTRACT_ADDRESS === 'COMING SOON' ? '#' : `https://pump.fun/${CONTRACT_ADDRESS}`} target="_blank" rel="noopener" className="text-xs font-black text-gray-500 hover:text-purple-400 transition-colors uppercase tracking-widest">Pump.fun</a>
                 <a href="#" className="text-xs font-black text-gray-500 hover:text-blue-400 transition-colors uppercase tracking-widest">Twitter (X)</a>
                 <a href="#" className="text-xs font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest">Docs</a>
               </div>
