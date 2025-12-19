@@ -425,20 +425,19 @@ export const PredictionCard = ({
                 />
             )}
 
-            {/* Off-Chain Indicator (For Debug/Transparency) */}
-            {polymarketId && !isOnChain && !resolved && (
-                <div className="absolute top-2 left-2 z-20">
-                    <span className="text-[8px] font-mono uppercase bg-blue-500/20 text-blue-400 px-1 py-0.5 rounded border border-blue-500/10">
-                        Lazy Init Ready
-                    </span>
-                </div>
-            )}
-
             {/* Header */}
             <div className="flex justify-between items-start gap-4 z-10">
                 <div className="flex flex-col gap-1.5 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <span className={`text-[10px] font-bold uppercase tracking-widest ${resolved ? 'text-gray-500' : theme.text}`}>{displayCategory}</span>
+
+                        {/* Lazy Init Badge (Moved here to avoid overlap) */}
+                        {polymarketId && !isOnChain && !resolved && (
+                            <span className="text-[8px] font-mono uppercase bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/10">
+                                INITIALIZE
+                            </span>
+                        )}
+
                         {isHot && !resolved && <span className="text-[10px] font-bold text-orange-500 flex items-center gap-1">
                             <span className="w-1 h-1 rounded-full bg-orange-500 animate-pulse" />
                             HOT

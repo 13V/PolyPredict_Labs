@@ -1,364 +1,339 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Users, DollarSign, Clock, ArrowUpRight, Activity } from 'lucide-react';
 import { Sparkline } from './Sparkline';
 
 import { useState, useEffect } from 'react';
-import { saveVote } from '@/utils/voteStorage';
+import { saveVote, getVote } from '@/utils/voteStorage';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useToast } from '@/context/ToastContext';
-import { useBetSuccess } from '@/context/BetSuccessContext';
+import { useHaptic } from '@/hooks/useHaptic';
 import { getPythSparkline, getPythPrices } from '@/services/pyth';
+import { getCoinGeckoSparkline } from '@/services/coingecko';
 
 interface FeaturedMarketProps {
-    data?: {
-        id: number;
-        question: string;
-        category: string;
-        timeLeft: string;
-        yesVotes: number;
-        noVotes: number;
-        totalVolume: number;
-        outcomeLabels?: string[];
-        slug?: string;
-        eventTitle?: string;
-    };
+    data: any; // Using any for flexibility to match PredictionCard shape
     onOpenCreateModal?: () => void;
     onOpenExpanded?: () => void;
 }
 
 export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: FeaturedMarketProps) => {
-    const { publicKey, connected, wallet } = useWallet();
+    const { publicKey, connected } = useWallet();
     const toast = useToast();
-    const { showBetSuccess } = useBetSuccess();
-    const [betMode, setBetMode] = useState<'yes' | 'no' | null>(null);
+    const { trigger: haptic } = useHaptic(); // Use haptic hook
+
+    // Default safe accessors
+    const id = data?.id || 0;
+    const question = data?.question || "Loading Market...";
+    const category = data?.category || "Crypto";
+    const endTime = data?.endTime || Date.now() / 1000;
+    const outcomes = data?.outcomes || ["Yes", "No"];
+    const totals = data?.totals || [50, 50];
+    const totalLiquidity = data?.totalLiquidity || 0;
+    const polymarketId = data?.polymarketId;
+    const isOnChain = data?.isOnChain || false;
+    const slug = data?.slug;
+    const eventTitle = data?.eventTitle;
+    const description = data?.description;
+
+    const [betMode, setBetMode] = useState<number | null>(null);
     const [stakeAmount, setStakeAmount] = useState('');
     const [pythData, setPythData] = useState<number[] | null>(null);
     const [pythPrice, setPythPrice] = useState<number | null>(null);
+    const [openPrice, setOpenPrice] = useState<number | null>(null);
+    const [isInitializing, setIsInitializing] = useState(false);
 
-    // Extraction Logic for "Up/Down" markets
-    // Priority: Question -> Slug -> EventTitle
+    // --- RECONSTRUCTION LOGIC (Parity with PredictionCard) ---
     const findTarget = () => {
-        const fullSource = `${data?.question} ${data?.slug || ''} ${data?.eventTitle || ''}`.toLowerCase();
+        const fullSource = `${question} ${slug || ''} ${eventTitle || ''} ${description || ''} ${outcomes.join(' ')}`.toLowerCase();
 
-        // 1. Check for standard money format ($96,000)
+        // 1. Money ($96,000)
         const matchMoney = fullSource.match(/\$(\d{1,3}(,\d{3})*(\.\d+)?)/);
         if (matchMoney) return matchMoney[0];
 
-        // 2. Check for "at" followed by price (price at 96000)
-        const matchAt = fullSource.match(/at\s+(\d{2,3}k|\d{4,})/);
+        // 2. "At" price
+        const matchAt = fullSource.match(/at\s+(\d{1,3}k|\d{4,})/);
         if (matchAt) return `$${matchAt[1]}`;
 
-        // 3. Fallback to any large numbers or "k" shorthand
-        const matchK = fullSource.match(/(\d{2,3}k)|(\d{5,})/i);
-        if (matchK) return `$${matchK[0]}`;
-
+        // 3. Digits
+        const matchDigits = fullSource.match(/(\$\d+(\.\d+)?k?)|(\d+(\.\d+)?k)|(\d{1,3}(,\d{3})+)|(\d{4,})/gi);
+        if (matchDigits) {
+            for (const m of matchDigits) {
+                const clean = m.replace(/[$,]/g, '').toLowerCase();
+                const val = clean.includes('k') ? parseFloat(clean) * 1000 : parseFloat(clean);
+                if (val > 100 && val < 1000000000) return m.startsWith('$') ? m : `$${m}`;
+            }
+        }
         return null;
     };
 
     const priceTarget = findTarget();
+    const isCrypto = category.toLowerCase().includes('crypto') ||
+        question.toLowerCase().match(/bitcoin|btc|ethereum|eth|solana|sol|price/i);
 
-    const isCrypto = data?.category?.toLowerCase().includes('crypto') ||
-        data?.question?.toLowerCase().match(/bitcoin|btc|ethereum|eth|solana|sol|price/i) ||
-        data?.slug?.toLowerCase().match(/bitcoin|btc|ethereum|eth|solana|sol|price/i);
+    const reconstructTitle = () => {
+        if (!isCrypto) return question;
+        const q = question.toLowerCase();
 
-    useEffect(() => {
-        if (isCrypto && priceTarget) {
-            console.log(
-                `%c[Featured] Init: "${data?.question}" | Target: ${priceTarget}`,
-                'background: #ec4899; color: white; font-weight: bold; padding: 2px 5px; border-radius: 3px;'
-            );
+        // Detect "Up or Down"
+        if (q.includes('up or down')) {
+            let asset = 'Asset';
+            if (q.includes('bitcoin') || q.includes('btc')) asset = 'Bitcoin';
+            else if (q.includes('ethereum') || q.includes('eth')) asset = 'Ethereum';
+            else if (q.includes('solana') || q.includes('sol')) asset = 'Solana';
+
+            if (priceTarget) return `${asset} above or under ${priceTarget}?`;
+            if (openPrice) return `${asset} Greater or Less than $${openPrice.toLocaleString()}?`;
+            return `${asset} Up or Down?`;
         }
-    }, [isCrypto, data, priceTarget]);
+        return question;
+    };
 
-    // Pyth Integration
+    const displayTitle = reconstructTitle();
+
+    // --- PYTH & SPARKLINE ---
     useEffect(() => {
         if (isCrypto) {
-            const q = `${data?.question} ${data?.slug || ''} ${data?.eventTitle || ''}`.toLowerCase();
+            const q = `${question} ${slug || ''}`.toLowerCase();
             let symbol = '';
             if (q.includes('bitcoin') || q.includes('btc')) symbol = 'BTC';
             else if (q.includes('ethereum') || q.includes('eth')) symbol = 'ETH';
             else if (q.includes('solana') || q.includes('sol')) symbol = 'SOL';
 
             if (symbol) {
-                const fetchPyth = async () => {
+                const initFetch = async () => {
                     try {
-                        const [sparkline, prices] = await Promise.all([
-                            getPythSparkline(symbol),
+                        const [{ sparkline, openPrice: op }, prices] = await Promise.all([
+                            getCoinGeckoSparkline(symbol),
                             getPythPrices([symbol])
                         ]);
-                        setPythData(sparkline);
+                        if (sparkline.length > 0) setPythData(sparkline);
+                        if (op) setOpenPrice(op);
                         if (prices[symbol]) setPythPrice(prices[symbol]);
                     } catch (e) {
-                        console.error('Featured Pyth fetch error:', e);
+                        console.error('Featured data fetch error:', e);
                     }
                 };
-
-                fetchPyth();
-                const interval = setInterval(fetchPyth, 15000); // 15s polling
-                return () => clearInterval(interval);
+                initFetch();
             }
         }
-    }, [isCrypto, data]);
+    }, [isCrypto, question, slug]);
 
-    const handleConfirmBet = async () => {
-        if (!connected || !publicKey) {
-            toast.error('Connect wallet to vote!');
+    // --- BETTING LOGIC (Lazy Creation) ---
+    const confirmBet = async () => {
+        if (betMode === null || !connected || !publicKey) return;
+
+        const amount = parseFloat(stakeAmount);
+        if (isNaN(amount) || amount <= 0) {
+            toast.error("Enter a valid amount");
             return;
         }
 
-        if (!stakeAmount || parseFloat(stakeAmount) <= 0) {
-            toast.error('Enter a valid stake amount');
-            return;
+        haptic('success');
+        let targetMarketId = id;
+
+        // Lazy Init
+        if (polymarketId && !isOnChain) {
+            setIsInitializing(true);
+            const toastId = toast.loading("Initializing Featured Market...");
+            try {
+                const { getProgram, getMarketPDA, getConfigPDA, getATA, BETTING_MINT } = await import('@/services/web3');
+                const { BN } = await import('@project-serum/anchor');
+
+                const program = getProgram({ publicKey, signTransaction: undefined, sendTransaction: undefined });
+                if (!program) throw new Error("Wallet not connected");
+
+                const newMarketId = Date.now();
+                const marketPda = (await getMarketPDA(publicKey, question))[0];
+                const configPda = await getConfigPDA();
+                const vaultTokenAcc = await getATA(marketPda, BETTING_MINT);
+
+                await program.methods.initializeMarket(
+                    new BN(newMarketId),
+                    new BN(endTime),
+                    question,
+                    2,
+                    ["Yes", "No", "", "", "", "", "", ""],
+                    null,
+                    new BN(1),
+                    new BN(1000000),
+                    "",
+                    polymarketId
+                ).accounts({
+                    market: marketPda,
+                    config: configPda,
+                    authority: publicKey,
+                    vaultTokenAccount: vaultTokenAcc,
+                    mint: BETTING_MINT,
+                    systemProgram: '11111111111111111111111111111111',
+                    tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+                    rent: 'SysvarRent11111111111111111111111111111111'
+                }).rpc();
+
+                toast.success("Market Initialized!", { id: toastId });
+                targetMarketId = newMarketId;
+            } catch (e: any) {
+                console.error("Lazy Init Failed:", e);
+                toast.error(`Init Failed: ${e.message}`, { id: toastId });
+                setIsInitializing(false);
+                return;
+            }
         }
 
-        try {
-            await saveVote({
-                predictionId: data?.id || 999999, // Fallback for featured ID
-                choice: betMode as 'yes' | 'no',
-                walletAddress: publicKey.toString(),
-                timestamp: Date.now(),
-                amount: parseFloat(stakeAmount)
-            }, wallet?.adapter); // Pass adapter for signing
+        saveVote({
+            predictionId: targetMarketId,
+            choice: 'multi',
+            outcomeIndex: betMode,
+            walletAddress: publicKey!.toString(),
+            timestamp: Date.now(),
+            amount: amount
+        }, { publicKey, signTransaction: undefined, sendTransaction: undefined });
 
-            // toast.success(`Successfully bet ${stakeAmount} on ${betMode?.toUpperCase()}`); 
-            // Replaced with Modal:
-            showBetSuccess({
-                amount: parseFloat(stakeAmount),
-                outcome: betMode as 'yes' | 'no',
-                question: data?.question || "Market",
-                payoutMultiplier: 1.85
-            });
+        setIsInitializing(false);
+        setBetMode(null);
+        toast.success(`Bet placed on ${outcomes[betMode]}`);
 
-            setBetMode(null);
-            setStakeAmount('');
-        } catch (e) {
-            console.error(e);
-            toast.error('Failed to place vote');
-        }
-    };
-    // Dynamic Category Coloring (Professional Themes)
-    const getCategoryTheme = (cat: string) => {
-        const c = cat.toLowerCase();
-        if (c.includes('crypto')) return { color: '#06b6d4', glow: 'rgba(6, 182, 212, 0.15)', text: 'text-cyan-400', border: 'border-cyan-500/30' };
-        if (c.includes('politics')) return { color: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)', text: 'text-red-400', border: 'border-red-500/30' };
-        if (c.includes('sports')) return { color: '#f59e0b', glow: 'rgba(245, 158, 11, 0.15)', text: 'text-amber-400', border: 'border-amber-500/30' };
-        if (c.includes('esports')) return { color: '#ec4899', glow: 'rgba(236, 72, 153, 0.15)', text: 'text-pink-400', border: 'border-pink-500/30' };
-        if (c.includes('news')) return { color: '#10b981', glow: 'rgba(16, 185, 129, 0.15)', text: 'text-emerald-400', border: 'border-emerald-500/30' };
-        return { color: '#a855f7', glow: 'rgba(168, 85, 247, 0.15)', text: 'text-purple-400', border: 'border-purple-500/30' }; // Default
+        if (polymarketId && !isOnChain) setTimeout(() => window.location.reload(), 2000);
     };
 
-    const theme = getCategoryTheme(data?.category || 'crypto');
+    // --- UI HELPERS ---
+    const totalVotes = totals.reduce((a, b) => a + b, 0);
+    const yesPercent = totalVotes > 0 ? (totals[0] / totalVotes) * 100 : 50;
+    const noPercent = 100 - yesPercent;
 
-    // Lifecycle Logic
-    const isExpired = data?.timeLeft === 'Ended' || (data?.id === 953233);
-
-    // Determine Yes % (default 50 if no data or 0 votes)
-    const totalVotes = data ? (data.yesVotes + data.noVotes) : 0;
-    const yesPercentage = totalVotes > 0 ? ((data!.yesVotes / totalVotes) * 100) : 50;
-    const yesPrice = Math.floor(yesPercentage);
-    const noPrice = 100 - yesPrice;
-
-    // Mock data for the big chart (still mock for now as we don't fetch historicals for hero yet)
-    const bigChartData = [45, 48, 47, 52, 55, 58, 54, 59, 62, 65, 63, 68, 72, 75, 74, 80, 82, 85];
+    const isExpired = Date.now() > endTime * 1000;
 
     return (
-        <div
-            onClick={onOpenExpanded}
-            className="relative group rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-gray-950 cursor-pointer"
-        >
-            {/* Cinematic Background Gradient */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-gray-900/0 to-gray-950/0" />
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600/10 blur-[150px] rounded-full pointer-events-none mix-blend-screen" />
+        <div onClick={onOpenExpanded} className="relative group rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-[#0a0a0a] cursor-pointer">
+            {/* Backgrounds */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/20 via-black/0 to-black/0" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]" />
 
-            {/* Animated Grid Texture Overlay */}
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
+            <div className="relative grid lg:grid-cols-5 min-h-[400px]">
+                {/* Left Content */}
+                <div className="lg:col-span-3 p-6 md:p-10 flex flex-col justify-between relative border-b lg:border-b-0 lg:border-r border-white/5">
 
-            <div className="relative grid lg:grid-cols-5 gap-0 min-h-[auto] lg:min-h-[480px]">
-                {/* Left: Chart & Info (3 cols) */}
-                <div className="lg:col-span-3 p-5 md:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/5 relative">
-
-                    <div className="absolute top-5 right-5 md:top-10 md:right-10 flex items-center gap-3">
-                        {pythPrice && (
-                            <div className="flex flex-col items-end mr-2">
-                                <span className="text-[10px] text-gray-500 uppercase font-black tracking-tighter">Current Price</span>
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/20 text-white text-sm font-mono font-bold shadow-2xl animate-in fade-in slide-in-from-right-4">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                                    ${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </div>
-                            </div>
-                        )}
-                        {isExpired ? (
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-500/10 border border-gray-500/20 text-gray-400 text-xs font-bold uppercase tracking-widest">
-                                <span className="w-1.5 h-1.5 rounded-full bg-gray-600" />
-                                MARKET ENDED
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-2 px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] md:text-xs font-bold animate-pulse">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                                LIVE
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="z-10 mt-8 md:mt-0">
-                    <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6 flex-wrap">
-                        <span className="bg-white/5 border border-white/10 text-white text-[10px] md:text-xs font-mono font-bold px-2 py-1 md:px-3 md:py-1 rounded-sm flex items-center gap-2 tracking-widest uppercase">
-                            <TrendingUp size={12} className={theme.text} /> #1 TRENDING
+                    {/* Header Badges */}
+                    <div className="flex items-center gap-3 mb-6">
+                        <span className="bg-white/5 border border-white/10 text-white text-[10px] font-bold px-2 py-1 rounded flex items-center gap-2 uppercase tracking-widest">
+                            <TrendingUp size={12} className="text-blue-400" /> Featured
                         </span>
-                        <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${theme.text}`}>
-                            {data?.category || 'Politics'} • Ends {data?.timeLeft || 'Today'}
+                        {polymarketId && !isOnChain && (
+                            <span className="bg-blue-500/20 border border-blue-500/20 text-blue-400 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest animate-pulse">
+                                Initialize Me
+                            </span>
+                        )}
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                            {category} • {new Date(endTime * 1000).toLocaleDateString()}
                         </span>
                     </div>
 
-                    <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-4 md:mb-8 leading-[1.05] tracking-tight">
-                        {data?.question || "Will Bitcoin close higher today?"}
+                    {/* Main Title */}
+                    <h2 className="text-2xl md:text-4xl font-black text-white mb-6 leading-tight tracking-tight max-w-2xl">
+                        {displayTitle}
                     </h2>
 
-                    <div className="flex flex-wrap items-center gap-4 md:gap-10 mt-2 md:mt-4 text-[10px] md:text-xs text-gray-400 font-bold tracking-widest uppercase">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/5 border border-white/10 rounded-lg">
-                                <Activity size={16} className={theme.text} />
-                            </div>
+                    {/* Stats Row */}
+                    <div className="flex items-center gap-8 mb-8">
+                        {/* Live Price */}
+                        {pythPrice && (
                             <div className="flex flex-col">
-                                <span className="text-gray-600">Volume</span>
-                                <span className="text-white">${data?.totalVolume ? data.totalVolume.toLocaleString() : '4.2M'}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/5 border border-white/10 rounded-lg">
-                                <Users size={16} className="text-blue-500" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-gray-600">Traders</span>
-                                <span className="text-white">12.5K</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Big Chart Area */}
-                <div className="mt-8 md:mt-16">
-                    <div className="flex items-end gap-3 md:gap-4 mb-6">
-                        <div className="text-5xl md:text-7xl font-black text-white tracking-tighter">{yesPrice}%</div>
-                        <div className="text-green-400 font-bold text-sm md:text-lg mb-2 flex items-center gap-1">
-                            <ArrowUpRight size={18} />
-                            +{(data?.question.length ? (data.question.length % 15) + 1.5 : 12.4).toFixed(1)}% TODAY
-                        </div>
-                    </div>
-
-                    {/* Seamless Chart Container */}
-                    <div className="h-[100px] md:h-[140px] w-full relative overflow-hidden mask-linear-fade">
-                        <Sparkline data={pythData || bigChartData} width={800} height={140} color={theme.color} />
-                        {/* Gradient Overlay for Fade */}
-                        <div
-                            className="absolute inset-x-0 bottom-0 h-1/2 opacity-30 pointer-events-none"
-                            style={{ background: `linear-gradient(to top, ${theme.color}, transparent)` }}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Right: Trading Interface (2 cols) */}
-            <div className="lg:col-span-2 p-5 md:p-10 bg-white/[0.02] backdrop-blur-md flex flex-col justify-center gap-6 md:gap-8 relative overflow-hidden">
-                {/* Glass Reflection */}
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-                <div className="space-y-6 z-10">
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">
-                            <span>Order Book</span>
-                            <span>Spread: 1¢</span>
-                        </div>
-                        {/* Mock Order Book Visual */}
-                        <div className="flex gap-1 h-1.5 md:h-2 w-full rounded-full overflow-hidden bg-gray-800">
-                            <motion.div
-                                initial={{ width: '50%' }}
-                                animate={{ width: `${yesPercentage}%` }}
-                                className="h-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]"
-                            />
-                            <div className="h-full flex-1 bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4">
-                        {betMode ? (
-                            <div className="bg-gray-800/80 p-4 md:p-6 rounded-2xl border border-gray-700 animate-in fade-in slide-in-from-bottom-4">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className={`text-lg md:text-xl font-black uppercase tracking-tight ${betMode === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
-                                        Bet on {betMode === 'yes' ? 'YES' : 'NO'}
-                                    </h3>
-                                    <button onClick={() => setBetMode(null)} className="text-gray-500 hover:text-white p-2">✕</button>
-                                </div>
-
-                                <div className="relative mb-4">
-                                    <input
-                                        type="number"
-                                        placeholder="Enter Amount"
-                                        value={stakeAmount}
-                                        onChange={(e) => setStakeAmount(e.target.value)}
-                                        className="w-full bg-black/40 border-2 border-gray-600 focus:border-purple-500 rounded-xl px-4 py-3 text-base md:text-lg text-white placeholder-gray-600 outline-none transition-all"
-                                        autoFocus
-                                    />
-                                    <span className="absolute right-4 top-4 text-xs md:text-sm font-bold text-gray-400">$PROPHET</span>
-                                </div>
-
-                                <button
-                                    onClick={handleConfirmBet}
-                                    className={`w-full py-3 md:py-4 rounded-xl text-base md:text-lg font-black uppercase tracking-widest text-white shadow-xl transition-transform active:scale-95 ${betMode === 'yes' ? 'bg-gradient-to-r from-green-600 to-green-500 hover:to-green-400 shadow-green-900/20' : 'bg-gradient-to-r from-red-600 to-red-500 hover:to-red-400 shadow-red-900/20'
-                                        }`}
-                                >
-                                    CONFIRM BET
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-2 gap-3 md:gap-4">
-                                <button
-                                    disabled={isExpired}
-                                    onClick={(e) => { e.stopPropagation(); connected ? setBetMode('yes') : alert('Connect Wallet!'); }}
-                                    className={`group relative overflow-hidden p-4 md:p-6 bg-green-500/10 ${isExpired ? 'cursor-not-allowed opacity-40' : 'hover:bg-green-500/20 border-green-500/20 hover:border-green-500/50'} rounded-2xl transition-all duration-300 active:scale-95`}
-                                >
-                                    <div className="relative z-10 flex flex-col items-center gap-1">
-                                        <span className="text-green-400 font-black text-xl md:text-2xl tracking-tight">
-                                            YES
-                                            {priceTarget && <span className="block text-[10px] md:text-xs text-green-500/50 font-bold mt-1 tracking-widest">{">"} {priceTarget}</span>}
-                                        </span>
-                                        <span className="text-white font-mono text-xs md:text-sm group-hover:scale-110 transition-transform bg-green-500/20 px-2 py-0.5 rounded">{yesPrice}¢</span>
-                                    </div>
-                                    <div className="absolute inset-0 bg-green-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </button>
-
-                                <button
-                                    disabled={isExpired}
-                                    onClick={(e) => { e.stopPropagation(); connected ? setBetMode('no') : alert('Connect Wallet!'); }}
-                                    className={`group relative overflow-hidden p-4 md:p-6 bg-red-500/10 ${isExpired ? 'cursor-not-allowed opacity-40' : 'hover:bg-red-500/20 border-red-500/20 hover:border-red-500/50'} rounded-2xl transition-all duration-300 active:scale-95`}
-                                >
-                                    <div className="relative z-10 flex flex-col items-center gap-1">
-                                        <span className="text-red-400 font-black text-xl md:text-2xl tracking-tight">
-                                            NO
-                                            {priceTarget && <span className="block text-[10px] md:text-xs text-red-500/50 font-bold mt-1 tracking-widest">{"<"} {priceTarget}</span>}
-                                        </span>
-                                        <span className="text-white font-mono text-xs md:text-sm group-hover:scale-110 transition-transform bg-red-500/20 px-2 py-0.5 rounded">{noPrice}¢</span>
-                                    </div>
-                                    <div className="absolute inset-0 bg-red-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </button>
+                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Live Oracle</span>
+                                <span className="text-xl font-mono font-bold text-white flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+                                    ${pythPrice.toLocaleString()}
+                                </span>
                             </div>
                         )}
+
+                        {/* Vol */}
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Volume</span>
+                            <span className="text-xl font-mono font-bold text-white">${totalLiquidity.toLocaleString()}</span>
+                        </div>
                     </div>
 
-                    <div className="pt-4 md:pt-6 border-t border-white/5 text-center">
-                        <button
-                            onClick={onOpenCreateModal} // Use the specific prop
-                            className="text-gray-400 hover:text-white text-[10px] md:text-xs uppercase tracking-widest font-bold transition-colors flex items-center justify-center gap-2 group"
-                        >
-                            <span className="w-1.5 h-1.5 rounded-full bg-gray-600 group-hover:bg-purple-500 transition-colors" />
-                            Create Your Own Market
-                        </button>
+                    {/* Chart Area */}
+                    <div className="h-32 w-full relative overflow-hidden mask-linear-fade opacity-60">
+                        {pythData && <Sparkline data={pythData} width={600} height={128} color="#3b82f6" />}
                     </div>
                 </div>
+
+                {/* Right Action Panel */}
+                <div className="lg:col-span-2 p-6 md:p-10 bg-white/[0.02] backdrop-blur-sm flex flex-col justify-center gap-6">
+                    {/* Order Book Bar */}
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                            <span>YES {yesPercent.toFixed(0)}%</span>
+                            <span>NO {noPercent.toFixed(0)}%</span>
+                        </div>
+                        <div className="flex h-2 w-full rounded-full overflow-hidden bg-gray-800">
+                            <motion.div initial={{ width: 0 }} animate={{ width: `${yesPercent}%` }} className="h-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]" />
+                            <div className="h-full flex-1 bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]" />
+                        </div>
+                    </div>
+
+                    {/* Betting Interface */}
+                    {betMode === null ? (
+                        <div className="grid grid-cols-2 gap-4">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setBetMode(0); }}
+                                disabled={isExpired}
+                                className="group p-4 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 rounded-xl transition-all active:scale-95"
+                            >
+                                <span className="text-green-400 font-black text-2xl block mb-1">YES</span>
+                                <span className="text-[10px] text-green-300 font-bold uppercase tracking-widest group-hover:underline">Bet Up</span>
+                            </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setBetMode(1); }}
+                                disabled={isExpired}
+                                className="group p-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 rounded-xl transition-all active:scale-95"
+                            >
+                                <span className="text-red-400 font-black text-2xl block mb-1">NO</span>
+                                <span className="text-[10px] text-red-300 font-bold uppercase tracking-widest group-hover:underline">Bet Down</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="bg-gray-800/50 p-4 rounded-xl border border-white/10 animate-in slide-in-from-bottom-2 fade-in">
+                            <div className="flex justify-between items-center mb-4">
+                                <span className="text-xs font-bold text-gray-400 uppercase">Bet {betMode === 0 ? 'YES' : 'NO'}</span>
+                                <button onClick={(e) => { e.stopPropagation(); setBetMode(null) }} className="text-gray-500 hover:text-white">✕</button>
+                            </div>
+                            <input
+                                autoFocus
+                                type="number"
+                                placeholder="Amount"
+                                value={stakeAmount}
+                                onChange={(e) => setStakeAmount(e.target.value)}
+                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white font-mono font-bold mb-3 focus:outline-none focus:border-blue-500"
+                            />
+                            <button
+                                onClick={(e) => { e.stopPropagation(); confirmBet(); }}
+                                className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
+                            >
+                                {isInitializing ? 'INITIALIZING...' : (polymarketId && !isOnChain ? 'INITIALIZE & BET' : 'PLACE BET')}
+                            </button>
+                        </div>
+                    )}
+
+                    <button onClick={(e) => { e.stopPropagation(); onOpenCreateModal?.() }} className="text-[10px] font-bold text-gray-600 hover:text-gray-400 uppercase tracking-widest text-center mt-2">
+                        + Create Custom Market
+                    </button>
+                </div>
             </div>
+
+            {/* Loading Overlay */}
+            {isInitializing && (
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="text-center">
+                        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                        <div className="text-blue-400 font-bold animate-pulse">Initializing Chain Market...</div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
+
