@@ -26,6 +26,7 @@ interface PredictionCardProps {
     slug?: string;
     eventTitle?: string;
     description?: string;
+    isOnChain?: boolean; // New prop for Real Betting status
     onOpenExpanded?: () => void;
     onSettle?: (id: number) => void;
 }
@@ -45,6 +46,7 @@ export const PredictionCard = ({
     slug,
     eventTitle,
     description,
+    isOnChain = false, // Default to false (Simulated)
     onOpenExpanded,
     onSettle
 }: PredictionCardProps) => {
@@ -59,6 +61,7 @@ export const PredictionCard = ({
     const [pythData, setPythData] = useState<number[] | null>(null);
     const [pythPrice, setPythPrice] = useState<number | null>(null);
     const [openPrice, setOpenPrice] = useState<number | null>(null);
+    const [isInitializing, setIsInitializing] = useState(false); // Loading state for lazy init
 
     // Extraction Logic for "Up/Down" markets
     // Priority: Question -> Slug -> EventTitle -> Description
@@ -265,8 +268,8 @@ export const PredictionCard = ({
         setBetMode(index);
     };
 
-    const confirmBet = () => {
-        if (betMode === null || !connected) return;
+    const confirmBet = async () => {
+        if (betMode === null || !connected || !publicKey) return;
 
         const amount = parseFloat(stakeAmount);
         const MAX_BET = 1000000;
@@ -282,18 +285,87 @@ export const PredictionCard = ({
         }
 
         haptic('success');
+
+        let targetMarketId = id;
+
+        // LAZY CREATION LOGIC
+        if (polymarketId && !isOnChain) {
+            console.log("Lazy Creating Market for:", polymarketId);
+            setIsInitializing(true);
+            const toastId = toast.loading("Initializing new market on-chain...");
+
+            try {
+                // Dynamically import web3 to avoid server issues
+                const { getProgram, getMarketPDA, getConfigPDA, getATA, BETTING_MINT } = await import('@/services/web3');
+                const { BN } = await import('@project-serum/anchor');
+
+                const program = getProgram({ publicKey, signTransaction: undefined, sendTransaction: undefined });
+                if (!program) throw new Error("Wallet not connected");
+
+                // Generate a new ID (Timestamp based)
+                const newMarketId = Date.now();
+                const mIdBN = new BN(newMarketId);
+                const endTimeBN = new BN(endTime);
+
+                // For Lazy Initialization, we default to a binary YES/NO structure
+                // Outcomes[0] = YES, Outcomes[1] = NO
+
+                const marketPda = (await getMarketPDA(publicKey, question))[0];
+                const configPda = await getConfigPDA();
+                const vaultTokenAcc = await getATA(marketPda, BETTING_MINT);
+
+                await program.methods.initializeMarket(
+                    mIdBN,
+                    endTimeBN,
+                    question,
+                    2,
+                    ["Yes", "No", "", "", "", "", "", ""],
+                    null,
+                    new BN(1), // Min bet
+                    new BN(1000000), // Max bet
+                    "",
+                    polymarketId // IMPORTANT: Link it!
+                ).accounts({
+                    market: marketPda,
+                    config: configPda,
+                    authority: publicKey,
+                    vaultTokenAccount: vaultTokenAcc,
+                    mint: BETTING_MINT,
+                    systemProgram: '11111111111111111111111111111111',
+                    tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+                    rent: 'SysvarRent11111111111111111111111111111111'
+                }).rpc();
+
+                toast.success("Market Initialized! Placing vote...", { id: toastId });
+                targetMarketId = newMarketId; // Use the new ON-CHAIN ID for the vote
+
+            } catch (e: any) {
+                console.error("Lazy Init Failed:", e);
+                toast.error(`Initialization Failed: ${e.message}`, { id: toastId });
+                setIsInitializing(false);
+                return;
+            }
+        }
+
+        // Proceed to Vote (either on existing ID or new initialized ID)
         saveVote({
-            predictionId: id,
+            predictionId: targetMarketId,
             choice: 'multi',
             outcomeIndex: betMode,
-            walletAddress: publicKey!.toString(),
+            walletAddress: publicKey.toString(),
             timestamp: Date.now(),
             amount: amount
         }, { publicKey, signTransaction: undefined, sendTransaction: undefined });
 
         setVotedIndex(betMode);
         setBetMode(null);
+        setIsInitializing(false);
         toast.success(`Bet placed on ${outcomes[betMode]}`);
+
+        // Reload page after delay if we initialized, to sync state
+        if (polymarketId && !isOnChain) {
+            setTimeout(() => window.location.reload(), 2000);
+        }
     };
 
     const timeLeft = () => {
@@ -337,12 +409,29 @@ export const PredictionCard = ({
                 </div>
             )}
 
+            {/* Initializing Loading State */}
+            {isInitializing && (
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
+                    <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />
+                    <span className="text-sm font-bold text-white animate-pulse">Initializing Market...</span>
+                </div>
+            )}
+
             {/* Theme Flare */}
             {!resolved && (
                 <div
                     className="absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-20 pointer-events-none transition-opacity duration-500 group-hover:opacity-40"
                     style={{ background: theme.color }}
                 />
+            )}
+
+            {/* Off-Chain Indicator (For Debug/Transparency) */}
+            {polymarketId && !isOnChain && !resolved && (
+                <div className="absolute top-2 left-2 z-20">
+                    <span className="text-[8px] font-mono uppercase bg-blue-500/20 text-blue-400 px-1 py-0.5 rounded border border-blue-500/10">
+                        Lazy Init Ready
+                    </span>
+                </div>
             )}
 
             {/* Header */}
@@ -508,7 +597,7 @@ export const PredictionCard = ({
                             onClick={(e) => { e.stopPropagation(); confirmBet(); }}
                             className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-xl font-bold text-sm shadow-lg shadow-purple-500/20 active:scale-[0.98] transition-all"
                         >
-                            Confirm Prediction
+                            {isOnChain || !polymarketId ? 'Confirm Prediction' : 'Initialize & Predict'}
                         </button>
                     </motion.div>
                 )}

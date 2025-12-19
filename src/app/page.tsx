@@ -118,8 +118,63 @@ export default function Home() {
           console.warn("Failed to fetch on-chain markets:", onChainErr);
         }
 
-        const userMarkets = getUserMarkets();
-        const mergedList = [...userMarkets, ...onChainMarkets, ...dailyMarkets].map(m => {
+        // Create Map for fast lookup of ON-CHAIN markets
+        const onChainMap = new Map();
+        onChainMarkets.forEach(m => {
+          if (m.polymarketId) {
+            // If it has a polymarket ID, store it
+            onChainMap.set(m.polymarketId, m);
+          }
+        });
+
+        // 3. Merge Logic:
+        // Start with User Created Markets (that are NOT proxy wrappers)
+        const pureUserMarkets = getUserMarkets();
+
+        const mergedList = dailyMarkets.map(polyItem => {
+          // CHECK: Does this exist on-chain?
+          const onChainMatch = onChainMap.get(polyItem.polymarketId);
+
+          if (onChainMatch) {
+            // YES: Return the On-Chain version (Real Betting Enabled)
+            // But keep some metadata from Polymarket if helpful (like sparkline or slug if missing)
+            return {
+              ...onChainMatch,
+              slug: polyItem.slug,
+              eventTitle: polyItem.eventTitle,
+              description: polyItem.description,
+              isHot: onChainMatch.totalLiquidity > 50000 || polyItem.isHot, // Combined Hotness
+              isOnChain: true // Explicit flag
+            };
+          } else {
+            // NO: Return raw Polymarket item (Simulation Mode)
+            return {
+              ...polyItem,
+              isOnChain: false
+            };
+          }
+        });
+
+        // Add pure user markets (that might not be in the daily feed)
+        // And also add any on-chain markets that didn't match (maybe manual creations?)
+        const finalPredictions = [...mergedList];
+
+        // Add manual markets that aren't polymarket proxies
+        pureUserMarkets.forEach(m => {
+          if (!finalPredictions.find(f => f.id === m.id)) finalPredictions.push({ ...m, isOnChain: false }); // Local legacy
+        });
+
+        // Add OnChain markets that weren't matched (e.g. pure manual on-chain markets)
+        onChainMarkets.forEach(m => {
+          // If it has no polymarket ID, it's a pure manual market
+          // If it HAS one but somehow wasn't in our refined daily list (rare, but possible if curation changed)
+          if (!finalPredictions.find(f => f.id === m.id)) {
+            finalPredictions.push({ ...m, isOnChain: true });
+          }
+        });
+
+        // Resolution Status Check
+        const resolvedList = finalPredictions.map(m => {
           const res = getResolutionStatus(m.id);
           if (res) {
             return {
@@ -128,28 +183,23 @@ export default function Home() {
               winningOutcome: res === 'yes' ? 0 : 1
             };
           }
-          // Also handle legacy/user status
           if (m.status === 'resolved') return { ...m, resolved: true, winningOutcome: 0 };
           return m;
         });
 
         // Unique filter by id to prevent duplicates
-        const uniqueById = mergedList.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+        const uniqueById = resolvedList.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
 
         // Aggressive Deduplication for "Up or Down" markets
-        // Filter out multiple markets for the same asset/date to prevent spam and rate limits
         const unique = uniqueById.filter((v, i, a) => {
           const isCrypto = v.category === 'CRYPTO' || v.question.includes('Bitcoin') || v.question.includes('Ethereum');
           if (!isCrypto) return true;
 
-          // Create a "signature" for natural deduplication
-          // e.g. "bitcoin-dec-18-2025"
           const dateStr = new Date(v.endTime * 1000).toDateString();
           const asset = v.question.toLowerCase().includes('bitcoin') ? 'btc'
             : v.question.toLowerCase().includes('ethereum') ? 'eth'
               : v.question.toLowerCase().includes('solana') ? 'sol' : v.question;
 
-          // Only keep the first valid occurrence of this Asset + Date combo
           return a.findIndex(t => {
             const tDate = new Date(t.endTime * 1000).toDateString();
             const tAsset = t.question.toLowerCase().includes('bitcoin') ? 'btc'

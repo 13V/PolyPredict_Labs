@@ -312,83 +312,69 @@ export async function fetchMarketResult(id: number): Promise<'yes' | 'no' | null
 }
 
 /**
- * Smart Fetcher: hunts for markets ending < 24h.
- * FALLBACK: If not enough daily markets are found, it fills the rest with standard trending markets.
+ * Curated Fetcher: "The Top 10"
+ * strict buckets: BTC, ETH, SOL, 5x Sports, 2x News
  */
 export async function fetchDailyMarkets(requiredCount = 50): Promise<any[]> {
     let collected: any[] = [];
+    const seenIds = new Set();
 
-    // 1. MAIN DEEP SCAN (Find highest volume ending soon)
-    const deepScanLimit = 30; // Pages to scan for general high volume
-    let offset = 0;
-    const batchSize = 100;
+    const addUnique = (items: any[], limit: number) => {
+        let added = 0;
+        for (const item of items) {
+            if (added >= limit) break;
+            if (!seenIds.has(item.id)) {
+                // Quality filter
+                if (item.totalLiquidity < 500) continue;
 
-    console.log(`Phase 1: Deep Scan...`);
+                // Ensure valid end date < 48h for crypto/sports usually
+                // But for "Top 10" we can be a bit more lenient on time if volume is huge, 
+                // though user wanted "Daily". Let's stick to < 48h.
+                if (!item.endTime) continue;
+                const hoursLeft = (item.endTime * 1000 - Date.now()) / (1000 * 60 * 60);
+                if (hoursLeft <= 0) continue; // Ended
+
+                seenIds.add(item.id);
+                collected.push(item);
+                added++;
+            }
+        }
+    };
+
+    console.log("Fetching Curated Top 10...");
+
     try {
-        for (let i = 0; i < deepScanLimit; i++) {
-            const batch = await fetchPolymarketTrending(batchSize, offset, 'endDate', true);
-            if (batch.length === 0) break;
+        // 1. Crypto Majors (Specific IDs or Tags)
+        // BTC
+        const btcBatch = await fetchPolymarketTrending(20, 0, 'volume', false, 'bitcoin');
+        addUnique(btcBatch, 1);
 
-            const valid = batch.filter(m => {
-                if (m.totalLiquidity < 1000) return false;
-                if (!m.endTime) return false;
-                const hoursLeft = (m.endTime * 1000 - Date.now()) / (1000 * 60 * 60);
-                return hoursLeft > 0 && hoursLeft <= 24;
-            });
+        // ETH
+        const ethBatch = await fetchPolymarketTrending(20, 0, 'volume', false, 'ethereum');
+        addUnique(ethBatch, 1);
 
-            for (const item of valid) {
-                if (!collected.find(c => c.id === item.id)) collected.push(item);
-            }
-            offset += batchSize;
-            if (collected.length >= 40) break; // Don't overfill yet
-            await delay(100);
+        // SOL
+        const solBatch = await fetchPolymarketTrending(20, 0, 'volume', false, 'solana');
+        addUnique(solBatch, 1);
+
+        // 2. Sports (NBA, NFL, Soccer) - 5 items total
+        const sportsBatch = await fetchPolymarketTrending(50, 0, 'volume', false, 'sports');
+        // Filter specifically for active recognizable leagues if possible, or just trust volume
+        addUnique(sportsBatch, 5);
+
+        // 3. News/Politics - 2 items
+        const politicsBatch = await fetchPolymarketTrending(30, 0, 'volume', false, 'politics');
+        addUnique(politicsBatch, 2);
+
+        // 4. Fill remaining if any buckets failed (Fallback to general trending)
+        if (collected.length < 10) {
+            const generalBatch = await fetchPolymarketTrending(20, 0, 'volume', false);
+            addUnique(generalBatch, 10 - collected.length);
         }
-    } catch (e) { console.warn("Deep scan error:", e); }
 
-    // 2. CATEGORY QUOTA CHECK & FILL
-    // We want at least 5 for filtered buckets: POLITICS, SPORTS, CRYPTO
-    const categories: ('POLITICS' | 'SPORTS' | 'CRYPTO')[] = ['POLITICS', 'SPORTS', 'CRYPTO'];
-    const buckets: Record<string, number> = { POLITICS: 0, SPORTS: 0, CRYPTO: 0 };
-    collected.forEach(m => { if (buckets[m.category] !== undefined) buckets[m.category]++; });
-
-    console.log("Category Counts before fill:", buckets);
-
-    for (const cat of categories) {
-        if (buckets[cat] < 6) { // User wants 5, we fetch 6 to be safe
-            console.log(`Refilling ${cat} (Current: ${buckets[cat]})...`);
-            try {
-                // Targeted fetch by tag
-                const tag = cat.toLowerCase(); // 'politics', 'sports', 'crypto' work as tags
-                // We fetch 'volume' sorted to get best items
-                // Note: We might NOT filter strictly by 24h here if it's too empty, 
-                // but let's try to stick to quality. 
-                const fillBatch = await fetchPolymarketTrending(100, 0, 'volume', false, tag);
-
-                let added = 0;
-                for (const item of fillBatch) {
-                    if (item.totalLiquidity < 100) continue; // Basic quality
-
-                    // DATE FILTER for Refill:
-                    // Prevent long-term markets (e.g. 2026) from filling the quota just because they have volume.
-                    if (!item.endTime) continue;
-                    const hoursLeft = (item.endTime * 1000 - Date.now()) / (1000 * 60 * 60);
-                    if (hoursLeft > 48 || hoursLeft <= 0) continue;
-
-                    // Force Category Match logic to be consistent
-                    item.category = cat;
-
-                    if (!collected.find(c => c.id === item.id)) {
-                        collected.push(item);
-                        added++;
-                        if (buckets[cat] + added >= 6) break;
-                    }
-                }
-            } catch (e) {
-                console.warn(`Failed refilling ${cat}:`, e);
-            }
-        }
+    } catch (e) {
+        console.error("Curation failed:", e);
     }
 
-    // Sort by volume descending
-    return collected.sort((a, b) => b.totalVolume - a.totalVolume).slice(0, 60);
+    return collected;
 }
