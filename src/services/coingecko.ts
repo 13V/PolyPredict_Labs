@@ -1,42 +1,45 @@
 /**
- * CoinGecko API Service
- * Fetches historical price data for sparklines
+ * CoinGecko API Service (Switched to Binance for better reliability/limits)
+ * Fetches historical price data for sparklines and open prices
  */
 
-const SYMBOL_TO_ID: Record<string, string> = {
-    'BTC': 'bitcoin',
-    'ETH': 'ethereum',
-    'SOL': 'solana',
+const SYMBOL_TO_BINANCE: Record<string, string> = {
+    'BTC': 'BTCUSDT',
+    'ETH': 'ETHUSDT',
+    'SOL': 'SOLUSDT',
 };
 
 /**
- * Fetches last 24h of price data from CoinGecko
+ * Fetches last 24h of price data from Binance (Public API)
  */
 export async function getCoinGeckoSparkline(symbol: string): Promise<{ sparkline: number[]; openPrice: number | null }> {
-    const id = SYMBOL_TO_ID[symbol.toUpperCase()];
-    if (!id) return { sparkline: [], openPrice: null };
+    const pair = SYMBOL_TO_BINANCE[symbol.toUpperCase()];
+    if (!pair) return { sparkline: [], openPrice: null };
 
     try {
-        // Public API (Demo) limits: 30 calls/minute
-        const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=1&interval=hourly`;
-        console.log(`[CoinGecko] Fetching: ${url}`);
+        // Binance Public API: 1h intervals, 24 candles = 24h history
+        const url = `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=1h&limit=24`;
 
         const response = await fetch(url);
         if (!response.ok) {
-            console.error(`[CoinGecko] API failure: ${response.status}`);
+            console.error(`[Binance] API failure: ${response.status}`);
             return { sparkline: [], openPrice: null };
         }
 
         const data = await response.json();
-        // data.prices is an array of [timestamp, price]
-        if (!data.prices || !Array.isArray(data.prices)) return { sparkline: [], openPrice: null };
+        // Binance response format: [ [OpenTime, Open, High, Low, Close, Volume, ...], ... ]
+        if (!Array.isArray(data) || data.length === 0) return { sparkline: [], openPrice: null };
 
-        const prices = data.prices.map((p: [number, number]) => p[1]);
-        const openPrice = prices.length > 0 ? prices[0] : null; // 24h ago price
+        // Parse sparkline from Closing prices (index 4)
+        const sparkline = data.map((candle: any[]) => parseFloat(candle[4]));
 
-        return { sparkline: prices, openPrice };
+        // Open Price is the Opening price of the FIRST candle in the 24h series (index 1)
+        // This gives us the "24h Open" or "Daily Open" equivalent relative to the chart
+        const openPrice = parseFloat(data[0][1]);
+
+        return { sparkline, openPrice };
     } catch (error) {
-        console.error('Error fetching CoinGecko sparkline:', error);
+        console.error('Error fetching Binance market data:', error);
         return { sparkline: [], openPrice: null };
     }
 }
