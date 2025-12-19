@@ -312,27 +312,36 @@ export async function fetchMarketResult(id: number): Promise<'yes' | 'no' | null
 }
 
 /**
- * Curated Fetcher: "The Top 10"
- * strict buckets: BTC, ETH, SOL, 5x Sports, 2x News
+ * Curated Fetcher: "Short-Term High Volume"
+ * Priorities:
+ * 1. Time: Must end soon (Daily/Hourly focus, < 48h ideally)
+ * 2. Volume: High liquidity (> $10k)
+ * 3. Mix: BTC, ETH, SOL, Sports, News
+ * Target: 20 Markets
  */
-export async function fetchDailyMarkets(requiredCount = 50): Promise<any[]> {
+export async function fetchDailyMarkets(requiredCount = 20): Promise<any[]> {
     let collected: any[] = [];
     const seenIds = new Set();
+    const TARGET_LIMIT = 20;
 
     const addUnique = (items: any[], limit: number) => {
         let added = 0;
         for (const item of items) {
             if (added >= limit) break;
-            if (!seenIds.has(item.id)) {
-                // Quality filter
-                if (item.totalLiquidity < 500) continue;
+            if (collected.length >= TARGET_LIMIT) break;
 
-                // Ensure valid end date < 48h for crypto/sports usually
-                // But for "Top 10" we can be a bit more lenient on time if volume is huge, 
-                // though user wanted "Daily". Let's stick to < 48h.
+            if (!seenIds.has(item.id)) {
+                // 1. Volume Filter (Stricter: > $5k to be considered "High Volume")
+                if (item.totalLiquidity < 5000) continue;
+
+                // 2. Short-Term Filter (Crucial: Daily/Hourly)
+                // We want markets ending VERY soon. < 48 hours.
                 if (!item.endTime) continue;
                 const hoursLeft = (item.endTime * 1000 - Date.now()) / (1000 * 60 * 60);
+
+                // Allow up to 72h (3 days) to ensure we fill the slots, but prioritize < 24h
                 if (hoursLeft <= 0) continue; // Ended
+                if (hoursLeft > 72) continue; // Too far out (not "daily")
 
                 seenIds.add(item.id);
                 collected.push(item);
@@ -341,40 +350,42 @@ export async function fetchDailyMarkets(requiredCount = 50): Promise<any[]> {
         }
     };
 
-    console.log("Fetching Curated Top 10...");
+    console.log("Fetching Short-Term High-Volume Markets (Limit 20)...");
 
     try {
-        // 1. Crypto Majors (Specific IDs or Tags)
+        // 1. Crypto Majors (Daily/Weekly Options usually)
         // BTC
-        const btcBatch = await fetchPolymarketTrending(20, 0, 'volume', false, 'bitcoin');
-        addUnique(btcBatch, 1);
+        const btcBatch = await fetchPolymarketTrending(30, 0, 'volume', false, 'bitcoin');
+        addUnique(btcBatch, 3); // Top 3 BTC Dailies
 
         // ETH
-        const ethBatch = await fetchPolymarketTrending(20, 0, 'volume', false, 'ethereum');
-        addUnique(ethBatch, 1);
+        const ethBatch = await fetchPolymarketTrending(30, 0, 'volume', false, 'ethereum');
+        addUnique(ethBatch, 3); // Top 3 ETH Dailies
 
         // SOL
-        const solBatch = await fetchPolymarketTrending(20, 0, 'volume', false, 'solana');
-        addUnique(solBatch, 1);
+        const solBatch = await fetchPolymarketTrending(30, 0, 'volume', false, 'solana');
+        addUnique(solBatch, 3); // Top 3 SOL Dailies
 
-        // 2. Sports (NBA, NFL, Soccer) - 5 items total
+        // 2. Sports (Tonight's Games) 
+        // Sports usually end same-day, so high volume sports are perfect
         const sportsBatch = await fetchPolymarketTrending(50, 0, 'volume', false, 'sports');
-        // Filter specifically for active recognizable leagues if possible, or just trust volume
-        addUnique(sportsBatch, 5);
+        addUnique(sportsBatch, 8); // Up to 8 Sports games
 
-        // 3. News/Politics - 2 items
+        // 3. News/Politics (Fast moving news)
         const politicsBatch = await fetchPolymarketTrending(30, 0, 'volume', false, 'politics');
-        addUnique(politicsBatch, 2);
+        addUnique(politicsBatch, 3); // Up to 3 News items
 
-        // 4. Fill remaining if any buckets failed (Fallback to general trending)
-        if (collected.length < 10) {
-            const generalBatch = await fetchPolymarketTrending(20, 0, 'volume', false);
-            addUnique(generalBatch, 10 - collected.length);
+        // 4. Fill remaining with generic trending if needed (Short term only)
+        if (collected.length < TARGET_LIMIT) {
+            const generalBatch = await fetchPolymarketTrending(50, 0, 'volume', false);
+            // Apply same strict filters in addUnique
+            addUnique(generalBatch, TARGET_LIMIT - collected.length);
         }
 
     } catch (e) {
         console.error("Curation failed:", e);
     }
 
-    return collected;
+    // sort by volume descending to ensure "High Volume" feel
+    return collected.sort((a, b) => b.totalLiquidity - a.totalLiquidity);
 }
