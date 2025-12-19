@@ -18,21 +18,38 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
     const [pythData, setPythData] = useState<number[] | null>(null);
 
     // Extraction Logic for "Up/Down" markets
-    // Priority: Question -> Slug -> EventTitle
+    // Priority: Question -> Slug -> EventTitle -> Description
     const findTarget = () => {
-        const fullSource = `${market?.question} ${market?.slug || ''} ${market?.eventTitle || ''}`.toLowerCase();
+        // Broaden search to include outcomes and description
+        const question = market?.question || '';
+        const slug = market?.slug || '';
+        const eventTitle = market?.eventTitle || '';
+        const description = market?.description || '';
+        const outcomes = market?.outcomes || [];
+
+        const fullSource = `${question} ${slug} ${eventTitle} ${description} ${outcomes.join(' ')}`.toLowerCase();
 
         // 1. Check for standard money format ($96,000)
         const matchMoney = fullSource.match(/\$(\d{1,3}(,\d{3})*(\.\d+)?)/);
         if (matchMoney) return matchMoney[0];
 
         // 2. Check for "at" followed by price (price at 96000)
-        const matchAt = fullSource.match(/at\s+(\d{2,3}k|\d{4,})/);
+        const matchAt = fullSource.match(/at\s+(\d{1,3}k|\d{4,})/);
         if (matchAt) return `$${matchAt[1]}`;
 
-        // 3. Fallback to any large numbers or "k" shorthand
-        const matchK = fullSource.match(/(\d{2,3}k)|(\d{5,})/i);
-        if (matchK) return `$${matchK[0]}`;
+        // 3. Fallback to numbers (including decimals and 'k'), but EXCLUDE timestamps
+        const matchDigits = fullSource.match(/(\$\d+(\.\d+)?k?)|(\d+(\.\d+)?k)|(\d{1,3}(,\d{3})+)|(\d{4,})/gi);
+        if (matchDigits) {
+            for (const m of matchDigits) {
+                const clean = m.replace(/[$,]/g, '').toLowerCase();
+                const val = clean.includes('k') ? parseFloat(clean) * 1000 : parseFloat(clean);
+
+                // Numbers between 1 and 1 Billion are likely prices. Above that are likely timestamps.
+                if (val > 100 && val < 1000000000) {
+                    return m.startsWith('$') ? m : `$${m}`;
+                }
+            }
+        }
 
         return null;
     };
@@ -43,14 +60,51 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
         market?.question?.toLowerCase().match(/bitcoin|btc|ethereum|eth|solana|sol|price/i) ||
         market?.slug?.toLowerCase().match(/bitcoin|btc|ethereum|eth|solana|sol|price/i);
 
+    // Title Reconstruction Logic
+    const reconstructTitle = () => {
+        if (!isCrypto || !market) return market?.question;
+
+        const q = market.question.toLowerCase();
+        const s = market.slug?.toLowerCase() || '';
+        const e = market.eventTitle?.toLowerCase() || '';
+        const d = market.description?.toLowerCase() || '';
+        const full = `${q} ${s} ${e} ${d}`;
+
+        // 1. Detect "Up or Down" or "Price Prediction" patterns
+        if (q.includes('up or down') || s.includes('up-or-down') || e.includes('up or down')) {
+            let asset = 'Asset';
+            if (full.includes('bitcoin') || full.includes('btc')) asset = 'Bitcoin';
+            else if (full.includes('ethereum') || full.includes('eth')) asset = 'Ethereum';
+            else if (full.includes('solana') || full.includes('sol')) asset = 'Solana';
+
+            // Extract Time (e.g. 9PM, 10:00AM, December 19)
+            const timeMatch = full.match(/(\d{1,2}(:\d{2})?\s*(AM|PM)(\s*ET)?)|((December|January|February|March|April|May|June|July|August|September|October|November)\s+\d{1,2})/i);
+            const timeStr = timeMatch ? ` by ${timeMatch[0]}` : '';
+
+            if (priceTarget) {
+                return `${asset} above or under ${priceTarget}${timeStr}?`;
+            }
+
+            // IF STILL FAILED: Check Description for specific "above $X" or "at $X" text
+            if (d) {
+                const dMatch = d.match(/(above|at)\s+(\$\d+(\.\d+)?k?|\d{2,})/i);
+                if (dMatch) return `${asset} above or under ${dMatch[2]}${timeStr}?`;
+            }
+        }
+
+        return market.question;
+    };
+
+    const displayTitle = reconstructTitle();
+
     useEffect(() => {
         if (isOpen && isCrypto) {
             console.log(
-                `%c[WarRoom] Init: "${market?.question}" | Target: ${priceTarget}`,
+                `%c[WarRoom] Init: "${market?.question}" | Target: ${priceTarget} | Display: ${displayTitle}`,
                 'background: #3b82f6; color: white; font-weight: bold; padding: 2px 5px; border-radius: 3px;'
             );
         }
-    }, [isOpen, market, priceTarget, isCrypto]);
+    }, [isOpen, market, priceTarget, isCrypto, displayTitle]);
 
     // Pyth Integration
     useEffect(() => {
@@ -171,7 +225,7 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                             </div>
 
                             <h1 className="text-3xl md:text-5xl font-black text-white leading-tight mb-8">
-                                {market.question}
+                                {displayTitle}
                             </h1>
 
                             {/* Large Chart Area */}
