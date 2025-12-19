@@ -348,6 +348,12 @@ export const PredictionCard = ({
                     <h3 className={`font-outfit font-bold text-lg leading-tight transition-colors ${resolved ? 'text-gray-400' : 'text-white'}`}>
                         {displayTitle}
                     </h3>
+                    {/* DEBUG OVERLAY - Temporary for identifying extraction issues */}
+                    <div className="mt-1 flex gap-2 text-[8px] font-mono text-gray-600 uppercase">
+                        <span>DESC: {description ? 'YES' : 'NO'}</span>
+                        <span>TARGET: {priceTarget || 'NONE'}</span>
+                        <span>SLUG: {slug ? 'YES' : 'NO'}</span>
+                    </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">
                     <div className="w-14 h-8 opacity-60 group-hover:opacity-100 transition-all duration-500">
