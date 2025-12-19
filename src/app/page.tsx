@@ -307,7 +307,7 @@ export default function Home() {
             <div className="flex items-center gap-2 md:gap-3">
               <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-purple-500" />
               <h1 className="text-lg md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-                PROPHET (LIVE)
+                PROPHET
               </h1>
             </div>
 
@@ -337,7 +337,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setIsPositionsOpen(true)}
-                className="text-xs md:text-sm font-bold text-gray-400 hover:text-white transition-colors flex items-center gap-2"
+                className="hidden md:flex text-xs md:text-sm font-bold text-gray-400 hover:text-white transition-colors items-center gap-2"
               >
                 My Bets
               </button>
