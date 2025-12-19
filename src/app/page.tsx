@@ -177,6 +177,44 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Live Odds Polling (Every 5s)
+  useEffect(() => {
+    if (predictions.length === 0) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const { refreshMarketBatch } = await import('@/services/polymarket');
+        // Only refresh Polymarket items (filtered by ID assumption or property)
+        // Actually, our API handles missing IDs gracefully.
+        const ids = predictions.filter(p => p.polymarketId).map(p => p.id);
+
+        if (ids.length === 0) return;
+
+        const updates = await refreshMarketBatch(ids);
+
+        if (updates.length > 0) {
+          setPredictions(prev => prev.map(p => {
+            const update = updates.find(u => u.id === p.id);
+            if (update) {
+              // Merge updates (Liquidity, Odds/Totals)
+              return {
+                ...p,
+                totals: update.totals,
+                totalLiquidity: update.totalLiquidity,
+                outcomes: update.outcomes // In case names change (rare)
+              };
+            }
+            return p;
+          }));
+        }
+      } catch (e) {
+        console.error("Polling error:", e);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [predictions]); // Restart timer on update (Throttle behavior)
+
   // Derived Sorted List Logic
   const filtered = predictions.filter(m => {
     // A market is resolved if the flag is set OR if we have a persisted resolution OR if it's explicitly marked in status

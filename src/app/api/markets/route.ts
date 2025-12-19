@@ -6,14 +6,20 @@ export async function GET(request: Request) {
     const offset = searchParams.get('offset') || '0';
     const closed = searchParams.get('closed') || 'false';
     const id = searchParams.get('id');
+    const ids = searchParams.get('ids'); // Support batch fetching
 
     try {
         // Direct call to Polymarket (Server-side, no CORS proxy needed)
         let targetUrl = `https://gamma-api.polymarket.com/events?closed=${closed}&order=liquidity&ascending=false&limit=${limit}&offset=${offset}`;
 
         if (id) {
-            // If id is provided, fetch specific event/market
+            // Single ID
             targetUrl = `https://gamma-api.polymarket.com/events?id=${id}`;
+        } else if (ids) {
+            // Batch IDs (comma separated) -> convert to ?id=1&id=2...
+            const idList = ids.split(',');
+            const query = idList.map(i => `id=${i.trim()}`).join('&');
+            targetUrl = `https://gamma-api.polymarket.com/events?${query}`;
         }
 
         console.log(`[API] Fetching: ${targetUrl}`);

@@ -183,6 +183,61 @@ export async function fetchPolymarketTrending(limit = 50, offset = 0, sortBy = '
     return [];
 }
 
+/**
+ * Lightweight batch refresher for live odds
+ */
+export async function refreshMarketBatch(ids: number[]): Promise<any[]> {
+    if (ids.length === 0) return [];
+
+    // Chunk into batches of 20 to avoid URL length limits
+    const chunks = [];
+    const chunkSize = 20;
+    for (let i = 0; i < ids.length; i += chunkSize) {
+        chunks.push(ids.slice(i, i + chunkSize));
+    }
+
+    let allEvents: PolymarketEvent[] = [];
+
+    for (const chunk of chunks) {
+        try {
+            const query = chunk.join(',');
+            const response = await fetch(`/api/markets?ids=${query}`);
+            if (response.ok) {
+                const events: PolymarketEvent[] = await response.json();
+                allEvents = [...allEvents, ...events];
+            }
+        } catch (e) {
+            console.error("Batch refresh failed:", e);
+        }
+    }
+
+    // Map using the same logic (We can refactor the mapper out, but for now duplicate the core logic for safety)
+    return allEvents.map(event => {
+        const market = event.markets[0];
+        if (!market) return null;
+
+        let prices = market.outcomePrices;
+        if (typeof prices === 'string') {
+            try { prices = JSON.parse(prices); } catch { prices = ["0.5", "0.5"]; }
+        }
+        const yesPrice = (prices && prices[0]) ? parseFloat(prices[0]) : 0.5;
+        const noPrice = (prices && prices[1]) ? parseFloat(prices[1]) : 0.5;
+        const totalVolume = parseFloat(market.volume || event.volume || '0');
+
+        // Return only what's needed for update
+        const id = parseInt(market.id);
+        const yesVotes = Math.floor(totalVolume * yesPrice);
+        const noVotes = Math.floor(totalVolume * noPrice);
+
+        return {
+            id,
+            totals: [yesVotes, noVotes],
+            totalLiquidity: totalVolume,
+            outcomes: market.outcomes // Just in case
+        };
+    }).filter(item => item !== null);
+}
+
 function classifyCategory(slug: string): 'CRYPTO' | 'POLITICS' | 'SPORTS' | 'NEWS' | 'ESPORTS' {
     const s = slug.toLowerCase();
 
