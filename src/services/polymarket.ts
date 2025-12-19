@@ -12,9 +12,11 @@ export interface PolymarketEvent {
         volume: string;
         liquidity: string;
         endDate: string;
+        description?: string;
     }>;
     volume: string;
     image?: string;
+    description?: string;
 }
 
 // Use internal API to bypass CORS
@@ -160,7 +162,8 @@ export async function fetchPolymarketTrending(limit = 50, offset = 0, sortBy = '
                     isHot: totalVolume > 100000,
                     polymarketId: market.id,
                     slug: event.slug,
-                    eventTitle: event.title
+                    eventTitle: event.title,
+                    description: market.description || event.description || ""
                 };
             }).filter(item => item !== null);
 

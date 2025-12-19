@@ -25,6 +25,7 @@ interface PredictionCardProps {
     isHot?: boolean;
     slug?: string;
     eventTitle?: string;
+    description?: string;
     onOpenExpanded?: () => void;
     onSettle?: (id: number) => void;
 }
@@ -43,6 +44,7 @@ export const PredictionCard = ({
     isHot,
     slug,
     eventTitle,
+    description,
     onOpenExpanded,
     onSettle
 }: PredictionCardProps) => {
@@ -58,10 +60,10 @@ export const PredictionCard = ({
     const [pythPrice, setPythPrice] = useState<number | null>(null);
 
     // Extraction Logic for "Up/Down" markets
-    // Priority: Question -> Slug -> EventTitle
+    // Priority: Question -> Slug -> EventTitle -> Description
     const findTarget = () => {
-        // Broaden search to include outcomes
-        const fullSource = `${question} ${slug || ''} ${eventTitle || ''} ${outcomes.join(' ')}`.toLowerCase();
+        // Broaden search to include outcomes and description
+        const fullSource = `${question} ${slug || ''} ${eventTitle || ''} ${description || ''} ${outcomes.join(' ')}`.toLowerCase();
 
         // 1. Check for standard money format ($96,000)
         const matchMoney = fullSource.match(/\$(\d{1,3}(,\d{3})*(\.\d+)?)/);
@@ -103,7 +105,8 @@ export const PredictionCard = ({
         const q = question.toLowerCase();
         const s = slug?.toLowerCase() || '';
         const e = eventTitle?.toLowerCase() || '';
-        const full = `${q} ${s} ${e}`;
+        const d = description?.toLowerCase() || '';
+        const full = `${q} ${s} ${e} ${d}`;
 
         // 1. Detect "Up or Down" or "Price Prediction" patterns
         if (q.includes('up or down') || s.includes('up-or-down') || e.includes('up or down')) {
@@ -119,6 +122,12 @@ export const PredictionCard = ({
 
             if (priceTarget) {
                 return `${asset} above or under ${priceTarget}${timeStr}?`;
+            }
+
+            // IF STILL FAILED: Check Description for specific "above $X" or "at $X" text
+            if (d) {
+                const dMatch = d.match(/(above|at)\s+(\$\d+(\.\d+)?k?|\d{2,})/i);
+                if (dMatch) return `${asset} above or under ${dMatch[2]}${timeStr}?`;
             }
         }
 
