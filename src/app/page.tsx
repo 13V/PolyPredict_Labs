@@ -303,11 +303,11 @@ export default function Home() {
       <div className="relative z-10">
         {/* Header */}
         <div className="sticky top-0 z-50 border-b border-gray-800 bg-gray-950/80 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-            <div className="flex items-center gap-3">
-              <Sparkles className="h-8 w-8 text-purple-500" />
-              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-                PROPHET PROTOCOL (LIVE)
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-6 py-3 md:py-4">
+            <div className="flex items-center gap-2 md:gap-3">
+              <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-purple-500" />
+              <h1 className="text-lg md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+                PROPHET (LIVE)
               </h1>
             </div>
 
@@ -331,7 +331,7 @@ export default function Home() {
 
               <button
                 onClick={() => setIsDashboardOpen(true)}
-                className="text-xs font-bold text-gray-400 hover:text-white transition-colors flex items-center gap-2"
+                className="hidden sm:flex text-xs font-bold text-gray-400 hover:text-white transition-colors items-center gap-2"
               >
                 Dashboard
               </button>
@@ -383,7 +383,7 @@ export default function Home() {
           </section>
 
           {/* Discovery & Sort Bar */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-[72px] z-40 bg-[#020617]/90 backdrop-blur-xl py-5 border-b border-white/5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 sticky top-[60px] md:top-[72px] z-40 bg-[#020617]/90 backdrop-blur-xl py-3 md:py-5 border-b border-white/5">
             <div className="flex flex-col gap-4 w-full md:w-auto">
               <NavCategories active={activeCategory} onSelect={setActiveCategory} />
 

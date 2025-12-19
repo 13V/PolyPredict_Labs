@@ -393,7 +393,7 @@ export const PredictionCard = ({
         <motion.div
             layout
             onClick={onOpenExpanded}
-            className={`glass rounded-2xl p-5 flex flex-col gap-4 transition-all duration-500 relative overflow-hidden group border-white/5 hover:border-white/10 cursor-pointer ${isHot ? 'shadow-[0_0_20px_rgba(249,115,22,0.1)]' : ''
+            className={`glass rounded-2xl p-4 md:p-5 flex flex-col gap-4 transition-all duration-500 relative overflow-hidden group border-white/5 hover:border-white/10 cursor-pointer ${isHot ? 'shadow-[0_0_20px_rgba(249,115,22,0.1)]' : ''
                 } ${(isExpired && !resolved) ? 'grayscale opacity-80' : ''}`}
             style={{
                 boxShadow: resolved ? 'none' : `0 0 30px ${theme.glow}`,
@@ -426,8 +426,8 @@ export const PredictionCard = ({
             )}
 
             {/* Header */}
-            <div className="flex justify-between items-start gap-4 z-10">
-                <div className="flex flex-col gap-1.5 flex-1">
+            <div className="flex flex-col md:flex-row justify-between items-start gap-3 md:gap-4 z-10">
+                <div className="flex flex-col gap-1.5 flex-1 w-full">
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className={`text-[10px] font-bold uppercase tracking-widest ${resolved ? 'text-gray-500' : theme.text}`}>{displayCategory}</span>
 
@@ -451,7 +451,7 @@ export const PredictionCard = ({
                         {displayTitle}
                     </h3>
                 </div>
-                <div className="flex flex-col items-end gap-2 shrink-0">
+                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start w-full md:w-auto gap-4 md:gap-2 shrink-0 border-t md:border-t-0 border-white/5 pt-3 md:pt-0">
                     <div className="w-14 h-8 opacity-60 group-hover:opacity-100 transition-all duration-500">
                         <Sparkline
                             data={pythData || getDeterministicPattern(id, outcomeProbabilities[0])}
@@ -475,7 +475,7 @@ export const PredictionCard = ({
             {/* Info Bar */}
             {
                 !resolved && (
-                    <div className="flex items-center gap-4 text-[11px] font-bold text-gray-500 tracking-wide z-10">
+                    <div className="flex items-center gap-3 md:gap-4 text-[10px] md:text-[11px] font-bold text-gray-500 tracking-wide z-10">
                         <div className="flex items-center gap-1.5">
                             <Clock size={12} className={isExpired ? 'text-red-500' : theme.text} />
                             <span className={isExpired ? 'text-red-500' : ''}>{timeLeft()}</span>

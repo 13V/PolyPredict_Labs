@@ -198,7 +198,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
     };
 
     // --- UI HELPERS ---
-    const totalVotes = totals.reduce((a, b) => a + b, 0);
+    const totalVotes = totals.reduce((a: number, b: number) => a + b, 0);
     const yesPercent = totalVotes > 0 ? (totals[0] / totalVotes) * 100 : 50;
     const noPercent = 100 - yesPercent;
 
@@ -211,9 +211,9 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]" />
 
-            <div className="relative grid lg:grid-cols-5 min-h-[400px]">
+            <div className="relative grid lg:grid-cols-5">
                 {/* Left Content */}
-                <div className="lg:col-span-3 p-6 md:p-10 flex flex-col justify-between relative border-b lg:border-b-0 lg:border-r border-white/5">
+                <div className="lg:col-span-3 p-5 md:p-10 flex flex-col justify-between relative border-b lg:border-b-0 lg:border-r border-white/5 order-1">
 
                     {/* Header Badges */}
                     <div className="flex items-center gap-3 mb-6">
@@ -231,18 +231,19 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                     </div>
 
                     {/* Main Title */}
-                    <h2 className="text-2xl md:text-4xl font-black text-white mb-6 leading-tight tracking-tight max-w-2xl">
+                    <h2 className="text-xl md:text-4xl font-black text-white mb-6 leading-tight tracking-tight max-w-2xl">
                         {displayTitle}
                     </h2>
 
                     {/* Stats Row */}
-                    <div className="flex items-center gap-8 mb-8">
+                    {/* Stats Row */}
+                    <div className="flex flex-wrap items-center gap-4 md:gap-8 mb-8">
                         {/* Live Price */}
                         {pythPrice && (
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Live Oracle</span>
-                                <span className="text-xl font-mono font-bold text-white flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+                                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-1">Live Oracle</span>
+                                <span className="text-lg md:text-xl font-mono font-bold text-white flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
                                     ${pythPrice.toLocaleString()}
                                 </span>
                             </div>
@@ -250,19 +251,19 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
 
                         {/* Vol */}
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Volume</span>
-                            <span className="text-xl font-mono font-bold text-white">${totalLiquidity.toLocaleString()}</span>
+                            <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-1">Volume</span>
+                            <span className="text-lg md:text-xl font-mono font-bold text-white text-blue-400">${totalLiquidity.toLocaleString()}</span>
                         </div>
                     </div>
 
                     {/* Chart Area */}
-                    <div className="h-32 w-full relative overflow-hidden mask-linear-fade opacity-60">
+                    <div className="h-24 md:h-32 w-full relative overflow-hidden mask-linear-fade opacity-40">
                         {pythData && <Sparkline data={pythData} width={600} height={128} color="#3b82f6" />}
                     </div>
                 </div>
 
                 {/* Right Action Panel */}
-                <div className="lg:col-span-2 p-6 md:p-10 bg-white/[0.02] backdrop-blur-sm flex flex-col justify-center gap-6">
+                <div className="lg:col-span-2 p-5 md:p-10 bg-white/[0.02] backdrop-blur-sm flex flex-col justify-center gap-6 order-2">
                     {/* Order Book Bar */}
                     <div className="space-y-2">
                         <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">

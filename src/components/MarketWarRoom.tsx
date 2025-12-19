@@ -182,7 +182,7 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-8"
                 >
                     {/* Backdrop */}
                     <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
@@ -192,7 +192,7 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-6xl h-full max-h-[850px] bg-gray-950 border border-white/10 rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-[0_0_100px_rgba(168,85,247,0.1)]"
+                        className="relative w-full max-w-6xl h-full max-h-[92vh] md:max-h-[850px] bg-gray-950 border border-white/10 rounded-2xl md:rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-[0_0_100px_rgba(168,85,247,0.1)]"
                     >
                         {/* Control Buttons */}
                         <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
@@ -211,7 +211,7 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                         </div>
 
                         {/* Left Side: Analysis & Chart */}
-                        <div className="flex-1 p-8 md:p-12 overflow-y-auto scrollbar-hide">
+                        <div className="flex-1 p-5 md:p-12 overflow-y-auto scrollbar-hide">
                             <div className="flex items-center gap-3 mb-6">
                                 <span className={`bg-gray-900 ${theme.text} text-[10px] font-black px-3 py-1 rounded-full border ${theme.border} uppercase tracking-widest`}>
                                     {displayCategory}
@@ -224,12 +224,12 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                                 )}
                             </div>
 
-                            <h1 className="text-3xl md:text-5xl font-black text-white leading-tight mb-8">
+                            <h1 className="text-2xl md:text-5xl font-black text-white leading-tight mb-8">
                                 {displayTitle}
                             </h1>
 
                             {/* Large Chart Area */}
-                            <div className="aspect-[21/9] w-full bg-white/5 rounded-3xl mb-8 relative group overflow-hidden border border-white/5">
+                            <div className="w-full aspect-square md:aspect-[21/9] bg-white/5 rounded-2xl md:rounded-3xl mb-8 relative group overflow-hidden border border-white/5">
                                 <div
                                     className="absolute inset-x-0 bottom-0 h-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
                                     style={{ background: `linear-gradient(to top, ${theme.color}20, transparent)` }}
