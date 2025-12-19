@@ -353,33 +353,36 @@ export async function fetchDailyMarkets(requiredCount = 20): Promise<any[]> {
     console.log("Fetching Short-Term High-Volume Markets (Limit 20)...");
 
     try {
-        // 1. Crypto Majors (Daily/Weekly Options usually)
+        // 1. Crypto Majors (Deep search for daily options)
         // BTC
-        const btcBatch = await fetchPolymarketTrending(30, 0, 'volume', false, 'bitcoin');
-        addUnique(btcBatch, 3); // Top 3 BTC Dailies
+        const btcBatch = await fetchPolymarketTrending(100, 0, 'volume', false, 'bitcoin');
+        addUnique(btcBatch, 3);
 
         // ETH
-        const ethBatch = await fetchPolymarketTrending(30, 0, 'volume', false, 'ethereum');
-        addUnique(ethBatch, 3); // Top 3 ETH Dailies
+        const ethBatch = await fetchPolymarketTrending(100, 0, 'volume', false, 'ethereum');
+        addUnique(ethBatch, 3);
 
         // SOL
-        const solBatch = await fetchPolymarketTrending(30, 0, 'volume', false, 'solana');
-        addUnique(solBatch, 3); // Top 3 SOL Dailies
+        const solBatch = await fetchPolymarketTrending(100, 0, 'volume', false, 'solana');
+        addUnique(solBatch, 3);
 
-        // 2. Sports (Tonight's Games) 
-        // Sports usually end same-day, so high volume sports are perfect
-        const sportsBatch = await fetchPolymarketTrending(50, 0, 'volume', false, 'sports');
-        addUnique(sportsBatch, 8); // Up to 8 Sports games
+        // 2. Sports (Deep search for tonight's games) 
+        const sportsBatch = await fetchPolymarketTrending(300, 0, 'volume', false, 'sports');
+        addUnique(sportsBatch, 8);
 
-        // 3. News/Politics (Fast moving news)
-        const politicsBatch = await fetchPolymarketTrending(30, 0, 'volume', false, 'politics');
-        addUnique(politicsBatch, 3); // Up to 3 News items
+        // 3. News/Politics
+        const politicsBatch = await fetchPolymarketTrending(100, 0, 'volume', false, 'politics');
+        addUnique(politicsBatch, 3);
 
-        // 4. Fill remaining with generic trending if needed (Short term only)
-        if (collected.length < TARGET_LIMIT) {
-            const generalBatch = await fetchPolymarketTrending(50, 0, 'volume', false);
-            // Apply same strict filters in addUnique
+        // 4. Fill remaining with generic trending (Iterative Search)
+        let page = 0;
+        while (collected.length < TARGET_LIMIT && page < 5) { // Try up to 5 pages (500 items)
+            console.log(`Deep searching general markets page ${page}...`);
+            const generalBatch = await fetchPolymarketTrending(100, page * 100, 'volume', false);
+            if (generalBatch.length === 0) break;
+
             addUnique(generalBatch, TARGET_LIMIT - collected.length);
+            page++;
         }
 
     } catch (e) {
