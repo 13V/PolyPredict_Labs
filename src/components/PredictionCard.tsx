@@ -60,23 +60,30 @@ export const PredictionCard = ({
     // Extraction Logic for "Up/Down" markets
     // Priority: Question -> Slug -> EventTitle
     const findTarget = () => {
-        const fullSource = `${question} ${slug || ''} ${eventTitle || ''}`.toLowerCase();
+        // Broaden search to include outcomes
+        const fullSource = `${question} ${slug || ''} ${eventTitle || ''} ${outcomes.join(' ')}`.toLowerCase();
 
         // 1. Check for standard money format ($96,000)
         const matchMoney = fullSource.match(/\$(\d{1,3}(,\d{3})*(\.\d+)?)/);
         if (matchMoney) return matchMoney[0];
 
         // 2. Check for "at" followed by price (price at 96000)
-        const matchAt = fullSource.match(/at\s+(\d{2,3}k|\d{4,})/);
+        const matchAt = fullSource.match(/at\s+(\d{1,3}k|\d{4,})/);
         if (matchAt) return `$${matchAt[1]}`;
 
-        // 3. Fallback to numbers, but EXCLUDE timestamps (e.g. > 1,000,000,000)
-        const matchDigits = fullSource.match(/(\d{2,3}k)|(\d{4,})/gi);
+        // 3. Fallback to numbers (including decimals and 'k'), but EXCLUDE timestamps
+        // Improved regex for $92k, 2.8k, 92000, 92,000
+        const matchDigits = fullSource.match(/(\$\d+(\.\d+)?k?)|(\d+(\.\d+)?k)|(\d{1,3}(,\d{3})+)|(\d{4,})/gi);
         if (matchDigits) {
             for (const m of matchDigits) {
-                const val = m.toLowerCase().includes('k') ? parseFloat(m) * 1000 : parseFloat(m);
+                const clean = m.replace(/[$,]/g, '').toLowerCase();
+                const val = clean.includes('k') ? parseFloat(clean) * 1000 : parseFloat(clean);
+
                 // Numbers between 1 and 1 Billion are likely prices. Above that are likely timestamps.
-                if (val > 1 && val < 1000000000) return `$${m}`;
+                // Special case: ignore small numbers like "18" (date) or "2025" (year)
+                if (val > 100 && val < 1000000000) {
+                    return m.startsWith('$') ? m : `$${m}`;
+                }
             }
         }
 
@@ -98,15 +105,16 @@ export const PredictionCard = ({
         const e = eventTitle?.toLowerCase() || '';
         const full = `${q} ${s} ${e}`;
 
-        // 1. Detect "Up or Down" pattern
-        if (q.includes('up or down')) {
+        // 1. Detect "Up or Down" or "Price Prediction" patterns
+        if (q.includes('up or down') || s.includes('up-or-down') || e.includes('up or down')) {
             let asset = 'Asset';
             if (full.includes('bitcoin') || full.includes('btc')) asset = 'Bitcoin';
             else if (full.includes('ethereum') || full.includes('eth')) asset = 'Ethereum';
             else if (full.includes('solana') || full.includes('sol')) asset = 'Solana';
 
             // Extract Time (e.g. 9PM, 10:00AM, December 19)
-            const timeMatch = question.match(/(\d{1,2}(:\d{2})?\s*(AM|PM))|(December|January|February|March|April|May|June|July|August|September|October|November)\s+\d{1,2}/i);
+            // Improved match for ET timezones and ranges
+            const timeMatch = full.match(/(\d{1,2}(:\d{2})?\s*(AM|PM)(\s*ET)?)|((December|January|February|March|April|May|June|July|August|September|October|November)\s+\d{1,2})/i);
             const timeStr = timeMatch ? ` by ${timeMatch[0]}` : '';
 
             if (priceTarget) {
