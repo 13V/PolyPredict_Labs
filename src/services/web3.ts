@@ -3,7 +3,7 @@ import { Program, AnchorProvider, web3, Idl } from '@project-serum/anchor';
 import { BN } from '@project-serum/anchor';
 import idl from '@/idl/polybet.json';
 
-const network = 'https://api.mainnet-beta.solana.com';
+const network = process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.ankr.com/solana';
 const opts = {
     preflightCommitment: "processed" as web3.Commitment,
 };

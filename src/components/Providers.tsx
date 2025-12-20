@@ -22,8 +22,10 @@ export const Providers: FC<{ children: ReactNode }> = ({ children }) => {
     // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
     const network = WalletAdapterNetwork.Mainnet;
 
-    // You can also provide a custom RPC endpoint.
-    const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+    // Use environment variable for RPC or fallback to a resilient public one
+    const endpoint = useMemo(() =>
+        process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.ankr.com/solana',
+        []);
 
     const wallets = useMemo(
         () => [
