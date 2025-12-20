@@ -24,7 +24,7 @@ export const Providers: FC<{ children: ReactNode }> = ({ children }) => {
 
     // Use environment variable for RPC or fallback to a resilient public one
     const endpoint = useMemo(() =>
-        process.env.NEXT_PUBLIC_RPC_URL || 'https://solana-mainnet.rpc.extrnode.com',
+        process.env.NEXT_PUBLIC_RPC_URL || 'https://solana-rpc.publicnode.com',
         []);
 
     const wallets = useMemo(
