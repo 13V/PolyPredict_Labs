@@ -361,7 +361,7 @@ export default function Home() {
               </a>
 
               <a
-                href="https://x.com/CryptoExpert101"
+                href="https://x.com/Polybet_Labs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 text-gray-400 hover:text-blue-400 transition-colors bg-gray-900 border border-white/5 rounded-lg md:flex hidden"
@@ -564,7 +564,7 @@ export default function Home() {
 
               <div className="flex items-center gap-8 mt-4">
                 <a href={CONTRACT_ADDRESS === 'COMING SOON' ? '#' : `https://pump.fun/${CONTRACT_ADDRESS}`} target="_blank" rel="noopener" className="text-xs font-black text-gray-500 hover:text-purple-400 transition-colors uppercase tracking-widest">Pump.fun</a>
-                <a href="https://x.com/CryptoExpert101" target="_blank" rel="noopener noreferrer" className="text-xs font-black text-gray-500 hover:text-blue-400 transition-colors uppercase tracking-widest">Twitter (X)</a>
+                <a href="https://x.com/Polybet_Labs" target="_blank" rel="noopener noreferrer" className="text-xs font-black text-gray-500 hover:text-blue-400 transition-colors uppercase tracking-widest">Twitter (X)</a>
                 <a href="#" className="text-xs font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest">Docs</a>
               </div>
             </div>
