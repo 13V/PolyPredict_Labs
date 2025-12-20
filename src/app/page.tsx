@@ -23,7 +23,7 @@ import { realSnapshot } from '@/data/real_snapshot';
 import { getUserMarkets, resolveUserMarket } from '@/utils/marketStorage';
 import { saveResolution, getResolutionStatus } from '@/utils/voteStorage';
 
-const CONTRACT_ADDRESS = 'COMING SOON';
+const CONTRACT_ADDRESS = '6ZFUNyPDn1ycjhb3RbNAmtcVvwp6oL4Zn6GswnGupump';
 
 export default function Home() {
   const { publicKey } = useWallet();

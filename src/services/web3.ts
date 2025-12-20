@@ -12,7 +12,7 @@ const opts = {
 export const PROGRAM_ID = new PublicKey('DcNb3pYGVqo1AdMdJGycDpRPb6d1nPsg3z4x5T714YW');
 
 // Token used for betting (POLYBET)
-export const BETTING_MINT = new PublicKey('22Tf2qNpb1Z56ZL6Mddsg85F6YVLQyhEJErA3fjzdAFf');
+export const BETTING_MINT = new PublicKey('6ZFUNyPDn1ycjhb3RbNAmtcVvwp6oL4Zn6GswnGupump');
 // export const USDC_MINT = ... (Deprecated)
 const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
