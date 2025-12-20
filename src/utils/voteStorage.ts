@@ -1,6 +1,7 @@
-import { getProgram, getVotePDA, getATA, BETTING_MINT } from '@/services/web3';
-import { PublicKey } from '@solana/web3.js';
-import { BN, web3 } from '@project-serum/anchor';
+import { Connection, PublicKey, Transaction, SystemProgram } from '@solana/web3.js';
+import { getProgram, getProvider, PROGRAM_ID, TOKEN_PROGRAM_ID, getVotePDA, getATA, BETTING_MINT } from '@/services/web3';
+import { BN } from '@project-serum/anchor';
+import { web3 } from '@project-serum/anchor';
 
 export interface Vote {
     predictionId: number;
@@ -34,7 +35,7 @@ export async function saveVote(vote: Vote, wallet: any): Promise<string | void> 
             // Derive PDA
             // Use the provided marketPublicKey or fallback to a derivation (if we have authority/question)
             // For MVP, we pass the marketPublicKey string from the mapped on-chain markets
-            const marketKey = vote.marketPublicKey ? new PublicKey(vote.marketPublicKey) : new PublicKey("11111111111111111111111111111111");
+            const marketKey = vote.marketPublicKey ? new PublicKey(vote.marketPublicKey) : SystemProgram.programId; // Fallback to system if empty?
 
             if (marketKey.toString() === "11111111111111111111111111111111") {
                 console.warn("No real marketPublicKey provided - check prediction data mapping.");
@@ -56,7 +57,7 @@ export async function saveVote(vote: Vote, wallet: any): Promise<string | void> 
                     userToken: userToken,
                     user: wallet.publicKey,
                     systemProgram: web3.SystemProgram.programId,
-                    tokenProgram: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+                    tokenProgram: TOKEN_PROGRAM_ID,
                 })
                 .rpc();
 
