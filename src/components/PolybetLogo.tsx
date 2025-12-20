@@ -16,53 +16,75 @@ export const PolybetLogo = ({ className = "h-8 w-8" }: { className?: string }) =
                     <stop offset="100%" stopColor="#db2777" /> {/* pink-600 */}
                 </linearGradient>
             </defs>
-            {/* Outer Hexagon */}
+
+            {/* 
+               Exact geometrical reconstruction based on the isometric cuboid P.
+               The structure is a 2x2x2 cube grid with missing blocks to form a 'P'.
+            */}
+
+            {/* Left Vertical Column (Front Face) */}
             <path
-                d="M50 5L89 27.5V72.5L50 95L11 72.5V27.5L50 5Z"
+                d="M30 25 L50 35 L50 95 L30 85 Z"
                 stroke="url(#logo-gradient)"
                 strokeWidth="4"
                 strokeLinejoin="round"
                 strokeLinecap="round"
             />
-            {/* Vertical stem line */}
+
+            {/* Left Vertical Column (Top Face) */}
             <path
-                d="M30 27.5V72.5"
-                stroke="url(#logo-gradient)"
-                strokeWidth="4"
-                strokeLinecap="round"
-            />
-            {/* Top cube face lines */}
-            <path
-                d="M50 5V38.75M11 27.5L50 50L89 27.5"
+                d="M30 25 L50 15 L70 25 L50 35 Z"
                 stroke="url(#logo-gradient)"
                 strokeWidth="4"
                 strokeLinejoin="round"
                 strokeLinecap="round"
             />
-            {/* Internal P structure lines */}
+
+            {/* Top Horizontal Bar (Front Face) */}
             <path
-                d="M30 50L50 38.75L69.5 50L50 61.25L30 50Z"
-                stroke="url(#logo-gradient)"
-                strokeWidth="3.5"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                fill="url(#logo-gradient)"
-                fillOpacity="0.05"
-            />
-            <path
-                d="M50 50V72.5L11 50M89 50L50 72.5V95M69.5 50V72.5L50 83.75"
+                d="M50 35 L70 25 L90 35 L70 45 Z" // corrected top-right connection
                 stroke="url(#logo-gradient)"
                 strokeWidth="4"
                 strokeLinejoin="round"
                 strokeLinecap="round"
             />
+
+            {/* Right Vertical Bar (Side Face) - Top part of P loop */}
             <path
-                d="M30 50L30 72.5L50 61.25M69.5 50L69.5 27.5"
+                d="M70 45 L90 35 L90 65 L70 75 Z"
                 stroke="url(#logo-gradient)"
                 strokeWidth="4"
                 strokeLinejoin="round"
                 strokeLinecap="round"
             />
+
+            {/* Bottom Horizontal Bar of Loop (Bottom Face) */}
+            <path
+                d="M50 55 L70 65 L70 75 L50 65 Z"
+                stroke="url(#logo-gradient)"
+                strokeWidth="4"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+            />
+
+            {/* Center Connection (Inner Corner) */}
+            <path
+                d="M50 55 L50 65"
+                stroke="url(#logo-gradient)"
+                strokeWidth="4"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+            />
+
+            {/* Outlines for depth definition matching the reference */}
+            <path
+                d="M50 15 V 35 M 90 35 V 65 L 70 75 L 50 65 V 55 M 70 45 V 65"
+                stroke="url(#logo-gradient)"
+                strokeWidth="4"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+            />
+
         </svg>
     );
 };
