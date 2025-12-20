@@ -12,42 +12,39 @@ export const PolybetLogo = ({ className = "h-8 w-8" }: { className?: string }) =
         >
             <defs>
                 <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#a855f7" /> {/* purple-500 */}
-                    <stop offset="100%" stopColor="#ec4899" /> {/* pink-600 */}
+                    <stop offset="0%" stopColor="#c084fc" /> {/* purple-400 */}
+                    <stop offset="100%" stopColor="#db2777" /> {/* pink-600 */}
                 </linearGradient>
             </defs>
-            {/* Geometric P Construction */}
+            {/* Outer Hexagon Border */}
             <path
-                d="M50 5L90 25V75L50 95L10 75V25L50 5Z"
+                d="M50 5L89 27.5V72.5L50 95L11 72.5V27.5L50 5Z"
                 stroke="url(#logo-gradient)"
-                strokeWidth="4"
+                strokeWidth="5"
                 strokeLinejoin="round"
+                strokeLinecap="round"
             />
-            {/* Internal Geometric Lines forming the P */}
+            {/* Vertical Stem of the P */}
             <path
-                d="M50 5V45L90 25"
+                d="M35 25V75"
                 stroke="url(#logo-gradient)"
-                strokeWidth="4"
+                strokeWidth="7"
+                strokeLinecap="round"
+            />
+            {/* Top Loop of the P (Isometric) */}
+            <path
+                d="M35 25L65 42L65 60L35 43"
+                stroke="url(#logo-gradient)"
+                strokeWidth="7"
                 strokeLinejoin="round"
+                strokeLinecap="round"
             />
+            {/* Internal Geometric Detail to give it the 3D 'Poly' feel */}
             <path
-                d="M10 25L50 45L50 85L10 65V25Z"
+                d="M35 43L50 52L65 42"
                 stroke="url(#logo-gradient)"
-                strokeWidth="4"
-                strokeLinejoin="round"
-                fill="url(#logo-gradient)"
-                fillOpacity="0.1"
-            />
-            <path
-                d="M50 45L90 25V65L50 85"
-                stroke="url(#logo-gradient)"
-                strokeWidth="4"
-                strokeLinejoin="round"
-            />
-            <path
-                d="M50 65L90 45"
-                stroke="url(#logo-gradient)"
-                strokeWidth="4"
+                strokeWidth="3"
+                strokeOpacity="0.5"
                 strokeLinejoin="round"
             />
         </svg>
