@@ -9,10 +9,14 @@ const opts = {
 };
 
 // Program ID (Prophet/Polybet Contract)
-export const PROGRAM_ID = new PublicKey('DcNb3pYGVqo1AdMdJGycDpRPb6d1nPsg3z4x5T714YW');
+export const PROGRAM_ID = new PublicKey(
+    process.env.NEXT_PUBLIC_PROGRAM_ID || 'DcNb3pYGVqo1AdMdJGycDpRPb6d1nPsg3z4x5T714YW'
+);
 
 // Token used for betting (POLYBET) - Pump.fun deployment
-export const BETTING_MINT = new PublicKey('6ZFUNyPDn1ycjhb3RbNAmtcVvwp6oL4Zn6GswnGupump');
+export const BETTING_MINT = new PublicKey(
+    process.env.NEXT_PUBLIC_BETTING_MINT || '6ZFUNyPDn1ycjhb3RbNAmtcVvwp6oL4Zn6GswnGupump'
+);
 
 // Constants
 export const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
