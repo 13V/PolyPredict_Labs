@@ -46,7 +46,7 @@ export const getProgram = (wallet: any) => {
     return new Program(idl as unknown as Idl, PROGRAM_ID, provider);
 };
 
-import { BN } from '@project-serum/anchor';
+
 
 export const getMarketPDA = async (marketId: number) => {
     return await PublicKey.findProgramAddress(
