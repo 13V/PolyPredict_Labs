@@ -14,6 +14,7 @@ import { MobileNav } from '@/components/MobileNav';
 import { HowItWorks } from "@/components/HowItWorks";
 import { Background } from "@/components/Background";
 import { MarketWarRoom } from "@/components/MarketWarRoom";
+import { TraderDashboard } from "@/components/TraderDashboard";
 import { useWallet } from '@solana/wallet-adapter-react';
 
 import { fetchPolymarketTrending, fetchMarketResult } from '@/services/polymarket';
