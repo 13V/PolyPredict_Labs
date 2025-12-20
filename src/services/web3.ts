@@ -44,12 +44,14 @@ export const getProgram = (wallet: any) => {
     return new Program(idl as unknown as Idl, PROGRAM_ID, provider);
 };
 
-export const getMarketPDA = async (authority: PublicKey, question: string) => {
+import { BN } from '@project-serum/anchor';
+
+export const getMarketPDA = async (authority: PublicKey, marketId: number) => {
     return await PublicKey.findProgramAddress(
         [
             Buffer.from("market"),
             authority.toBuffer(),
-            Buffer.from(question)
+            new BN(marketId).toArrayLike(Buffer, 'le', 8)
         ],
         PROGRAM_ID
     );

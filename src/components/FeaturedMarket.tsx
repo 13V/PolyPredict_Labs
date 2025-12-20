@@ -147,7 +147,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                 if (!program) throw new Error("Wallet not connected");
 
                 const newMarketId = Date.now();
-                const marketPda = (await getMarketPDA(publicKey, question))[0];
+                const marketPda = (await getMarketPDA(publicKey, newMarketId))[0];
                 const configPda = await getConfigPDA();
                 const vaultTokenAcc = await getATA(marketPda, BETTING_MINT);
 

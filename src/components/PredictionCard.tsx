@@ -312,7 +312,7 @@ export const PredictionCard = ({
                 // For Lazy Initialization, we default to a binary YES/NO structure
                 // Outcomes[0] = YES, Outcomes[1] = NO
 
-                const marketPda = (await getMarketPDA(publicKey, question))[0];
+                const marketPda = (await getMarketPDA(publicKey, newMarketId))[0];
                 const configPda = await getConfigPDA();
                 const vaultTokenAcc = await getATA(marketPda, BETTING_MINT);
 
