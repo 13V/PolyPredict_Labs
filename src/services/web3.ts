@@ -46,11 +46,10 @@ export const getProgram = (wallet: any) => {
 
 import { BN } from '@project-serum/anchor';
 
-export const getMarketPDA = async (authority: PublicKey, marketId: number) => {
+export const getMarketPDA = async (marketId: number) => {
     return await PublicKey.findProgramAddress(
         [
             Buffer.from("market"),
-            authority.toBuffer(),
             new BN(marketId).toArrayLike(Buffer, 'le', 8)
         ],
         PROGRAM_ID

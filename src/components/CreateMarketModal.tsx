@@ -124,7 +124,7 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
                 "YES", "NO", "", "", "", "", "", ""
             ];
 
-            const marketPda = (await getMarketPDA(publicKey, marketId.toNumber()))[0];
+            const marketPda = (await getMarketPDA(marketId.toNumber()))[0];
             const configPda = await getConfigPDA();
             const vaultTokenAcc = await getATA(marketPda, BETTING_MINT);
 
