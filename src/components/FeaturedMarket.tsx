@@ -276,8 +276,8 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                     {/* Order Book Bar */}
                     <div className="space-y-2">
                         <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                            <span>YES {yesPercent.toFixed(0)}%</span>
-                            <span>NO {noPercent.toFixed(0)}%</span>
+                            <span>{outcomes[0]} {yesPercent.toFixed(0)}%</span>
+                            <span>{outcomes[1]} {noPercent.toFixed(0)}%</span>
                         </div>
                         <div className="flex h-2 w-full rounded-full overflow-hidden bg-gray-800">
                             <motion.div initial={{ width: 0 }} animate={{ width: `${yesPercent}%` }} className="h-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]" />
@@ -293,7 +293,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                                 disabled={isExpired}
                                 className="group p-4 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 rounded-xl transition-all active:scale-95"
                             >
-                                <span className="text-green-400 font-black text-2xl block mb-1">YES</span>
+                                <span className="text-green-400 font-black text-xl md:text-2xl block mb-1 truncate">{outcomes[0]}</span>
                                 <span className="text-[10px] text-green-300 font-bold uppercase tracking-widest group-hover:underline">Bet Up</span>
                             </button>
                             <button
@@ -301,14 +301,14 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                                 disabled={isExpired}
                                 className="group p-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 rounded-xl transition-all active:scale-95"
                             >
-                                <span className="text-red-400 font-black text-2xl block mb-1">NO</span>
+                                <span className="text-red-400 font-black text-xl md:text-2xl block mb-1 truncate">{outcomes[1]}</span>
                                 <span className="text-[10px] text-red-300 font-bold uppercase tracking-widest group-hover:underline">Bet Down</span>
                             </button>
                         </div>
                     ) : (
                         <div className="bg-gray-800/50 p-4 rounded-xl border border-white/10 animate-in slide-in-from-bottom-2 fade-in">
                             <div className="flex justify-between items-center mb-4">
-                                <span className="text-xs font-bold text-gray-400 uppercase">Bet {betMode === 0 ? 'YES' : 'NO'}</span>
+                                <span className="text-xs font-bold text-gray-400 uppercase">Bet {betMode === 0 ? outcomes[0] : outcomes[1]}</span>
                                 <button onClick={(e) => { e.stopPropagation(); setBetMode(null) }} className="text-gray-500 hover:text-white">✕</button>
                             </div>
                             <input
