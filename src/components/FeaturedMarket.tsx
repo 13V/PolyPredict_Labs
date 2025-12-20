@@ -11,7 +11,7 @@ import { useToast } from '@/context/ToastContext';
 import { useHaptic } from '@/hooks/useHaptic';
 import { getPythSparkline, getPythPrices } from '@/services/pyth';
 import { getCoinGeckoSparkline } from '@/services/coingecko';
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 
 interface FeaturedMarketProps {
     data: any; // Using any for flexibility to match PredictionCard shape
@@ -180,9 +180,9 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                     authority: publicKey,
                     vaultTokenAccount: vaultTokenAcc,
                     mint: BETTING_MINT,
-                    systemProgram: new PublicKey('11111111111111111111111111111111'),
+                    systemProgram: SystemProgram.programId,
                     tokenProgram: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-                    rent: new PublicKey('SysvarRent11111111111111111111111111111111')
+                    rent: SYSVAR_RENT_PUBKEY
                 }).rpc();
 
                 toast.success("Market Initialized!", { id: toastId });
