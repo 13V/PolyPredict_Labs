@@ -298,8 +298,9 @@ export const PredictionCard = ({
 
             try {
                 // Dynamically import web3 to avoid server issues
-                const { getProgram, getMarketPDA, getConfigPDA, getATA, BETTING_MINT } = await import('@/services/web3');
+                const { getProgram, getMarketPDA, getConfigPDA, getATA, BETTING_MINT, TOKEN_PROGRAM_ID } = await import('@/services/web3');
                 const { BN } = await import('@project-serum/anchor');
+                const { SystemProgram, SYSVAR_RENT_PUBKEY } = await import('@solana/web3.js');
 
                 const program = getProgram({ publicKey, signTransaction: undefined, sendTransaction: undefined });
                 if (!program) throw new Error("Wallet not connected");
@@ -320,22 +321,22 @@ export const PredictionCard = ({
                     mIdBN,
                     endTimeBN,
                     question,
-                    2,
+                    2, // outcomeCount
                     ["Yes", "No", "", "", "", "", "", ""],
-                    null,
-                    new BN(1), // Min bet
-                    new BN(1000000), // Max bet
-                    "",
-                    polymarketId // IMPORTANT: Link it!
+                    null, // oracleKey
+                    new BN(1), // minBet
+                    new BN(1000000), // maxBet
+                    "", // metadataUrl
+                    polymarketId // Use the ID as slug/reference
                 ).accounts({
                     market: marketPda,
                     config: configPda,
                     authority: publicKey,
                     vaultTokenAccount: vaultTokenAcc,
                     mint: BETTING_MINT,
-                    systemProgram: '11111111111111111111111111111111',
-                    tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-                    rent: 'SysvarRent11111111111111111111111111111111'
+                    systemProgram: SystemProgram.programId,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                    rent: SYSVAR_RENT_PUBKEY
                 }).rpc();
 
                 toast.success("Market Initialized! Placing vote...", { id: toastId });

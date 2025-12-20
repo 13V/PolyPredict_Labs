@@ -140,7 +140,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
             setIsInitializing(true);
             const toastId = toast.loading("Initializing Featured Market...");
             try {
-                const { getProgram, getMarketPDA, getConfigPDA, getATA, BETTING_MINT } = await import('@/services/web3');
+                const { getProgram, getMarketPDA, getConfigPDA, getATA, BETTING_MINT, TOKEN_PROGRAM_ID } = await import('@/services/web3');
                 const { BN } = await import('@project-serum/anchor');
 
                 const program = getProgram({ publicKey, signTransaction: undefined, sendTransaction: undefined });
@@ -156,10 +156,11 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                     configPda: configPda?.toString(),
                     vaultTokenAcc: vaultTokenAcc?.toString(),
                     mint: BETTING_MINT?.toString(),
-                    authority: publicKey?.toString()
+                    authority: publicKey?.toString(),
+                    tokenProgram: TOKEN_PROGRAM_ID?.toString()
                 });
 
-                if (!marketPda || !configPda || !vaultTokenAcc || !BETTING_MINT || !publicKey) {
+                if (!marketPda || !configPda || !vaultTokenAcc || !BETTING_MINT || !publicKey || !TOKEN_PROGRAM_ID) {
                     throw new Error("Missing critical keys for initialization");
                 }
 
@@ -181,7 +182,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                     vaultTokenAccount: vaultTokenAcc,
                     mint: BETTING_MINT,
                     systemProgram: SystemProgram.programId,
-                    tokenProgram: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+                    tokenProgram: TOKEN_PROGRAM_ID,
                     rent: SYSVAR_RENT_PUBKEY
                 }).rpc();
 

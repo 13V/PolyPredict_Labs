@@ -1,21 +1,22 @@
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Program, AnchorProvider, web3, Idl } from '@project-serum/anchor';
+import { BN } from '@project-serum/anchor';
 import idl from '@/idl/polybet.json';
 
-const network = 'https://api.devnet.solana.com';
+const network = 'https://api.mainnet-beta.solana.com';
 const opts = {
     preflightCommitment: "processed" as web3.Commitment,
 };
 
-// Program ID from the IDL or Devnet
-// Program ID from the IDL or Devnet
+// Program ID (Prophet/Polybet Contract)
 export const PROGRAM_ID = new PublicKey('DcNb3pYGVqo1AdMdJGycDpRPb6d1nPsg3z4x5T714YW');
 
-// Token used for betting (POLYBET)
+// Token used for betting (POLYBET) - Pump.fun deployment
 export const BETTING_MINT = new PublicKey('6ZFUNyPDn1ycjhb3RbNAmtcVvwp6oL4Zn6GswnGupump');
-// export const USDC_MINT = ... (Deprecated)
-const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
-const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+
+// Constants
+export const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
+export const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 
 export const getATA = async (owner: PublicKey, mint: PublicKey) => {
     const [ata] = await PublicKey.findProgramAddress(
@@ -23,6 +24,12 @@ export const getATA = async (owner: PublicKey, mint: PublicKey) => {
         SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID
     );
     return ata;
+};
+const [ata] = await PublicKey.findProgramAddress(
+    [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
+    SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID
+);
+return ata;
 };
 
 export const getProvider = (wallet: any) => {

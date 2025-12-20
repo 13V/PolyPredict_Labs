@@ -6,9 +6,10 @@ import confetti from 'canvas-confetti';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { saveUserMarket } from '@/utils/marketStorage';
 import { hasMinimumTokens, getTokenBalance } from '@/utils/tokenGating';
-import { getProgram, getMarketPDA, getConfigPDA, getATA, BETTING_MINT } from '@/services/web3';
+import { getProgram, getMarketPDA, getConfigPDA, getATA, BETTING_MINT, TOKEN_PROGRAM_ID } from '@/services/web3';
 import { BN } from '@project-serum/anchor';
 import { toast } from 'react-hot-toast';
+import { SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 
 interface CreateMarketModalProps {
     isOpen: boolean;
@@ -147,9 +148,9 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
                 authority: publicKey,
                 vaultTokenAccount: vaultTokenAcc,
                 mint: BETTING_MINT,
-                systemProgram: '11111111111111111111111111111111', // System program
-                tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-                rent: 'SysvarRent11111111111111111111111111111111'
+                systemProgram: SystemProgram.programId,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                rent: SYSVAR_RENT_PUBKEY
             }).rpc();
 
             confetti({
