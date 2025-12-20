@@ -71,7 +71,7 @@ export const InstallPrompt = () => {
                             <Smartphone size={24} />
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-white font-bold text-sm">Install Prophet App</h3>
+                            <h3 className="text-white font-bold text-sm">Install Polybet App</h3>
                             <p className="text-slate-400 text-xs mt-0.5">Add to home screen for the full experience.</p>
                         </div>
                     </div>

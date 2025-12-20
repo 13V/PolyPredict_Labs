@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
-pub enum ProphetError {
+pub enum PolybetError {
     #[msg("Market has already ended.")]
     MarketEnded,
     #[msg("Market is still active.")]

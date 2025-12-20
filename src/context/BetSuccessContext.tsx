@@ -33,7 +33,7 @@ export function BetSuccessProvider({ children }: { children: ReactNode }) {
 
     const handleShare = () => {
         if (!details) return;
-        const text = `I just bet $${details.amount} on ${details.outcome.toUpperCase()} for "${details.question}" on Prophet Protocol! 🔮`;
+        const text = `I just bet $${details.amount} on ${details.outcome.toUpperCase()} for "${details.question}" on Polybet! 🔮`;
         navigator.clipboard.writeText(text);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);

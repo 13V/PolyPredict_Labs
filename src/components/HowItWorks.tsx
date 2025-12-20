@@ -13,7 +13,7 @@ export const HowItWorks = () => {
         {
             icon: Vote,
             title: 'Vote on Predictions',
-            description: 'Use your $PROPHET tokens to vote YES or NO on crypto predictions.',
+            description: 'Use your $POLYBET tokens to vote YES or NO on crypto predictions.',
             color: 'from-purple-500 to-pink-500',
         },
         {

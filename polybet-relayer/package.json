@@ -1,7 +1,7 @@
 {
-  "name": "prophet-relayer",
+  "name": "polybet-relayer",
   "version": "1.0.0",
-  "description": "Autonomous resolution relayer for Prophet Protocol",
+  "description": "Autonomous resolution relayer for Polybet Protocol",
   "main": "index.js",
   "scripts": {
     "dev": "vercel dev",

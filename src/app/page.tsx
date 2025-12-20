@@ -101,6 +101,7 @@ export default function Home() {
               return {
                 id: m.marketId.toNumber(),
                 question: m.question,
+                marketPublicKey: acc.publicKey.toString(), // Store the actual PDA string
                 endTime: m.endTime.toNumber(),
                 category: 'CRYPTO', // Default
                 outcomes: m.outcomeNames.filter((n: string) => n !== ""),
@@ -140,6 +141,7 @@ export default function Home() {
             // But keep some metadata from Polymarket if helpful (like sparkline or slug if missing)
             return {
               ...onChainMatch,
+              marketPublicKey: onChainMatch.marketPublicKey,
               slug: polyItem.slug,
               eventTitle: polyItem.eventTitle,
               description: polyItem.description,
@@ -307,14 +309,14 @@ export default function Home() {
             <div className="flex items-center gap-2 md:gap-3">
               <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-purple-500" />
               <h1 className="text-lg md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-                PROPHET
+                Polybet
               </h1>
             </div>
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-gray-900 border border-white/5 rounded-lg text-[9px] md:text-[10px] font-mono group">
                 <span className="hidden md:inline text-gray-500 uppercase">CA:</span>
-                <span className="text-gray-400">{CONTRACT_ADDRESS === 'COMING SOON' ? CONTRACT_ADDRESS : `${CONTRACT_ADDRESS.slice(0, 4)}...${CONTRACT_ADDRESS.slice(-4)}`}</span>
+                <span className="text-gray-400">{CONTRACT_ADDRESS === 'COMING SOON' ? CONTRACT_ADDRESS : `${(CONTRACT_ADDRESS as string).slice(0, 4)}...${(CONTRACT_ADDRESS as string).slice(-4)}`}</span>
                 <button onClick={copyToClipboard} className="text-purple-500 hover:text-purple-400 transition-colors p-1">
                   {copied ? <Check size={10} className="md:w-3 md:h-3" /> : <Copy size={10} className="md:w-3 md:h-3" />}
                 </button>
@@ -326,7 +328,7 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-[9px] md:text-[10px] font-black uppercase tracking-tighter px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-lg shadow-purple-500/20 active:scale-95 transition-all outline-none"
               >
-                Buy <span className="hidden md:inline">$PROPHET</span>
+                Buy <span className="hidden md:inline">$POLYBET</span>
               </a>
 
               <button
@@ -513,11 +515,11 @@ export default function Home() {
               </div>
 
               <div className="space-y-4 max-w-2xl px-4">
-                <p className="text-gray-400 text-xs font-medium uppercase tracking-[0.2em]">Prophet Protocol © 2025</p>
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-[0.2em]">Polybet © 2025</p>
                 <p className="text-gray-600 text-[10px] leading-relaxed italic">
-                  Prophet is a decentralized prediction protocol in Beta. All participation is at your own risk.
+                  Polybet is a decentralized prediction protocol in Beta. All participation is at your own risk.
                   Digital assets are highly volatile. This is not financial advice.
-                  Be the Prophet, or be the exit liquidity.
+                  Be the Alpha, or be the exit liquidity.
                 </p>
               </div>
 

@@ -13,14 +13,14 @@ interface TraderDashboardProps {
 export const TraderDashboard = ({ isOpen, onClose, walletAddress }: TraderDashboardProps) => {
     // Mock Data - In a real app, we'd calculate this from voteHistory
     const stats = [
-        { label: 'Total PnL', value: '+12,450 $PROPHET', color: 'text-green-400', icon: TrendingUp },
+        { label: 'Total PnL', value: '+12,450 $POLYBET', color: 'text-green-400', icon: TrendingUp },
         { label: 'Win Rate', value: '68%', color: 'text-purple-400', icon: Target },
         { label: 'Total Bets', value: '42', color: 'text-blue-400', icon: BarChart3 },
         { label: 'Rank', value: '#124', color: 'text-orange-400', icon: Trophy },
     ];
 
     const badges = [
-        { name: 'Early Prophet', icon: Zap, description: 'One of the first 1000 users', unlocked: true },
+        { name: 'Early Poly', icon: Zap, description: 'One of the first 1000 users', unlocked: true },
         { name: 'Whale Hunter', icon: Target, description: 'Followed a whale move correctly', unlocked: true },
         { name: 'Steady Hand', icon: Shield, description: 'Longest winning streak: 5', unlocked: false },
         { name: 'Grandmaster', icon: Award, description: 'Win 100+ markets', unlocked: false },
@@ -112,8 +112,8 @@ export const TraderDashboard = ({ isOpen, onClose, walletAddress }: TraderDashbo
                                             <div
                                                 key={i}
                                                 className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${badge.unlocked
-                                                        ? 'bg-purple-500/10 border-purple-500/30'
-                                                        : 'bg-white/5 border-white/5 opacity-40 grayscale'
+                                                    ? 'bg-purple-500/10 border-purple-500/30'
+                                                    : 'bg-white/5 border-white/5 opacity-40 grayscale'
                                                     }`}
                                             >
                                                 <div className={`p-3 rounded-xl ${badge.unlocked ? 'bg-purple-500/20 text-purple-400' : 'bg-gray-800 text-gray-600'}`}>

@@ -36,6 +36,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
     const slug = data?.slug;
     const eventTitle = data?.eventTitle;
     const description = data?.description;
+    const marketPublicKey = data?.marketPublicKey;
 
     const [betMode, setBetMode] = useState<number | null>(null);
     const [stakeAmount, setStakeAmount] = useState('');
@@ -173,6 +174,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
 
                 toast.success("Market Initialized!", { id: toastId });
                 targetMarketId = newMarketId;
+                (window as any).lastInitializedPda = marketPda.toString();
             } catch (e: any) {
                 console.error("Lazy Init Failed:", e);
                 toast.error(`Init Failed: ${e.message}`, { id: toastId });
@@ -181,20 +183,27 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
             }
         }
 
-        saveVote({
-            predictionId: targetMarketId,
-            choice: 'multi',
-            outcomeIndex: betMode,
-            walletAddress: publicKey!.toString(),
-            timestamp: Date.now(),
-            amount: amount
-        }, { publicKey, signTransaction: undefined, sendTransaction: undefined });
+        try {
+            await saveVote({
+                predictionId: targetMarketId,
+                choice: 'multi',
+                outcomeIndex: betMode,
+                walletAddress: publicKey!.toString(),
+                marketPublicKey: marketPublicKey || (window as any).lastInitializedPda,
+                timestamp: Date.now(),
+                amount: amount
+            }, { publicKey, signTransaction: undefined, sendTransaction: undefined });
 
-        setIsInitializing(false);
-        setBetMode(null);
-        toast.success(`Bet placed on ${outcomes[betMode]}`);
+            setIsInitializing(false);
+            setBetMode(null);
+            toast.success(`Bet placed on ${outcomes[betMode]}`);
 
-        if (polymarketId && !isOnChain) setTimeout(() => window.location.reload(), 2000);
+            if (polymarketId && !isOnChain) setTimeout(() => window.location.reload(), 2000);
+        } catch (e: any) {
+            console.error("Vote failed:", e);
+            toast.error(`Transaction failed: ${e.message || 'Check your wallet'}`);
+            setIsInitializing(false);
+        }
     };
 
     // --- UI HELPERS ---

@@ -27,6 +27,7 @@ interface PredictionCardProps {
     eventTitle?: string;
     description?: string;
     isOnChain?: boolean; // New prop for Real Betting status
+    marketPublicKey?: string; // Blockchain Address
     onOpenExpanded?: () => void;
     onSettle?: (id: number) => void;
 }
@@ -47,6 +48,7 @@ export const PredictionCard = ({
     eventTitle,
     description,
     isOnChain = false, // Default to false (Simulated)
+    marketPublicKey,
     onOpenExpanded,
     onSettle
 }: PredictionCardProps) => {
@@ -280,7 +282,7 @@ export const PredictionCard = ({
         }
 
         if (amount > MAX_BET) {
-            toast.error(`Exceeds max bet of ${MAX_BET.toLocaleString()} $PROPHET`);
+            toast.error(`Exceeds max bet of ${MAX_BET.toLocaleString()} $POLYBET`);
             return;
         }
 
@@ -338,6 +340,7 @@ export const PredictionCard = ({
 
                 toast.success("Market Initialized! Placing vote...", { id: toastId });
                 targetMarketId = newMarketId; // Use the new ON-CHAIN ID for the vote
+                (window as any).lastInitializedPda = marketPda.toString(); // Store for saveVote
 
             } catch (e: any) {
                 console.error("Lazy Init Failed:", e);
@@ -348,23 +351,30 @@ export const PredictionCard = ({
         }
 
         // Proceed to Vote (either on existing ID or new initialized ID)
-        saveVote({
-            predictionId: targetMarketId,
-            choice: 'multi',
-            outcomeIndex: betMode,
-            walletAddress: publicKey.toString(),
-            timestamp: Date.now(),
-            amount: amount
-        }, { publicKey, signTransaction: undefined, sendTransaction: undefined });
+        try {
+            await saveVote({
+                predictionId: targetMarketId,
+                choice: 'multi',
+                outcomeIndex: betMode,
+                walletAddress: publicKey.toString(),
+                marketPublicKey: marketPublicKey || (window as any).lastInitializedPda, // Fallback if we just created it
+                timestamp: Date.now(),
+                amount: amount
+            }, { publicKey, signTransaction: undefined, sendTransaction: undefined });
 
-        setVotedIndex(betMode);
-        setBetMode(null);
-        setIsInitializing(false);
-        toast.success(`Bet placed on ${outcomes[betMode]}`);
+            setVotedIndex(betMode);
+            setBetMode(null);
+            setIsInitializing(false);
+            toast.success(`Bet placed on ${outcomes[betMode]}`);
 
-        // Reload page after delay if we initialized, to sync state
-        if (polymarketId && !isOnChain) {
-            setTimeout(() => window.location.reload(), 2000);
+            // Reload page after delay if we initialized, to sync state
+            if (polymarketId && !isOnChain) {
+                setTimeout(() => window.location.reload(), 2000);
+            }
+        } catch (e: any) {
+            console.error("Vote failed:", e);
+            toast.error(`Transaction failed: ${e.message || 'Check your wallet'}`);
+            setIsInitializing(false);
         }
     };
 
@@ -578,7 +588,7 @@ export const PredictionCard = ({
                             />
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-end">
                                 <span className="text-[10px] text-gray-500 font-bold uppercase">Max: 1M</span>
-                                <span className="text-xs font-bold text-slate-500">$PROPHET</span>
+                                <span className="text-xs font-bold text-slate-500">$POLYBET</span>
                             </div>
                         </div>
                         <div className="grid grid-cols-4 gap-2">

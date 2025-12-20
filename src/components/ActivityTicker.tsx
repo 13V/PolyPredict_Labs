@@ -4,14 +4,14 @@ import { motion } from 'framer-motion';
 import { TrendingUp, User } from 'lucide-react';
 
 const RECENT_BETS = [
-    { user: '0x3a...29b', action: 'voted YES', market: 'BTC > $100k', amount: '5,000 $PROPHET' },
-    { user: '0x7e...44a', action: 'voted YES', market: 'SOL to $500', amount: '25,000 $PROPHET', isWhale: true },
-    { user: '0x8f...1a2', action: 'voted NO', market: 'ETH > $4k', amount: '2,500 $PROPHET' },
-    { user: '0xDb...21c', action: 'voted NO', market: 'S&P 500 ATH', amount: '100,000 $PROPHET', isWhale: true },
-    { user: '0x1c...99d', action: 'voted YES', market: 'Memecoin Season', amount: '1,200 $PROPHET' },
+    { user: '0x3a...29b', action: 'voted YES', market: 'BTC > $100k', amount: '5,000 $POLYBET' },
+    { user: '0x7e...44a', action: 'voted YES', market: 'SOL to $500', amount: '25,000 $POLYBET', isWhale: true },
+    { user: '0x8f...1a2', action: 'voted NO', market: 'ETH > $4k', amount: '2,500 $POLYBET' },
+    { user: '0xDb...21c', action: 'voted NO', market: 'S&P 500 ATH', amount: '100,000 $POLYBET', isWhale: true },
+    { user: '0x1c...99d', action: 'voted YES', market: 'Memecoin Season', amount: '1,200 $POLYBET' },
     { user: '0x99...11f', action: 'created market', market: 'Mars Landing 2030', isNew: true },
-    { user: '0xWh...ale', action: 'voted YES', market: 'Trump Election', amount: '1M $PROPHET', isWhale: true },
-    { user: '0x44...8ab', action: 'voted YES', market: 'GTA 6 Release', amount: '8,000 $PROPHET' },
+    { user: '0xWh...ale', action: 'voted YES', market: 'Trump Election', amount: '1M $POLYBET', isWhale: true },
+    { user: '0x44...8ab', action: 'voted YES', market: 'GTA 6 Release', amount: '8,000 $POLYBET' },
 ];
 
 export const ActivityTicker = () => {
@@ -42,7 +42,7 @@ export const ActivityTicker = () => {
                             </div>
 
                             <span className={`text-[11px] font-bold uppercase tracking-tight ${item.isNew ? 'text-blue-400' :
-                                    item.action.includes('YES') ? 'text-cyan-400' : 'text-rose-400'
+                                item.action.includes('YES') ? 'text-cyan-400' : 'text-rose-400'
                                 }`}>
                                 {item.action}
                             </span>

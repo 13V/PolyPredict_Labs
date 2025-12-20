@@ -21,7 +21,7 @@ export interface RewardCalculation {
  */
 export function calculateRewards(
     predictionId: number,
-    totalRewardPool: number = 1000 // Default: 1000 $PROPHET tokens
+    totalRewardPool: number = 1000 // Default: 1000 $POLYBET tokens
 ): RewardCalculation | null {
     // Get the outcome
     const outcome = getPredictionOutcome(predictionId);
@@ -130,7 +130,7 @@ export function downloadRewardsCSV(): void {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `prophet-rewards-${Date.now()}.csv`;
+    a.download = `polybet-rewards-${Date.now()}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

@@ -7,77 +7,82 @@ export interface Vote {
     choice: 'yes' | 'no' | 'multi'; // Allow multi-outcome
     outcomeIndex?: number; // Specific outcome index
     walletAddress: string;
+    marketPublicKey?: string; // LINK TO BLOCKCHAIN PDA
     timestamp: number;
     amount?: number;
     txHash?: string;
 }
 
-const VOTES_KEY = 'prophet_votes';
+const VOTES_KEY = 'polybet_votes';
 
 /**
- * Save a vote to localStorage AND Blockchain
+ * Save a vote to Blockchain and cache to localStorage only on success
  */
-export async function saveVote(vote: Vote, wallet?: any): Promise<string | void> {
-
-    // 1. Blockchain Transaction (Real)
-    if (wallet && wallet.publicKey) {
-        try {
-            console.log("Initiating On-Chain Vote...");
-            const program = getProgram(wallet);
-
-            if (program) {
-                // Determine outcome index
-                const outcomeIndex = vote.outcomeIndex ?? (vote.choice === 'yes' ? 0 : 1);
-                const amount = vote.amount || 0;
-
-                // Derive PDA
-                // NOTE: In a real app we'd fetch the actual market PDA from the ID
-                // For MVP we mock the market Key (using System Program ID as valid placeholder)
-                const marketKey = new PublicKey("11111111111111111111111111111111");
-                const votePda = await getVotePDA(marketKey, wallet.publicKey);
-
-                // Derive Token Accounts
-                const userToken = await getATA(wallet.publicKey, BETTING_MINT);
-                const vaultToken = await getATA(marketKey, BETTING_MINT);
-
-                // IMPORTANT: In production, we need a way to ensure the Vault ATA exists. 
-                // The `initializeMarket` instruction usually creates it.
-                // Here we assume it exists for the MVP smart contract calls.
-
-                // Call the Smart Contract
-                const tx = await program.methods.placeVote(outcomeIndex, new BN(amount))
-                    .accounts({
-                        market: marketKey,
-                        vote: votePda,
-                        vaultToken: vaultToken,
-                        userToken: userToken,
-                        user: wallet.publicKey,
-                        systemProgram: web3.SystemProgram.programId,
-                        tokenProgram: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-                    })
-                    .rpc();
-
-                console.log("Vote Transaction Sent!", tx);
-                vote.txHash = tx;
-            }
-        } catch (e) {
-            console.warn("Blockchain Transaction Failed (Simulation Mode Continuing):", e);
-            // We continue to save locally so the UI updates
-        }
+export async function saveVote(vote: Vote, wallet: any): Promise<string | void> {
+    if (!wallet || !wallet.publicKey) {
+        throw new Error("Wallet connection required to vote.");
     }
+    try {
+        console.log("Initiating On-Chain Vote...");
+        const program = getProgram(wallet);
 
-    // 2. Local Storage (Fallback/Cache)
-    const votes = getAllVotes();
+        if (program) {
+            // Determine outcome index
+            const outcomeIndex = vote.outcomeIndex ?? (vote.choice === 'yes' ? 0 : 1);
+            const amount = vote.amount || 0;
 
-    // Remove any existing vote for this prediction by this wallet
-    const filteredVotes = votes.filter(
-        v => !(v.predictionId === vote.predictionId && v.walletAddress === vote.walletAddress)
-    );
+            // Derive PDA
+            // Use the provided marketPublicKey or fallback to a derivation (if we have authority/question)
+            // For MVP, we pass the marketPublicKey string from the mapped on-chain markets
+            const marketKey = vote.marketPublicKey ? new PublicKey(vote.marketPublicKey) : new PublicKey("11111111111111111111111111111111");
 
-    // Add new vote
-    filteredVotes.push(vote);
+            if (marketKey.toString() === "11111111111111111111111111111111") {
+                console.warn("No real marketPublicKey provided - check prediction data mapping.");
+                throw new Error("Invalid Market Account");
+            }
 
-    localStorage.setItem(VOTES_KEY, JSON.stringify(filteredVotes));
+            const votePda = await getVotePDA(marketKey, wallet.publicKey);
+
+            // Derive Token Accounts
+            const userToken = await getATA(wallet.publicKey, BETTING_MINT);
+            const vaultToken = await getATA(marketKey, BETTING_MINT);
+
+            // Call the Smart Contract
+            const tx = await program.methods.placeVote(outcomeIndex, new BN(amount))
+                .accounts({
+                    market: marketKey,
+                    vote: (votePda as any)[0], // getVotePDA returns [pda, bump]
+                    vaultToken: vaultToken,
+                    userToken: userToken,
+                    user: wallet.publicKey,
+                    systemProgram: web3.SystemProgram.programId,
+                    tokenProgram: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+                })
+                .rpc();
+
+            console.log("Vote Transaction Sent!", tx);
+            vote.txHash = tx;
+
+            // 2. Local Storage Cache (On Success Only)
+            const votes = getAllVotes();
+
+            // Remove any existing vote for this prediction by this wallet
+            const filteredVotes = votes.filter(
+                v => !(v.predictionId === vote.predictionId && v.walletAddress === vote.walletAddress)
+            );
+
+            // Add new vote
+            filteredVotes.push(vote);
+
+            localStorage.setItem(VOTES_KEY, JSON.stringify(filteredVotes));
+            return tx;
+        } else {
+            throw new Error("Smart contract program not initialized");
+        }
+    } catch (e: any) {
+        console.error("Blockchain Transaction Failed:", e);
+        throw e; // Propagate error to UI
+    }
 }
 
 /**
@@ -120,16 +125,16 @@ export function getVoteCounts(predictionId: number): { yes: number; no: number }
 }
 
 /**
- * Clear all votes (for testing)
+ * Clear all votes
  */
 export function clearAllVotes(): void {
     localStorage.removeItem(VOTES_KEY);
-    localStorage.removeItem('prophet_resolutions');
+    localStorage.removeItem('polybet_resolutions');
 }
 
 // --- Resolution Storage ---
 
-const RESOLUTIONS_KEY = 'prophet_resolutions';
+const RESOLUTIONS_KEY = 'polybet_resolutions';
 
 export interface Resolution {
     predictionId: number;

@@ -1,180 +1,63 @@
-# OMEN - Deployment Guide
+# 🛳️ Polybet - Deployment Guide
 
-## MVP Features Implemented ✅
+This guide ensures a seamless transition of the Polybet protocol from development to production.
 
-### 1. Token Gating (Mock)
-- Checks if wallet holds minimum $OMEN tokens before voting
-- Currently returns `true` (mock) - update after token launch
-- File: `src/utils/tokenGating.ts`
+## ✅ Production Readiness Checklist
 
-### 2. Vote Persistence
-- Votes saved to browser localStorage
-- Persists across page reloads
-- Prevents double voting
-- File: `src/utils/voteStorage.ts`
+### 1. Smart Contract (Anchor)
+- [ ] Program ID updated in `Anchor.toml` and `lib.rs`
+- [ ] Deployed to Solana Mainnet-Beta
+- [ ] Verified on Solana Explorer/Solscan
+- [ ] IDL exported and synced to `src/idl/polybet.json`
 
-### 3. Wallet Integration
-- Requires wallet connection to vote
-- Shows "Connect wallet to vote" warning
-- Integrates with Phantom/Solflare
-
-### 4. Enhanced UX
-- Vote counts update in real-time
-- Progress bars animate
-- Buttons disable after voting
-- Visual feedback for voted state
+### 2. Frontend (Next.js)
+- [ ] `PROGRAM_ID` in `src/services/web3.ts` matches deployment
+- [ ] `BETTING_MINT` set to official $POLYBET token address
+- [ ] `CREATION_THRESHOLD` (5M) verified for market curation
+- [ ] RPC endpoint set to high-performance provider (Helius/Triton)
 
 ---
 
-## Deploying to Vercel
+## 🚀 Deployment Steps
 
-### Step 1: Install Vercel CLI (Optional)
-```powershell
-npm install -g vercel
+### Step 1: Deploy Smart Contract
+```bash
+cd solana-contracts
+anchor build
+anchor deploy --provider.cluster mainnet
 ```
 
-### Step 2: Deploy via Vercel Dashboard (Recommended)
+### Step 2: Extract & Sync IDL
+Copy the generated IDL to the frontend to ensure type-safe interactions:
+```bash
+cp target/idl/polybet.json ../src/idl/polybet.json
+```
 
-1. **Push to GitHub**
-   ```powershell
-   git init
-   git add .
-   git commit -m "Initial commit - OMEN prediction dApp"
-   git branch -M main
-   git remote add origin YOUR_GITHUB_REPO_URL
-   git push -u origin main
-   ```
+### Step 3: Frontend Environment Variables
+Set these on Vercel:
+- `NEXT_PUBLIC_SOLANA_NETWORK`: `mainnet-beta`
+- `NEXT_PUBLIC_RPC_URL`: `https://mainnet.helius-rpc.com/?api-key=YOUR_KEY`
+- `NEXT_PUBLIC_PROGRAM_ID`: `your_program_id`
 
-2. **Connect to Vercel**
-   - Go to [vercel.com](https://vercel.com)
-   - Click "New Project"
-   - Import your GitHub repository
-   - Framework Preset: **Next.js**
-   - Root Directory: `./`
-   - Build Command: `npm run build`
-   - Output Directory: `.next`
-
-3. **Deploy**
-   - Click "Deploy"
-   - Wait for build to complete (~2-3 minutes)
-   - Your site will be live at `https://your-project.vercel.app`
-
-### Step 3: Custom Domain (Optional)
-1. Go to Project Settings → Domains
-2. Add your custom domain (e.g., `omen.xyz`)
-3. Follow DNS configuration instructions
+### Step 4: Vercel Deployment
+```bash
+npx vercel --prod
+```
 
 ---
 
-## After Token Launch
+## 🛠️ Key Technical Files
 
-### Update Token Contract Address
+- **`src/services/web3.ts`**: Core connectivity hub. Update `PROGRAM_ID` here for one-click migration.
+- **`src/app/page.tsx`**: Logic for fetching On-Chain markets from the Solana state.
+- **`src/components/PredictionCard.tsx`**: Handles "Lazy Initialization" of Polymarket events.
 
-1. **Get Token Address from Pump.fun**
-   - After launching on Pump.fun, copy the token contract address
-
-2. **Update `src/utils/tokenGating.ts`**
-   ```typescript
-   const OMEN_TOKEN_ADDRESS = 'YOUR_ACTUAL_TOKEN_ADDRESS_HERE';
-   ```
-
-3. **Enable Real Token Gating**
-   - Uncomment the real implementation in `hasMinimumTokens()`
-   - Comment out the mock `return true;`
-
-4. **Redeploy**
-   ```powershell
-   git add .
-   git commit -m "Add real token contract address"
-   git push
-   ```
-   - Vercel will auto-deploy
+## ⚠️ Important Notes
+- **Vault Security**: The protocol uses Program Derived Addresses (PDAs) to store tokens. Only the program itself (or designated authorities in the IDL) can authorize distributions.
+- **Oracle Reliability**: Ensure Pyth feeds are active for the markets you intend to feature.
 
 ---
 
-## Environment Variables (Optional)
-
-If you want to make the token address configurable:
-
-1. **Create `.env.local`**
-   ```
-   NEXT_PUBLIC_OMEN_TOKEN_ADDRESS=YOUR_TOKEN_ADDRESS
-   NEXT_PUBLIC_MINIMUM_TOKENS=1000
-   ```
-
-2. **Add to Vercel**
-   - Go to Project Settings → Environment Variables
-   - Add the same variables
-
-3. **Update Code**
-   ```typescript
-   const OMEN_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_OMEN_TOKEN_ADDRESS || '7XuMtMfPXxHbjDLYtxmK4wRvYiFu1N9F8VDXukMTpump';
-   const MINIMUM_TOKENS = parseInt(process.env.NEXT_PUBLIC_MINIMUM_TOKENS || '1000');
-   ```
-
----
-
-## Testing Locally
-
-1. **Run Dev Server**
-   ```powershell
-   $env:PATH = "C:\Users\troy.watson\OneDrive - Commercial Motor Vehicles Pty Ltd\Desktop\Node JS\node-v24.11.1-win-x64;$env:PATH"; & "C:\Users\troy.watson\OneDrive - Commercial Motor Vehicles Pty Ltd\Desktop\Node JS\node-v24.11.1-win-x64\npm.cmd" run dev
-   ```
-
-2. **Test Voting**
-   - Connect Phantom wallet
-   - Try voting on a prediction
-   - Refresh page - vote should persist
-   - Try voting again - should be blocked
-
-3. **Build for Production**
-   ```powershell
-   npm run build
-   npm start
-   ```
-
----
-
-## Next Steps After Launch
-
-### Phase 2: Backend Integration
-1. Set up Supabase database
-2. Migrate votes from localStorage to database
-3. Add real-time vote syncing
-4. Build admin panel
-
-### Phase 3: Advanced Features
-1. Leaderboard system
-2. Reward distribution
-3. On-chain voting (optional)
-4. Mobile app
-
----
-
-## Troubleshooting
-
-### Build Errors
-- **Error**: "Module not found"
-  - Run `npm install` to ensure all dependencies are installed
-
-- **Error**: "Type errors"
-  - Check TypeScript files for any type mismatches
-
-### Wallet Connection Issues
-- Ensure Phantom/Solflare extension is installed
-- Check browser console for errors
-- Verify wallet adapter packages are installed
-
-### Vote Not Persisting
-- Check browser localStorage (F12 → Application → Local Storage)
-- Ensure `voteStorage.ts` is imported correctly
-- Clear localStorage and try again
-
----
-
-## Support
-
-For issues or questions:
-- Check Next.js docs: https://nextjs.org/docs
-- Solana wallet adapter: https://github.com/solana-labs/wallet-adapter
-- Vercel deployment: https://vercel.com/docs
+## 🆘 Support & Maintenance
+- **Monitor**: Use `solana logs -u mainnet-beta` to track live transactions.
+- **Admin**: Use the Polybet Admin Panel (`/admin`) to settle markets manually if automated resolution fails.

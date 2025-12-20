@@ -1,6 +1,6 @@
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Program, AnchorProvider, web3, Idl } from '@project-serum/anchor';
-import idl from '@/idl/prophet.json';
+import idl from '@/idl/polybet.json';
 
 const network = 'https://api.devnet.solana.com';
 const opts = {
@@ -11,7 +11,7 @@ const opts = {
 // Program ID from the IDL or Devnet
 export const PROGRAM_ID = new PublicKey('DcNb3pYGVqo1AdMdJGycDpRPb6d1nPsg3z4x5T714YW');
 
-// Token used for betting (PROPHET)
+// Token used for betting (POLYBET)
 export const BETTING_MINT = new PublicKey('22Tf2qNpb1Z56ZL6Mddsg85F6YVLQyhEJErA3fjzdAFf');
 // export const USDC_MINT = ... (Deprecated)
 const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');

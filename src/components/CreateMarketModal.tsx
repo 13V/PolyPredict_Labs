@@ -15,7 +15,7 @@ interface CreateMarketModalProps {
     onClose: () => void;
 }
 
-const CREATION_THRESHOLD = 5000000; // 5M PROPHET to create
+const CREATION_THRESHOLD = 5000000; // 5M POLYBET to create
 
 export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) => {
     const { publicKey } = useWallet();
@@ -213,12 +213,12 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
                                     </div>
                                     <h3 className="text-xl font-bold text-white mb-2">Whales Only</h3>
                                     <p className="text-gray-400 mb-6 max-w-[80%] mx-auto">
-                                        You need <strong>{CREATION_THRESHOLD.toLocaleString()} $PROPHET</strong> to create new prediction markets on the protocol.
+                                        You need <strong>{CREATION_THRESHOLD.toLocaleString()} $POLYBET</strong> to create new prediction markets on the protocol.
                                     </p>
                                     <div className="bg-gray-800 rounded-lg p-4 inline-block border border-gray-700">
                                         <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Your Balance</p>
                                         <p className="text-2xl font-mono text-white">
-                                            {balance !== null ? balance.toLocaleString() : '0'} PROPHET
+                                            {balance !== null ? balance.toLocaleString() : '0'} POLYBET
                                         </p>
                                     </div>
                                 </div>
@@ -229,7 +229,7 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
                                         <Unlock size={20} className="text-green-500" />
                                         <div>
                                             <p className="text-sm font-bold text-green-400">Access Granted</p>
-                                            <p className="text-xs text-green-500/80">You hold {balance?.toLocaleString()} PROPHET</p>
+                                            <p className="text-xs text-green-500/80">You hold {balance?.toLocaleString()} POLYBET</p>
                                         </div>
                                     </div>
 
@@ -238,7 +238,7 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
                                             <Calendar className="text-orange-500 mb-2" size={32} />
                                             <h3 className="text-orange-400 font-bold uppercase tracking-wider text-sm">Limit Reached</h3>
                                             <p className="text-xs text-orange-500/70">
-                                                Prophet Protocol enforces a **1 market per day** limit for quality assurance.
+                                                Polybet enforces a **1 market per day** limit for quality assurance.
                                             </p>
                                             <div className="mt-2 text-[10px] font-mono bg-orange-500/20 px-3 py-1 rounded-full text-orange-400 uppercase">
                                                 Next Slot: {new Date(lastCreationTime! + (24 * 60 * 60 * 1000)).toLocaleString()}

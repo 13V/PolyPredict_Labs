@@ -13,7 +13,7 @@ export interface Market {
     pumpFunMint?: string; // CA of the token required to bet
 }
 
-const MARKETS_KEY = 'prophet_user_markets';
+const MARKETS_KEY = 'polybet_user_markets';
 
 /**
  * Save a new user-created market

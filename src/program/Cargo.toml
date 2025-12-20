@@ -1,12 +1,12 @@
 [package]
-name = "prophet"
+name = "polybet"
 version = "0.1.0"
-description = "Prophet Protocol: Solana Prediction Market"
+description = "Polybet Protocol: Solana Prediction Market"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "prophet"
+name = "polybet"
 
 [features]
 no-entrypoint = []

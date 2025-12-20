@@ -4,18 +4,18 @@ use anchor_spl::token::{self, Token, Transfer, TokenAccount};
 declare_id!("DcNb3pYGVqo1AdMdJGycDpRPb6d1nPsg3z4x5T714YW");
 
 #[program]
-pub mod prophet {
+pub mod polybet {
     use super::*;
 
     pub fn initialize_config(
         ctx: Context<InitializeConfig>,
         dev_vault: Pubkey,
-        prophet_token_mint: Pubkey,
+        polybet_token_mint: Pubkey,
     ) -> Result<()> {
         let config = &mut ctx.accounts.config;
         config.authority = ctx.accounts.authority.key();
         config.dev_vault = dev_vault;
-        config.prophet_token_mint = prophet_token_mint;
+        config.polybet_token_mint = polybet_token_mint;
         config.burn_fee_bps = 300; // 3%
         config.dev_fee_bps = 200;  // 2%
         config.creator_fee_bps = 500; // 5%
@@ -26,14 +26,14 @@ pub mod prophet {
     pub fn update_config(
         ctx: Context<UpdateConfig>,
         dev_vault: Option<Pubkey>,
-        prophet_token_mint: Option<Pubkey>,
+        polybet_token_mint: Option<Pubkey>,
         burn_fee_bps: Option<u16>,
         dev_fee_bps: Option<u16>,
         creator_fee_bps: Option<u16>,
     ) -> Result<()> {
         let config = &mut ctx.accounts.config;
         if let Some(v) = dev_vault { config.dev_vault = v; }
-        if let Some(v) = prophet_token_mint { config.prophet_token_mint = v; }
+        if let Some(v) = polybet_token_mint { config.polybet_token_mint = v; }
         if let Some(v) = burn_fee_bps { config.burn_fee_bps = v; }
         if let Some(v) = dev_fee_bps { config.dev_fee_bps = v; }
         if let Some(v) = creator_fee_bps { config.creator_fee_bps = v; }
@@ -54,7 +54,7 @@ pub mod prophet {
         polymarket_id: String
     ) -> Result<()> {
         require!(outcome_count > 0 && outcome_count <= 8, MarketError::InvalidOutcomeCount);
-        require!(ctx.accounts.mint.key() == ctx.accounts.config.prophet_token_mint, MarketError::InvalidMint);
+        require!(ctx.accounts.mint.key() == ctx.accounts.config.polybet_token_mint, MarketError::InvalidMint);
         
         let market = &mut ctx.accounts.market;
         market.authority = ctx.accounts.authority.key();
@@ -700,7 +700,7 @@ pub struct ClaimWinnings<'info> {
 pub struct GlobalConfig {
     pub authority: Pubkey,
     pub dev_vault: Pubkey,
-    pub prophet_token_mint: Pubkey,
+    pub polybet_token_mint: Pubkey,
     pub burn_fee_bps: u16,
     pub dev_fee_bps: u16,
     pub creator_fee_bps: u16,
@@ -777,7 +777,7 @@ pub enum MarketError {
     BetTooSmall,
     #[msg("Bet amount is above the maximum limit.")]
     BetTooLarge,
-    #[msg("Invalid mint. Only Prophet Token is allowed.")]
+    #[msg("Invalid mint. Only Polybet Token is allowed.")]
     InvalidMint,
     #[msg("Sweep can only occur 30 days after market resolution.")]
     SweepTooEarly,

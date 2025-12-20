@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎰 Polybet - Decentralized Prediction Markets
 
-## Getting Started
+Polybet is a high-performance, on-chain prediction platform built on Solana. It allows users to bet on real-world outcomes using **$POLYBET** tokens with near-instant finality and zero central authority.
 
-First, run the development server:
+![Polybet Banner](https://i.imgur.com/your-polybet-banner.png)
 
+## 🚀 Key Features
+
+- **On-Chain Settlement**: Every vote is a transaction. Your tokens are held in secure, program-derived vaults on Solana.
+- **Polymarket Mirroring**: Real-time discovery of global markets, instantly bridgeable to the Solana ecosystem.
+- **Whale-Only Creation**: Market creation is gated to $POLYBET whales (5M+ tokens), ensuring high-quality, relevant prediction items.
+- **Anti-Gravity UX**: A premium, "glassmorphism" interface designed for speed and clarity on both mobile and desktop.
+
+## 🛠️ Tech Stack
+
+- **Blockchain**: Solana (Anchor Framework 0.26.0)
+- **Frontend**: Next.js 14, Framer Motion, Tailwind CSS
+- **Wallet**: Solana Wallet Adapter (Phantom, Solflare)
+- **Data**: Pyth Network & CoinGecko oracles
+
+## 🏁 Getting Started
+
+### 1. Installation
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Environment Setup
+Create a `.env.local` file:
+```env
+NEXT_PUBLIC_PROGRAM_ID=C7KxvEYEsqyE2TjG6gqNndS5Cj9v9tS1vS9FuvNpump
+NEXT_PUBLIC_BETTING_MINT=22Tf2V9xR9V9v7V9v7V9v7V9v7V9v7V9v7V9v7V9v7V9
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Run Development
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📜 Smart Contract
+The core logic is located in `/solana-contracts`. 
+- **Program ID**: `C7Kxv...`
+- **Audit Status**: Internal Alpha
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🏗️ Community
+Follow the journey:
+- **X (Twitter)**: [@PolybetApp](https://x.com/PolybetApp)
+- **Website**: [polybet.io](https://polybet.io)

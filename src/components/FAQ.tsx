@@ -5,16 +5,16 @@ import { useState } from 'react';
 
 const faqs = [
     {
-        question: 'What is PROPHET?',
-        answer: 'PROPHET is a prediction dApp where you vote on crypto market predictions using $PROPHET tokens. Correct predictions earn you rewards from the prize pool.',
+        question: 'What is Polybet?',
+        answer: 'Polybet is a prediction dApp where you vote on crypto market predictions using $POLYBET tokens. Correct predictions earn you rewards from the prize pool.',
     },
     {
-        question: 'How do I buy $PROPHET tokens?',
-        answer: 'After our fair launch on Pump.fun, you can buy $PROPHET by connecting your Solana wallet (Phantom/Solflare) and swapping SOL for $PROPHET on the platform.',
+        question: 'How do I buy $POLYBET tokens?',
+        answer: 'After our fair launch on Pump.fun, you can buy $POLYBET by connecting your Solana wallet (Phantom/Solflare) and swapping SOL for $POLYBET on the platform.',
     },
     {
         question: 'What makes this different from other memecoins?',
-        answer: 'Unlike pure memecoins, $PROPHET has real utility. You need tokens to vote on predictions, and accurate predictions earn rewards. Plus, we have deflationary tokenomics with a 1% burn on every transaction.',
+        answer: 'Unlike pure memecoins, $POLYBET has real utility. You need tokens to vote on predictions, and accurate predictions earn rewards. Plus, we have deflationary tokenomics with a 1% burn on every transaction.',
     },
     {
         question: 'When is the launch?',
@@ -26,7 +26,7 @@ const faqs = [
     },
     {
         question: 'How do I earn rewards?',
-        answer: 'Vote on predictions using your $PROPHET tokens. When a prediction closes, if you voted correctly, you receive a share of the rewards pool proportional to your vote.',
+        answer: 'Vote on predictions using your $POLYBET tokens. When a prediction closes, if you voted correctly, you receive a share of the rewards pool proportional to your vote.',
     },
 ];
 

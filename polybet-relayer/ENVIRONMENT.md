@@ -1,4 +1,4 @@
-# Prophet Relayer Environment Variables
+# Polybet Relayer Environment Variables
 # Copy these values to your Vercel Project Settings -> Environment Variables
 
 | Variable | Description | Example |

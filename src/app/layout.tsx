@@ -8,15 +8,15 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-  title: "PROPHET | The Future is Prediction",
-  description: "The premier multi-outcome prediction protocol. Stake $PROPHET, predict events, and prove your foresight.",
-  keywords: ["prediction market", "prophet protocol", "solana", "betting", "crypto"],
+  title: "Polybet | The Future is Prediction",
+  description: "The premier multi-outcome prediction protocol. Stake $POLYBET, predict events, and prove your foresight.",
+  keywords: ["prediction market", "polybet", "solana", "betting", "crypto"],
   manifest: "/manifest.json",
   openGraph: {
-    title: "PROPHET | The Future is Prediction",
+    title: "Polybet | The Future is Prediction",
     description: "The premier multi-outcome prediction protocol on Solana.",
-    url: "https://prophetprotocol.fun",
-    siteName: "Prophet",
+    url: "https://polybet.fun",
+    siteName: "Polybet",
     images: [
       {
         url: "/icons/icon-512x512.png",
@@ -29,14 +29,14 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "PROPHET | The Future is Prediction",
-    description: "Stake $PROPHET, predict events, and prove your foresight. Live on Solana.",
+    title: "Polybet | The Future is Prediction",
+    description: "Stake $POLYBET, predict events, and prove your foresight. Live on Solana.",
     images: ["/icons/icon-512x512.png"],
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Prophet",
+    title: "Polybet",
   },
   icons: {
     apple: "/icons/icon-192x192.png",

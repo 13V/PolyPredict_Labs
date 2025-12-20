@@ -4,7 +4,7 @@ import { BETTING_MINT } from '@/services/web3';
 const MINIMUM_TOKENS = 1000; // Minimum tokens required to vote
 
 /**
- * Check if a wallet holds the minimum required PROPHET tokens
+ * Check if a wallet holds the minimum required POLYBET tokens
  * @param walletAddress The wallet to check
  * @param threshold The minimum amount required (default 1000)
  * @param connection Optional connection object

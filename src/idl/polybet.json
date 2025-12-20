@@ -1,6 +1,6 @@
 {
     "version": "1.0.0",
-    "name": "prophet",
+    "name": "polybet",
     "instructions": [
         {
             "name": "initializeConfig",
@@ -337,7 +337,7 @@
                         "type": "publicKey"
                     },
                     {
-                        "name": "prophetTokenMint",
+                        "name": "polybetTokenMint",
                         "type": "publicKey"
                     },
                     {
@@ -596,7 +596,7 @@
         {
             "code": 6015,
             "name": "InvalidMint",
-            "msg": "Invalid mint. Only Prophet Token is allowed."
+            "msg": "Invalid mint. Only Polybet Token is allowed."
         },
         {
             "code": 6016,

@@ -10,13 +10,13 @@ use errors::*;
 declare_id!("8f4FusHQaT2KxwpZzRNTV6TpdaEu68bcLFfJKBwZ3koE");
 
 #[program]
-pub mod prophet {
+pub mod polybet {
     use super::*;
 
     /// Initialize a new Prediction Market with custom outcomes
     /// outcomes_count: 2-8 (e.g., 2 for YES/NO, 3 for Trump/Biden/Other)
     pub fn initialize_market(ctx: Context<InitializeMarket>, question: String, end_timestamp: i64, outcomes_count: u8) -> Result<()> {
-        require!(outcomes_count >= 2 && outcomes_count <= 8, ProphetError::InvalidOutcome);
+        require!(outcomes_count >= 2 && outcomes_count <= 8, PolybetError::InvalidOutcome);
         
         let market = &mut ctx.accounts.market;
         market.authority = ctx.accounts.authority.key();
@@ -34,11 +34,11 @@ pub mod prophet {
     /// Place a Vote (Bet)
     pub fn place_vote(ctx: Context<PlaceVote>, outcome_index: u8, amount: u64) -> Result<()> {
         let market = &mut ctx.accounts.market;
-        require!(!market.resolved, ProphetError::MarketEnded);
-        require!(outcome_index < market.outcomes_count, ProphetError::InvalidOutcome);
+        require!(!market.resolved, PolybetError::MarketEnded);
+        require!(outcome_index < market.outcomes_count, PolybetError::InvalidOutcome);
         
         let clock = Clock::get()?;
-        require!(clock.unix_timestamp < market.end_timestamp, ProphetError::MarketEnded);
+        require!(clock.unix_timestamp < market.end_timestamp, PolybetError::MarketEnded);
 
         // 1. Transfer Tokens from User to Vault
         let cpi_accounts = Transfer {
@@ -59,10 +59,10 @@ pub mod prophet {
         vote.bump = *ctx.bumps.get("vote").unwrap();
 
         // 3. Update Market Stats
-        market.total_pot = market.total_pot.checked_add(amount).ok_or(ProphetError::MathOverflow)?;
+        market.total_pot = market.total_pot.checked_add(amount).ok_or(PolybetError::MathOverflow)?;
         market.outcome_totals[outcome_index as usize] = market.outcome_totals[outcome_index as usize]
             .checked_add(amount)
-            .ok_or(ProphetError::MathOverflow)?;
+            .ok_or(PolybetError::MathOverflow)?;
 
         Ok(())
     }
@@ -70,8 +70,8 @@ pub mod prophet {
     /// Resolve Market (Admin Only for MVP)
     pub fn resolve_market(ctx: Context<ResolveMarket>, winner_index: u8) -> Result<()> {
         let market = &mut ctx.accounts.market;
-        require!(!market.resolved, ProphetError::MarketEnded);
-        require!(winner_index < market.outcomes_count, ProphetError::InvalidOutcome);
+        require!(!market.resolved, PolybetError::MarketEnded);
+        require!(winner_index < market.outcomes_count, PolybetError::InvalidOutcome);
         
         // In real world, check Timestamp or Oracle signature
         
@@ -85,11 +85,11 @@ pub mod prophet {
     /// Can only be called once by market authority
     pub fn distribute_fees(ctx: Context<DistributeFees>) -> Result<()> {
         let market = &mut ctx.accounts.market;
-        require!(market.resolved, ProphetError::MarketActive);
-        require!(!market.fees_distributed, ProphetError::AlreadyClaimed);
-        require!(market.authority == ctx.accounts.authority.key(), ProphetError::Unauthorized);
+        require!(market.resolved, PolybetError::MarketActive);
+        require!(!market.fees_distributed, PolybetError::AlreadyClaimed);
+        require!(market.authority == ctx.accounts.authority.key(), PolybetError::Unauthorized);
 
-        let winner_index = market.winner_index.ok_or(ProphetError::OutcomeNotSet)?;
+        let winner_index = market.winner_index.ok_or(PolybetError::OutcomeNotSet)?;
         
         // Sum all losing outcomes
         let mut total_losing = 0u64;
@@ -97,22 +97,22 @@ pub mod prophet {
             if i != winner_index {
                 total_losing = total_losing
                     .checked_add(market.outcome_totals[i as usize])
-                    .ok_or(ProphetError::MathOverflow)?;
+                    .ok_or(PolybetError::MathOverflow)?;
             }
         }
 
         // Calculate fees from losing pool
         let creator_fee = (total_losing as u128)
             .checked_mul(1000) // 10%
-            .ok_or(ProphetError::MathOverflow)?
+            .ok_or(PolybetError::MathOverflow)?
             .checked_div(10000)
-            .ok_or(ProphetError::MathOverflow)? as u64;
+            .ok_or(PolybetError::MathOverflow)? as u64;
 
         let burn_fee = (total_losing as u128)
             .checked_mul(500) // 5%
-            .ok_or(ProphetError::MathOverflow)?
+            .ok_or(PolybetError::MathOverflow)?
             .checked_div(10000)
-            .ok_or(ProphetError::MathOverflow)? as u64;
+            .ok_or(PolybetError::MathOverflow)? as u64;
 
         // Transfer creator fee
         let seeds = &[
@@ -156,15 +156,15 @@ pub mod prophet {
         let market = &ctx.accounts.market;
         let vote = &mut ctx.accounts.vote;
 
-        require!(market.resolved, ProphetError::MarketActive);
-        require!(!vote.claimed, ProphetError::AlreadyClaimed);
+        require!(market.resolved, PolybetError::MarketActive);
+        require!(!vote.claimed, PolybetError::AlreadyClaimed);
         
-        let winner_index = market.winner_index.ok_or(ProphetError::OutcomeNotSet)?;
-        require!(vote.outcome_index == winner_index, ProphetError::InvalidOutcome);
+        let winner_index = market.winner_index.ok_or(PolybetError::OutcomeNotSet)?;
+        require!(vote.outcome_index == winner_index, PolybetError::InvalidOutcome);
 
         // Get winning pool total
         let winning_total = market.outcome_totals[winner_index as usize];
-        require!(winning_total > 0, ProphetError::MathOverflow);
+        require!(winning_total > 0, PolybetError::MathOverflow);
         
         // Sum ALL losing outcomes
         let mut total_losing = 0u64;
@@ -172,23 +172,23 @@ pub mod prophet {
             if i != winner_index {
                 total_losing = total_losing
                     .checked_add(market.outcome_totals[i as usize])
-                    .ok_or(ProphetError::MathOverflow)?;
+                    .ok_or(PolybetError::MathOverflow)?;
             }
         }
 
         // Calculate user's proportional share of winnings
         let user_share_of_winning_pool = (vote.amount as u128)
             .checked_mul(10000)
-            .ok_or(ProphetError::MathOverflow)?
+            .ok_or(PolybetError::MathOverflow)?
             .checked_div(winning_total as u128)
-            .ok_or(ProphetError::MathOverflow)?;
+            .ok_or(PolybetError::MathOverflow)?;
 
         // 85% of ALL losing pools go to winners
         let winning_pool = (total_losing as u128)
             .checked_mul(8500)
-            .ok_or(ProphetError::MathOverflow)?
+            .ok_or(PolybetError::MathOverflow)?
             .checked_div(10000)
-            .ok_or(ProphetError::MathOverflow)? as u64;
+            .ok_or(PolybetError::MathOverflow)? as u64;
 
         let user_winnings = (winning_pool as u128)
             .checked_mul(user_share_of_winning_pool)
@@ -199,7 +199,7 @@ pub mod prophet {
         // Total payout = original bet + winnings
         let total_payout = vote.amount
             .checked_add(user_winnings)
-            .ok_or(ProphetError::MathOverflow)?;
+            .ok_or(PolybetError::MathOverflow)?;
 
         // Transfer from Vault to User
         let seeds = &[

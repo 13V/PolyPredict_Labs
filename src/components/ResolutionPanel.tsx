@@ -29,7 +29,7 @@ export const ResolutionPanel = ({ id, yesLabel, noLabel, onResolve }: Resolution
         const hasFunds = await hasMinimumTokens(publicKey.toString(), STAKE_AMOUNT);
 
         if (!hasFunds) {
-            alert(`Insufficient Balance! You need ${STAKE_AMOUNT} PROPHET to verify.`);
+            alert(`Insufficient Balance! You need ${STAKE_AMOUNT} $POLYBET to verify.`);
             setIsStaking(false);
             return;
         }
@@ -58,7 +58,7 @@ export const ResolutionPanel = ({ id, yesLabel, noLabel, onResolve }: Resolution
                 </div>
                 <h4 className="text-blue-400 font-bold mb-1">Verification Cast!</h4>
                 <p className="text-xs text-blue-300/80">
-                    You staked {STAKE_AMOUNT} PROPHET on <strong>{selected === 'yes' ? yesLabel : noLabel}</strong>.
+                    You staked {STAKE_AMOUNT} $POLYBET on <strong>{selected === 'yes' ? yesLabel : noLabel}</strong>.
                 </p>
                 <div className="mt-2 text-[10px] text-gray-500 uppercase tracking-wider">
                     Reward Distribution in 24h

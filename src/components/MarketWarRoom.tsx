@@ -170,7 +170,7 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
     const resolved = market.resolved;
 
     const shareToX = () => {
-        const text = encodeURIComponent(`I'm predicting on "${market.question}" using @ProphetProtocol! 🔮\n\nPredictions live on Solana. #PROPHET #Solana`);
+        const text = encodeURIComponent(`I'm predicting on "${market.question}" using @PolyBet! 🔮\n\nPredictions live on Solana. #POLYBET #Solana`);
         const url = encodeURIComponent(window.location.href);
         window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
     };
@@ -352,7 +352,7 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                                             className="w-full py-4 text-white font-black text-sm uppercase tracking-[0.2em] rounded-2xl shadow-lg transition-all"
                                             style={{ backgroundColor: theme.color, boxShadow: `0 10px 20px ${theme.color}20` }}
                                         >
-                                            Approve $PROPHET
+                                            Approve Polybet
                                         </button>
                                     </>
                                 )}

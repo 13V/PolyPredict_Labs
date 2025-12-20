@@ -47,7 +47,7 @@ export const Tokenomics = () => {
                         Tokenomics
                     </h2>
                     <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                        $PROPHET is designed for long-term value with deflationary mechanics and real utility.
+                        $POLYBET is designed for long-term value with deflationary mechanics and real utility on Polybet.
                     </p>
                 </motion.div>
 
