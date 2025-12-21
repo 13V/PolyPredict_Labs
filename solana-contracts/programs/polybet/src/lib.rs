@@ -657,10 +657,18 @@ pub struct DistributeFees<'info> {
     
     pub config: Account<'info, GlobalConfig>,
     
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = creator_token_account.owner == market.authority,
+        constraint = creator_token_account.mint == config.polybet_token_mint
+    )]
     pub creator_token_account: Account<'info, TokenAccount>,
     
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = dev_token_account.owner == config.dev_vault,
+        constraint = dev_token_account.mint == config.polybet_token_mint
+    )]
     pub dev_token_account: Account<'info, TokenAccount>,
     
     #[account(mut, seeds = [b"vault", market.key().as_ref()], bump)]
@@ -688,10 +696,18 @@ pub struct ClaimWinnings<'info> {
     #[account(mut)]
     pub user_token_account: Account<'info, TokenAccount>,
     
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = creator_token_account.owner == market.authority,
+        constraint = creator_token_account.mint == config.polybet_token_mint
+    )]
     pub creator_token_account: Account<'info, TokenAccount>,
-
-    #[account(mut)]
+    
+    #[account(
+        mut,
+        constraint = dev_token_account.owner == config.dev_vault,
+        constraint = dev_token_account.mint == config.polybet_token_mint
+    )]
     pub dev_token_account: Account<'info, TokenAccount>,
 
     #[account(mut, seeds = [b"vault", market.key().as_ref()], bump)]

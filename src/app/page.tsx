@@ -110,7 +110,8 @@ export default function Home() {
                 resolved: m.resolved,
                 winningOutcome: m.winningOutcome,
                 polymarketId: m.polymarketId || null,
-                isHot: m.totalLiquidity.toNumber() > 100000
+                isHot: m.totalLiquidity.toNumber() > 100000,
+                creator: m.authority.toString()
               };
             });
             console.log(`Fetched ${onChainMarkets.length} global markets from chain`);

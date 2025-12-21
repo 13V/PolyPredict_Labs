@@ -1,5 +1,7 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PublicKey } from '@solana/web3.js';
+import { BN } from '@project-serum/anchor';
 import {
     TrendingUp,
     TrendingDown,
@@ -45,6 +47,7 @@ interface PredictionCardProps {
     description?: string;
     isOnChain?: boolean; // New prop for Real Betting status
     marketPublicKey?: string; // Blockchain Address
+    creator?: string; // Market Initializer
     onOpenExpanded?: () => void;
     onSettle?: (id: number) => void;
 }
@@ -66,6 +69,7 @@ export const PredictionCard = ({
     description,
     isOnChain = false, // Default to false (Simulated)
     marketPublicKey,
+    creator,
     onOpenExpanded,
     onSettle
 }: PredictionCardProps) => {
@@ -644,7 +648,56 @@ export const PredictionCard = ({
                 resolved && (
                     <div className="pt-2 border-t-2 border-black flex justify-between items-center">
                         <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">ARCHIVED RECORD</span>
-                        <button onClick={(e) => { e.stopPropagation(); /* claim logic */ }} className="text-[10px] font-black text-green-600 hover:underline uppercase tracking-tighter">REDEEM WINNINGS</button>
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                if (!connected || !publicKey) return toast.error("Connect Wallet");
+                                if (!isOnChain || !marketPublicKey) return toast.error("Not an on-chain market");
+
+                                const toastId = toast.loading("Processing claim...");
+                                try {
+                                    const { getProgram, getMarketPDA, getVotePDA, getConfigPDA, getATA, BETTING_MINT, TOKEN_PROGRAM_ID } = await import('@/services/web3');
+                                    const program = getProgram({ publicKey, signTransaction, signAllTransactions });
+                                    if (!program) throw new Error("Program not initialized");
+
+                                    const marketPda = new PublicKey(marketPublicKey);
+                                    const votePda = (await getVotePDA(marketPda, publicKey))[0];
+                                    const configPda = (await getConfigPDA());
+                                    const configAccount: any = await program.account.globalConfig.fetch(configPda);
+
+                                    const vaultTokenAcc = (await getATA(marketPda, BETTING_MINT));
+                                    const userTokenAcc = (await getATA(publicKey, BETTING_MINT));
+                                    const devVault = configAccount.devVault;
+                                    const devTokenAcc = (await getATA(devVault, BETTING_MINT));
+
+                                    // Resolved Creator ATA
+                                    const creatorPubkey = creator ? new PublicKey(creator) : publicKey; // fallback to user if not found (will fail contract constraint if wrong)
+                                    const creatorTokenAcc = (await getATA(creatorPubkey, BETTING_MINT));
+
+                                    await program.methods.claimWinnings().accounts({
+                                        market: marketPda,
+                                        config: configPda,
+                                        voteRecord: votePda,
+                                        user: publicKey,
+                                        userTokenAccount: userTokenAcc,
+                                        creatorTokenAccount: creatorTokenAcc,
+                                        devTokenAccount: devTokenAcc,
+                                        vaultTokenAccount: vaultTokenAcc,
+                                        mint: BETTING_MINT,
+                                        tokenProgram: TOKEN_PROGRAM_ID,
+                                    }).rpc();
+
+                                    toast.success("Winnings Claimed Successfully!", { id: toastId });
+                                    if (onSettle) onSettle(id);
+                                } catch (e: any) {
+                                    console.error("Claim Failed:", e);
+                                    toast.error(`Claim Failed: ${e.message}`, { id: toastId });
+                                }
+                            }}
+                            className="text-[10px] font-black text-green-600 hover:underline uppercase tracking-tighter"
+                        >
+                            REDEEM WINNINGS
+                        </button>
                     </div>
                 )
             }

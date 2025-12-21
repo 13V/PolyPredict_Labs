@@ -42,6 +42,9 @@ export const Hero = () => {
                             <p className="text-sm md:text-base font-black text-black/60 uppercase max-w-xl leading-relaxed tracking-tight">
                                 PolyPredict is a high-fidelity oracle protocol designed for precision forecasting.
                                 We transform market volatility into verifiable intelligence through decentralized skin-in-the-game mechanics.
+                                <span className="block mt-4 text-black border-l-4 border-orange-600 pl-4">
+                                    PROTOCOL_INCENTIVE: 5% YIELD IS ROUTED TO SIGNAL ARCHITECTS (INITIALIZERS) TO REWARD ACCURATE MARKET DEPLOYMENT.
+                                </span>
                             </p>
                         </div>
 
@@ -95,9 +98,15 @@ export const Hero = () => {
                             </div>
 
                             <div className="mt-12 pt-8 border-t border-white/20">
-                                <p className="text-[9px] font-mono text-white/20 uppercase tracking-[0.2em] leading-relaxed">
-                                    NOTICE: ALL BETS ARE FINAL. VERIFICATION IS SETTLED BY DECENTRALIZED ORACLES UPON MARKET EXPIRY.
-                                </p>
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="px-2 py-0.5 bg-orange-600 text-white text-[9px] font-black uppercase tracking-widest">PROTOCOL_FEE: 10%</div>
+                                        <div className="px-2 py-0.5 bg-white/10 text-white/60 text-[9px] font-black uppercase tracking-widest border border-white/10">SPLIT: 5% CREATOR / 5% DEV</div>
+                                    </div>
+                                    <p className="text-[9px] font-mono text-white/20 uppercase tracking-[0.2em] leading-relaxed">
+                                        NOTICE: ALL BETS ARE FINAL. VERIFICATION IS SETTLED BY DECENTRALIZED ORACLES OR ADMIN CONSENSUS. 5% YIELD IS ROUTED DIRECTLY TO THE WALLET THAT INITIALIZED THE MARKET.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
