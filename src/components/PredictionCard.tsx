@@ -475,7 +475,7 @@ export const PredictionCard = ({
 
             {/* Team Background Watermarks */}
             {teams && (
-                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-5 grayscale transition-opacity group-hover:opacity-10">
+                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-10 grayscale transition-opacity group-hover:opacity-20">
                     <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-48 h-48 rotate-[-12deg]">
                         <TeamLogo name={teams[0]} className="w-full h-full" />
                     </div>
