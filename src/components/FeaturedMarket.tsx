@@ -278,7 +278,14 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                         {/* Live Price */}
                         {pythPrice && (
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1 italic">Oracle_Feed</span>
+                                <div className="flex items-center gap-1.5 mb-1">
+                                    <motion.div
+                                        animate={{ opacity: [1, 0, 1] }}
+                                        transition={{ duration: 0.8, repeat: Infinity }}
+                                        className="w-2 h-2 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.5)]"
+                                    />
+                                    <span className="text-[10px] text-red-600 font-black uppercase tracking-[0.2em] animate-pulse">ORACLE_LIVE_FEED</span>
+                                </div>
                                 <span className="text-xl md:text-3xl font-mono font-black text-black flex items-center gap-2">
                                     ${pythPrice.toLocaleString()}
                                 </span>

@@ -262,7 +262,14 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                                 <div className="p-8 h-full flex flex-col relative z-10">
                                     <div className="flex justify-between items-end mb-auto">
                                         <div>
-                                            <p className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] mb-1">REAL_TIME_FEED_VALUATION</p>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <motion.div
+                                                    animate={{ opacity: [1, 0, 1] }}
+                                                    transition={{ duration: 0.8, repeat: Infinity }}
+                                                    className="w-2.5 h-2.5 rounded-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]"
+                                                />
+                                                <p className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] animate-pulse">ORACLE_LIVE_FEED</p>
+                                            </div>
                                             <p className="text-5xl font-black text-black font-mono tracking-tighter">
                                                 {pythPrice ? `$${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '74.00%'}
                                                 {pythPrice ? (

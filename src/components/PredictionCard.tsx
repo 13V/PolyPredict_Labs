@@ -485,18 +485,30 @@ export const PredictionCard = ({
                         {displayTitle}
                     </h3>
                 </div>
-                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start w-full md:w-auto gap-4 md:gap-2 shrink-0 border-t md:border-t-0 border-black/10 pt-3 md:pt-0">
-                    <div className="w-14 h-8 opacity-60 group-hover:opacity-100 transition-all duration-500">
-                        <Sparkline
-                            data={pythData || getDeterministicPattern(id, outcomeProbabilities[0])}
-                            width={56}
-                            height={32}
-                            color={resolved ? '#4b5563' : '#000000'}
-                        />
+                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start w-full md:w-auto gap-4 md:gap-3 shrink-0 border-t md:border-t-0 border-black/10 pt-3 md:pt-0">
+                    <div className="flex items-center gap-3">
+                        <div className="opacity-10 text-black">
+                            <CategoryIcon size={24} strokeWidth={2.5} />
+                        </div>
+                        <div className="w-14 h-8 opacity-60 group-hover:opacity-100 transition-all duration-500">
+                            <Sparkline
+                                data={pythData || getDeterministicPattern(id, outcomeProbabilities[0])}
+                                width={56}
+                                height={32}
+                                color={resolved ? '#4b5563' : '#000000'}
+                            />
+                        </div>
                     </div>
                     {isCrypto && (
                         <div className="flex flex-col items-end">
-                            <span className="text-[9px] text-gray-500 uppercase font-black tracking-tighter">Spot Oracle</span>
+                            <div className="flex items-center gap-1.5 mb-1">
+                                <motion.div
+                                    animate={{ opacity: [1, 0, 1] }}
+                                    transition={{ duration: 0.8, repeat: Infinity }}
+                                    className="w-1.5 h-1.5 rounded-full bg-red-600 shadow-[0_0_5px_rgba(220,38,38,0.5)]"
+                                />
+                                <span className="text-[9px] text-red-600 uppercase font-black tracking-widest animate-pulse">LIVE_ORACLE</span>
+                            </div>
                             <span className="text-xs font-mono font-black text-black flex items-center gap-1 bg-white border-2 border-black px-2 py-0.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                                 {pythPrice ? `$${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'OFFLINE'}
                             </span>
@@ -509,12 +521,13 @@ export const PredictionCard = ({
             {
                 !resolved && (
                     <div className="flex items-center gap-3 md:gap-4 text-[11px] font-black text-black z-10 border-b-2 border-black pb-2">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 border-r border-black/10 pr-3 md:pr-4">
                             <Clock size={12} className={isExpired ? 'text-red-500' : 'text-black'} />
-                            <span className={isExpired ? 'text-red-500' : ''}>{timeLeft()} REMAINING</span>
+                            <span className={isExpired ? 'text-red-500' : ''}>{timeLeft()} <span className="hidden md:inline">REMAINING</span></span>
                         </div>
                         <div className="flex items-center gap-1.5">
                             <BarChart3 size={12} className="text-black" />
+                            <span className="text-[9px] text-black/40 mr-1 hidden md:inline">POOL_VOLUME:</span>
                             <span>{totalLiquidity.toLocaleString()} $PREDICT</span>
                         </div>
                     </div>
@@ -586,7 +599,10 @@ export const PredictionCard = ({
                         className="absolute inset-x-0 bottom-0 bg-white border-t-2 border-black p-5 flex flex-col gap-4 z-20"
                     >
                         <div className="flex justify-between items-center">
-                            <span className="text-xs font-black text-black uppercase tracking-tighter">Stake: {outcomes[betMode]}</span>
+                            <div className="flex items-center gap-3">
+                                <span className="text-xs font-black text-black uppercase tracking-tighter">Stake: {outcomes[betMode]}</span>
+                                <span className="text-[9px] font-black text-black/40 uppercase tracking-widest bg-gray-100 px-1.5 py-0.5 border border-black/10">PLATFORM_FEE: 10%</span>
+                            </div>
                             <button onClick={(e) => { e.stopPropagation(); setBetMode(null); }} className="text-black font-black hover:scale-110">✕</button>
                         </div>
                         <div className="relative">
