@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Users, DollarSign, Clock, ArrowUpRight, Activity, Zap, Swords, Gavel, Newspaper, Tv, Globe } from 'lucide-react';
+import { TeamLogo } from './TeamLogo';
 import { Sparkline } from './Sparkline';
 
 import { useState, useEffect } from 'react';
@@ -94,6 +95,23 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
     };
 
     const displayTitle = reconstructTitle();
+
+    // Team Parsing Logic for Sports
+    const getTeams = () => {
+        const fullSource = `${question} ${slug || ''} ${eventTitle || ''}`.toLowerCase();
+        if (fullSource.includes(' vs ') || fullSource.includes(' vs. ')) {
+            const parts = (eventTitle || question).split(/ vs\.? /i);
+            if (parts.length === 2) {
+                return [
+                    parts[0].replace(/^Will\s+/i, '').replace(/\s+win\??$/i, '').trim(),
+                    parts[1].replace(/\s+win\??$/i, '').replace(/\?$/, '').trim()
+                ];
+            }
+        }
+        return null;
+    };
+
+    const teams = getTeams();
 
     // --- PYTH & SPARKLINE ---
     useEffect(() => {
@@ -250,6 +268,18 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
         <div onClick={onOpenExpanded} className="relative group overflow-hidden neo-border neo-shadow bg-white cursor-pointer" style={{ paddingLeft: '1.25rem' }}>
             {/* Signal Sidebar */}
             <div className={`absolute left-0 top-0 bottom-0 w-2 z-30 bg-orange-600 transition-all duration-300 group-hover:w-3`} />
+
+            {/* Team Background Watermarks */}
+            {teams && (
+                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-[0.03] grayscale transition-opacity group-hover:opacity-10">
+                    <div className="absolute -left-12 top-1/2 -translate-y-1/2 w-96 h-96 rotate-[-12deg]">
+                        <TeamLogo name={teams[0]} className="w-full h-full" />
+                    </div>
+                    <div className="absolute -right-12 top-1/2 -translate-y-1/2 w-96 h-96 rotate-[12deg]">
+                        <TeamLogo name={teams[1]} className="w-full h-full" />
+                    </div>
+                </div>
+            )}
 
             {/* Background Dot Grid */}
             <div className="absolute inset-0 dot-grid opacity-10" />

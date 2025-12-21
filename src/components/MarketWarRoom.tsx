@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, TrendingUp, Users, MessageSquare, ShieldCheck, Share2, Zap, Swords, Gavel, Newspaper, Tv, Globe, Activity } from 'lucide-react';
+import { TeamLogo } from './TeamLogo';
 import { Sparkline } from './Sparkline';
 import { getPythPrices } from '@/services/pyth';
 import { getCoinGeckoSparkline } from '@/services/coingecko';
@@ -97,6 +98,27 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
     };
 
     const displayTitle = reconstructTitle();
+
+    // Team Parsing Logic for Sports
+    const getTeams = () => {
+        const question = market?.question || '';
+        const slug = market?.slug || '';
+        const eventTitle = market?.eventTitle || '';
+        const fullSource = `${question} ${slug} ${eventTitle}`.toLowerCase();
+
+        if (fullSource.includes(' vs ') || fullSource.includes(' vs. ')) {
+            const parts = (eventTitle || question).split(/ vs\.? /i);
+            if (parts.length === 2) {
+                return [
+                    parts[0].replace(/^Will\s+/i, '').replace(/\s+win\??$/i, '').trim(),
+                    parts[1].replace(/\s+win\??$/i, '').replace(/\?$/, '').trim()
+                ];
+            }
+        }
+        return null;
+    };
+
+    const teams = getTeams();
 
     useEffect(() => {
         if (isOpen && isCrypto) {
@@ -214,6 +236,17 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                         exit={{ scale: 0.98, opacity: 0, y: 10 }}
                         className="relative w-full max-w-6xl h-full max-h-[100vh] md:max-h-[850px] bg-white border-[3px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col md:flex-row overflow-hidden pl-2"
                     >
+                        {/* Team Background Watermarks */}
+                        {teams && (
+                            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-[0.03] grayscale">
+                                <div className="absolute -left-24 top-1/2 -translate-y-1/2 w-[600px] h-[600px] rotate-[-12deg]">
+                                    <TeamLogo name={teams[0]} className="w-full h-full" />
+                                </div>
+                                <div className="absolute -right-24 top-1/2 -translate-y-1/2 w-[600px] h-[600px] rotate-[12deg]">
+                                    <TeamLogo name={teams[1]} className="w-full h-full" />
+                                </div>
+                            </div>
+                        )}
                         {/* Signal Sidebar */}
                         <div
                             className="absolute left-0 top-0 bottom-0 w-2 z-[70]"

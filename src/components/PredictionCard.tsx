@@ -20,6 +20,7 @@ import {
     Activity,
     Shield
 } from 'lucide-react';
+import { TeamLogo } from './TeamLogo';
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { saveVote, getVote } from '@/utils/voteStorage';
@@ -175,6 +176,23 @@ export const PredictionCard = ({
     };
 
     const displayTitle = reconstructTitle();
+
+    // Team Parsing Logic for Sports
+    const getTeams = () => {
+        const fullSource = `${question} ${slug || ''} ${eventTitle || ''}`.toLowerCase();
+        if (fullSource.includes(' vs ') || fullSource.includes(' vs. ')) {
+            const parts = (eventTitle || question).split(/ vs\.? /i);
+            if (parts.length === 2) {
+                return [
+                    parts[0].replace(/^Will\s+/i, '').replace(/\s+win\??$/i, '').trim(),
+                    parts[1].replace(/\s+win\??$/i, '').replace(/\?$/, '').trim()
+                ];
+            }
+        }
+        return null;
+    };
+
+    const teams = getTeams();
 
     // UNIVERSAL PROBE: Log all props once per ID to see what Polymarket is sending
 
@@ -454,6 +472,18 @@ export const PredictionCard = ({
                 className="absolute left-0 top-0 bottom-0 w-1.5 z-30 transition-all duration-300 group-hover:w-2"
                 style={{ backgroundColor: isHot ? '#ea580c' : theme.color }}
             />
+
+            {/* Team Background Watermarks */}
+            {teams && (
+                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-5 grayscale transition-opacity group-hover:opacity-10">
+                    <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-48 h-48 rotate-[-12deg]">
+                        <TeamLogo name={teams[0]} className="w-full h-full" />
+                    </div>
+                    <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-48 h-48 rotate-[12deg]">
+                        <TeamLogo name={teams[1]} className="w-full h-full" />
+                    </div>
+                </div>
+            )}
             {/* Market Closed Banner */}
             {isExpired && !resolved && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
