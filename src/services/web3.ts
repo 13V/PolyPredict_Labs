@@ -13,7 +13,7 @@ export const PROGRAM_ID = new PublicKey(
     process.env.NEXT_PUBLIC_PROGRAM_ID || 'DcNb3pYGVqo1AdMdJGycDpRPb6d1nPsg3z4x5T714YW'
 );
 
-// Token used for betting (POLYBET) - Pump.fun deployment
+// Token used for betting ($PREDICT) - Pump.fun deployment
 export const BETTING_MINT = new PublicKey(
     process.env.NEXT_PUBLIC_BETTING_MINT || '6ZFUNyPDn1ycjhb3RbNAmtcVvwp6oL4Zn6GswnGupump'
 );

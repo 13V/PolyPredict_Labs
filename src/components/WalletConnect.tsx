@@ -19,8 +19,7 @@ export const WalletConnect: FC = () => {
 
     return (
         <div className="z-50 relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-300"></div>
-            <WalletMultiButton className="!bg-[#0f172a] !border !border-white/10 hover:!border-purple-500/50 !transition-all !rounded-xl !font-outfit !font-bold !text-[11px] md:text-sm !h-auto !py-1.5 md:!py-2.5 !px-3 md:!px-6 !whitespace-nowrap shadow-xl" />
+            <WalletMultiButton className="!bg-black !text-white !border-2 !border-black hover:!bg-orange-600 !transition-all !rounded-none !font-mono !font-black !text-[10px] md:!text-xs !h-auto !py-2 md:!py-3 !px-4 md:!px-8 !whitespace-nowrap !italic !uppercase !tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" />
         </div>
     );
 };

@@ -39,44 +39,56 @@ export const LaunchCountdown = () => {
     }, []);
 
     const timeUnits = [
-        { label: 'Days', value: timeLeft.days },
-        { label: 'Hours', value: timeLeft.hours },
-        { label: 'Minutes', value: timeLeft.minutes },
-        { label: 'Seconds', value: timeLeft.seconds },
+        { label: 'DAYS', value: timeLeft.days },
+        { label: 'HOURS', value: timeLeft.hours },
+        { label: 'MINUTES', value: timeLeft.minutes },
+        { label: 'SECONDS', value: timeLeft.seconds },
     ];
 
     return (
-        <section className="py-16 px-6 bg-gradient-to-r from-purple-900/20 via-pink-900/20 to-purple-900/20">
-            <div className="max-w-4xl mx-auto text-center">
+        <section className="py-24 px-6 bg-white border-t-2 border-black relative overflow-hidden">
+            <div className="absolute inset-0 dot-grid opacity-5" />
+
+            <div className="max-w-7xl mx-auto relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
+                    className="text-center"
                 >
-                    <h2 className="text-4xl font-bold mb-2 text-white">🚀 Fair Launch Countdown</h2>
-                    <p className="text-gray-400 mb-8">Get ready for the most anticipated memecoin launch!</p>
+                    <div className="flex items-center gap-3 mb-6 justify-center">
+                        <span className="bg-orange-600 text-white text-[10px] font-black px-2 py-1 uppercase tracking-widest italic whitespace-nowrap">T-MINUS_GENESIS</span>
+                        <div className="h-[2px] w-full md:w-32 bg-black/10" />
+                    </div>
 
-                    <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto">
+                    <h2 className="text-5xl md:text-8xl font-black mb-6 tracking-tighter uppercase italic leading-[0.85]">
+                        Protocol<br />Deployment
+                    </h2>
+                    <p className="text-sm font-bold text-black/40 uppercase tracking-[0.2em] font-mono max-w-2xl mx-auto mb-16">
+                        PolyPredict mainnet synchronization in progress. Prepare terminal for signal entry.
+                    </p>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-2 border-black bg-black max-w-4xl mx-auto">
                         {timeUnits.map((unit, index) => (
                             <motion.div
                                 key={unit.label}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
-                                className="bg-gradient-to-br from-gray-900 to-gray-950 rounded-xl p-6 border border-purple-500/30"
+                                className="bg-white p-8 md:p-12 border-black border-r-2 last:border-r-0 md:even:border-r-2"
                             >
-                                <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600 mb-2">
+                                <div className="text-6xl md:text-8xl font-black font-mono tracking-tighter italic text-black leading-none mb-4">
                                     {unit.value.toString().padStart(2, '0')}
                                 </div>
-                                <div className="text-gray-400 text-sm uppercase tracking-wider">{unit.label}</div>
+                                <div className="text-black/40 text-[10px] font-black uppercase tracking-[0.3em]">{unit.label}</div>
                             </motion.div>
                         ))}
                     </div>
 
-                    <div className="mt-8">
-                        <button className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg font-bold text-white hover:scale-105 transition-all">
-                            Set Reminder
+                    <div className="mt-16">
+                        <button className="neo-button bg-black text-white px-12 py-5 text-sm font-black uppercase tracking-[0.2em] italic hover:bg-orange-600 transition-all">
+                            REGISTER_FOR_WHITELIST
                         </button>
                     </div>
                 </motion.div>

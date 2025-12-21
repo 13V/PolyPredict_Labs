@@ -11,7 +11,7 @@ import { Sparkles, ArrowRight, Twitter, Send, Copy, Check, Plus, Search } from "
 import { CreateMarketModal } from '@/components/CreateMarketModal';
 import { UserPositions } from '@/components/UserPositions';
 import { MobileNav } from '@/components/MobileNav';
-import { HowItWorks } from "@/components/HowItWorks";
+import { Hero } from "@/components/Hero";
 import { Background } from "@/components/Background";
 import { MarketWarRoom } from "@/components/MarketWarRoom";
 import { TraderDashboard } from "@/components/TraderDashboard";
@@ -386,30 +386,7 @@ export default function Home() {
           <TraderDashboard isOpen={isDashboardOpen} onClose={() => setIsDashboardOpen(false)} walletAddress={publicKey?.toString()} />
 
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-black text-black uppercase tracking-[0.2em] italic underline">ORACLE_HIGHLIGHT</h2>
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="flex items-center gap-2 bg-white hover:bg-black hover:text-white text-black border-2 border-black px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all neo-shadow-sm hover:translate-y-[-1px]"
-              >
-                <Plus size={14} />
-                CREATE_MARKET
-              </button>
-            </div>
-
-            {isLoading ? (
-              <div className="h-[480px] w-full rounded-3xl bg-gray-900/20 border border-gray-800 overflow-hidden relative" />
-            ) : fetchError ? (
-              <div className="h-[480px] w-full rounded-3xl bg-red-950/20 border border-red-900/50 flex items-center justify-center p-8">
-                <h3 className="text-red-400 font-bold">Failed to load live data.</h3>
-              </div>
-            ) : (
-              <FeaturedMarket
-                data={predictions[0]}
-                onOpenCreateModal={() => setIsCreateModalOpen(true)}
-                onOpenExpanded={() => openWarRoom(predictions[0])}
-              />
-            )}
+            <Hero />
           </section>
 
           {/* Discovery & Sort Bar */}
@@ -438,15 +415,24 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-black w-4 h-4" />
-              <input
-                type="text"
-                placeholder="PROBE_MARKETS..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full md:w-80 bg-gray-50 border-2 border-black focus:bg-white pl-10 pr-4 py-3 text-xs font-black uppercase outline-none transition-all placeholder:text-gray-300"
-              />
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="relative group flex-1 md:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-black w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="PROBE_MARKETS..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-gray-50 border-2 border-black focus:bg-white pl-10 pr-4 py-3 text-xs font-black uppercase outline-none transition-all placeholder:text-gray-300"
+                />
+              </div>
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="hidden sm:flex items-center gap-2 bg-black text-white px-6 py-3 text-xs font-black uppercase tracking-widest transition-all neo-shadow-sm hover:translate-y-[-2px] hover:neo-shadow active:translate-y-[2px] active:neo-shadow-none whitespace-nowrap"
+              >
+                <Plus size={16} />
+                CREATE
+              </button>
             </div>
           </div>
 
@@ -522,7 +508,7 @@ export default function Home() {
           </div>
 
           <section className="pt-8 border-t border-gray-800">
-            <HowItWorks />
+            {/* Mission status footer */}
           </section>
         </div>
 

@@ -53,36 +53,41 @@ export const InstallPrompt = () => {
     return (
         <AnimatePresence>
             <motion.div
-                initial={{ y: 100, opacity: 0 }}
+                initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 100, opacity: 0 }}
+                exit={{ y: 20, opacity: 0 }}
                 className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:w-96 z-[100]"
             >
-                <div className="bg-slate-900 border border-purple-500/30 rounded-2xl p-4 shadow-2xl shadow-purple-500/20 backdrop-blur-xl group">
+                <div className="bg-white border-4 border-black p-5 neo-shadow group relative">
                     <button
                         onClick={() => setIsVisible(false)}
-                        className="absolute top-2 right-2 p-1 text-slate-500 hover:text-white transition-colors"
+                        className="absolute top-3 right-3 p-1 text-black hover:bg-black hover:text-white transition-colors border border-black"
                     >
-                        <X size={16} />
+                        <X size={14} />
                     </button>
 
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-purple-500/20 rounded-xl text-purple-400 group-hover:scale-110 transition-transform">
+                    <div className="flex items-center gap-4 mb-5">
+                        <div className="p-3 bg-black text-white border-2 border-black">
                             <Smartphone size={24} />
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-white font-bold text-sm">Install Polybet App</h3>
-                            <p className="text-slate-400 text-xs mt-0.5">Add to home screen for the full experience.</p>
+                            <h3 className="text-black font-black text-base uppercase tracking-tighter italic">Install_Predict_Terminal</h3>
+                            <p className="text-black/60 text-[10px] font-mono mt-1 font-bold uppercase">Ready_for_deployment_to_home_screen</p>
                         </div>
                     </div>
 
                     <button
                         onClick={handleInstallClick}
-                        className="w-full mt-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-purple-900/40 flex items-center justify-center gap-2"
+                        className="w-full py-3 bg-orange-600 text-white text-xs font-black uppercase tracking-widest border-2 border-black neo-shadow-sm hover:translate-y-[-2px] hover:neo-shadow active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-2"
                     >
                         <Download size={14} />
-                        Install Now
+                        EXECUTE_INSTALLATION
                     </button>
+
+                    <div className="mt-3 flex justify-between items-center text-[8px] font-mono text-black/40 font-bold uppercase">
+                        <span>Terminal_ID: v0.2.0</span>
+                        <span>Protocol: MAINNET_BETA</span>
+                    </div>
                 </div>
             </motion.div>
         </AnimatePresence>

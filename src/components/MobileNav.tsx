@@ -17,54 +17,53 @@ export const MobileNav = ({ onOpenSearch, onOpenMyBets, onScrollTop }: MobileNav
 
     const navItems = [
         {
-            label: "Home",
+            label: "TERMINAL",
             icon: Home,
             action: onScrollTop
         },
         {
-            label: "Predict",
+            label: "INTEL_HUB",
             icon: TrendingUp,
-            action: onOpenSearch // Actually "Explore" / Search categories
+            action: onOpenSearch
         },
         {
-            label: "My Bets",
+            label: "PORTFOLIO",
             icon: Wallet,
             action: onOpenMyBets
         },
         {
-            label: "Profile",
+            label: "SIGNAL",
             icon: UserIcon,
-            action: () => alert("User Profile Coming Soon") // Placeholder
+            action: () => { } // Profile handled elsewhere or placeholder
         }
     ];
 
     return (
         <div className="fixed bottom-0 left-0 right-0 z-[40] md:hidden">
-            {/* Gradient Fade above bar */}
-            <div className="absolute bottom-full left-0 right-0 h-12 bg-gradient-to-t from-[#020617] to-transparent pointer-events-none" />
-
-            <div className="bg-gray-950/90 backdrop-blur-xl border-t border-white/10 pb-6 pt-2 px-6 safe-area-pb">
-                <div className="flex justify-between items-center">
+            <div className="bg-black border-t-2 border-black pb-8 pt-3 px-6 safe-area-pb">
+                <div className="flex justify-between items-center max-w-lg mx-auto">
                     {navItems.map((item, index) => (
                         <button
                             key={index}
                             onClick={item.action}
-                            className="flex flex-col items-center gap-1 group w-16"
+                            className="flex flex-col items-center gap-1.5 group flex-1"
                         >
-                            <div className="p-2 rounded-xl group-active:scale-95 transition-transform group-hover:bg-white/5">
+                            <div className="p-2 transition-transform group-active:scale-90">
                                 <item.icon
-                                    size={24}
-                                    className={`transition-colors ${index === 2 && connected ? 'text-purple-400' : 'text-gray-400 group-hover:text-white'}`}
-                                    strokeWidth={2}
+                                    size={20}
+                                    className={`transition-colors ${index === 2 && connected ? 'text-orange-500' : 'text-white'}`}
+                                    strokeWidth={3}
                                 />
                             </div>
-                            <span className="text-[10px] font-medium text-gray-500 group-hover:text-gray-300">
+                            <span className="text-[8px] font-black text-white/40 group-hover:text-white uppercase tracking-widest italic font-mono">
                                 {item.label}
                             </span>
                         </button>
                     ))}
                 </div>
             </div>
+            {/* Corner decorator for the black bar to give it an industrial look */}
+            <div className="absolute top-0 left-0 w-4 h-4 bg-orange-600 -translate-y-full border-t-2 border-r-2 border-black" />
         </div>
     );
 };

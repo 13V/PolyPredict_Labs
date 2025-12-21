@@ -5,139 +5,119 @@ import { Check, Rocket, Target, Trophy, Zap } from 'lucide-react';
 export const Roadmap = () => {
     const phases = [
         {
-            phase: 'Phase 1',
-            title: 'Launch',
+            stage: '01',
+            title: 'PROTOCOL_INIT',
             status: 'completed',
             icon: Rocket,
             items: [
-                'Prediction dApp MVP ✓',
-                'Wallet integration ✓',
-                '10 active predictions ✓',
-                'Community building ✓',
+                'Execution Engine MVP',
+                'Wallet Interface Sync',
+                'Genesis Market Batches',
+                'Community Nexus Established',
             ],
         },
         {
-            phase: 'Phase 2',
-            title: 'Token Launch',
+            stage: '02',
+            title: 'TERMINAL_DEPLOY',
             status: 'current',
             icon: Zap,
             items: [
-                'Fair launch on Pump.fun',
-                'Liquidity locked for 1 year',
-                'Token gating for voting',
-                'Marketing campaign',
+                'Fair Launch: Pump.fun',
+                'Liquidity Vault Lock (365d)',
+                'Token-Gated Market Access',
+                'Global Intel Campaign',
             ],
         },
         {
-            phase: 'Phase 3',
-            title: 'Rewards System',
+            stage: '03',
+            title: 'MERIT_PROTOCOL',
             status: 'upcoming',
             icon: Trophy,
             items: [
-                'Leaderboard implementation',
-                'Reward distribution for winners',
-                'Staking mechanism',
-                'NFT badges for top predictors',
+                'Dynamic Leaderboard Feed',
+                'Automated Reward Distributions',
+                'Staking Throttles',
+                'NFT Identity Certificates',
             ],
         },
         {
-            phase: 'Phase 4',
-            title: 'DAO Governance',
+            stage: '04',
+            title: 'GOVERNANCE_EXPANSION',
             status: 'upcoming',
             icon: Target,
             items: [
-                'Community voting on predictions',
-                'Proposal system',
-                'Treasury management',
-                'Multi-chain expansion',
+                'Community Signal Voting',
+                'Protocol Improvement Proposals',
+                'Treasury Vault Control',
+                'Cross-Chain Intel Expansion',
             ],
         },
     ];
 
     return (
-        <section className="py-20 px-6 bg-gradient-to-b from-gray-950 to-gray-900">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
+        <section className="py-24 px-6 bg-white border-t-2 border-black relative overflow-hidden">
+            <div className="absolute inset-0 dot-grid opacity-5" />
+
+            <div className="max-w-7xl mx-auto relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-center mb-16"
+                    className="mb-20"
                 >
-                    <h2 className="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-                        Roadmap
+                    <div className="flex items-center gap-3 mb-6">
+                        <span className="bg-black text-white text-[10px] font-black px-2 py-1 uppercase tracking-widest italic">SYSTEM_EVOLUTION</span>
+                        <div className="h-[2px] flex-1 bg-black/10" />
+                    </div>
+                    <h2 className="text-5xl md:text-8xl font-black mb-6 tracking-tighter uppercase italic leading-[0.85]">
+                        Roadmap<br />Milestones
                     </h2>
-                    <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                        Our vision for building the ultimate prediction platform.
-                    </p>
+                    <p className="text-sm font-bold text-black/40 uppercase tracking-[0.2em] font-mono max-w-2xl">Visualizing the progression of the PolyPredict decentralized intelligence network.</p>
                 </motion.div>
 
-                {/* Timeline */}
-                <div className="relative">
-                    {/* Vertical Line */}
-                    <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-purple-500 via-pink-500 to-transparent hidden md:block" />
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-0 border-2 border-black">
+                    {phases.map((phase, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1 }}
+                            className={`bg-white border-b-2 sm:border-b-0 md:border-r-2 last:border-r-0 border-black p-8 group hover:bg-black hover:text-white transition-colors flex flex-col`}
+                        >
+                            <div className="flex items-center justify-between mb-8">
+                                <span className="text-2xl font-mono font-black text-orange-600">[{phase.stage}]</span>
+                                {phase.status === 'completed' && (
+                                    <span className="text-[10px] font-black px-2 py-1 bg-black text-white group-hover:bg-white group-hover:text-black border border-black uppercase italic">SYNCED</span>
+                                )}
+                                {phase.status === 'current' && (
+                                    <span className="text-[10px] font-black px-2 py-1 bg-orange-600 text-white border border-black uppercase italic animate-pulse">ACTIVE_OP</span>
+                                )}
+                                {phase.status === 'upcoming' && (
+                                    <span className="text-[10px] font-black px-2 py-1 bg-white text-black/20 border border-black/10 uppercase italic">QUEUED</span>
+                                )}
+                            </div>
 
-                    {/* Phases */}
-                    <div className="space-y-12">
-                        {phases.map((phase, index) => (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.2 }}
-                                className={`flex items-center gap-8 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                                    }`}
-                            >
-                                {/* Content */}
-                                <div className="flex-1">
-                                    <div
-                                        className={`bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl p-8 border ${phase.status === 'completed'
-                                                ? 'border-green-500/50'
-                                                : phase.status === 'current'
-                                                    ? 'border-purple-500'
-                                                    : 'border-gray-800'
-                                            } ${index % 2 === 0 ? 'md:text-right' : 'md:text-left'}`}
-                                    >
-                                        <div className="flex items-center gap-3 mb-4 justify-start md:justify-end">
-                                            <span className="text-sm font-bold text-purple-400">{phase.phase}</span>
-                                            {phase.status === 'completed' && (
-                                                <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs rounded-full border border-green-500/30">
-                                                    Completed
-                                                </span>
-                                            )}
-                                            {phase.status === 'current' && (
-                                                <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full border border-purple-500/30 animate-pulse">
-                                                    In Progress
-                                                </span>
-                                            )}
-                                        </div>
-                                        <h3 className="text-3xl font-bold text-white mb-4">{phase.title}</h3>
-                                        <ul className="space-y-2">
-                                            {phase.items.map((item, i) => (
-                                                <li key={i} className="text-gray-400 flex items-center gap-2 justify-start md:justify-end">
-                                                    {phase.status === 'completed' ? (
-                                                        <Check className="w-4 h-4 text-green-400" />
-                                                    ) : (
-                                                        <div className="w-2 h-2 rounded-full bg-purple-400" />
-                                                    )}
-                                                    <span>{item}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </div>
+                            <h3 className="text-2xl font-black mb-6 uppercase italic tracking-tighter">{phase.title}</h3>
 
-                                {/* Icon */}
-                                <div className="hidden md:flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 border-4 border-gray-950 z-10">
-                                    <phase.icon className="w-8 h-8 text-white" />
-                                </div>
+                            <ul className="space-y-4 mb-12 flex-1">
+                                {phase.items.map((item, i) => (
+                                    <li key={i} className="flex items-start gap-3">
+                                        {phase.status === 'completed' ? (
+                                            <Check className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
+                                        ) : (
+                                            <div className="w-1.5 h-1.5 bg-black/20 group-hover:bg-white/40 shrink-0 mt-2" />
+                                        )}
+                                        <span className="text-xs font-bold leading-tight uppercase opacity-60 group-hover:opacity-100">{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
 
-                                {/* Spacer */}
-                                <div className="flex-1 hidden md:block" />
-                            </motion.div>
-                        ))}
-                    </div>
+                            <div className="pt-8 border-t border-black/5 group-hover:border-white/10">
+                                <phase.icon className="w-8 h-8 opacity-10 group-hover:opacity-100 group-hover:text-orange-600 transition-all" />
+                            </div>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
         </section>

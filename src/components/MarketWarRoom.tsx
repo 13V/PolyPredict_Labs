@@ -182,102 +182,116 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-8"
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-8"
                 >
                     {/* Backdrop */}
-                    <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
+                    <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
                     {/* Content Container */}
                     <motion.div
-                        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                        initial={{ scale: 0.98, opacity: 0, y: 10 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-6xl h-full max-h-[92vh] md:max-h-[850px] bg-gray-950 border border-white/10 rounded-2xl md:rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-[0_0_100px_rgba(168,85,247,0.1)]"
+                        exit={{ scale: 0.98, opacity: 0, y: 10 }}
+                        className="relative w-full max-w-6xl h-full max-h-[100vh] md:max-h-[850px] bg-white border-[3px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col md:flex-row overflow-hidden"
                     >
+                        {/* Status Bar */}
+                        <div className="absolute top-0 inset-x-0 h-6 bg-black flex items-center justify-between px-4 z-[60]">
+                            <div className="flex items-center gap-4 text-[8px] font-mono font-black text-white uppercase tracking-widest">
+                                <span>TERMINAL_SESSION: {market.id}</span>
+                                <span className="text-orange-600 animate-pulse">● LIVE_FEED</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-[8px] font-mono font-black text-white/40 uppercase tracking-widest">
+                                <span>PROTOCOL: POLYPREDICT_V0.1</span>
+                                <span>NETWORK: SOLANA_MAINNET</span>
+                            </div>
+                        </div>
+
                         {/* Control Buttons */}
-                        <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
+                        <div className="absolute top-10 right-6 z-50 flex items-center gap-3">
                             <button
                                 onClick={shareToX}
-                                className="p-2.5 bg-gray-900 border border-white/10 rounded-full text-gray-400 hover:text-white hover:border-white/20 transition-all hover:scale-110"
+                                className="p-2 bg-white border-2 border-black text-black hover:bg-black hover:text-white transition-all hover:translate-y-[-2px] hover:neo-shadow-sm active:translate-y-0 active:shadow-none"
                             >
-                                <Share2 size={18} />
+                                <Share2 size={16} />
                             </button>
                             <button
                                 onClick={onClose}
-                                className="p-2.5 bg-gray-900 border border-white/10 rounded-full text-gray-400 hover:text-white hover:border-white/20 transition-all hover:scale-110"
+                                className="p-2 bg-white border-2 border-black text-black hover:bg-black hover:text-white transition-all hover:translate-y-[-2px] hover:neo-shadow-sm active:translate-y-0 active:shadow-none"
                             >
-                                <X size={20} />
+                                <X size={16} strokeWidth={3} />
                             </button>
                         </div>
 
                         {/* Left Side: Analysis & Chart */}
-                        <div className="flex-1 p-5 md:p-12 overflow-y-auto scrollbar-hide">
+                        <div className="flex-1 p-6 md:p-12 overflow-y-auto pt-16 md:pt-16">
                             <div className="flex items-center gap-3 mb-6">
-                                <span className={`bg-gray-900 ${theme.text} text-[10px] font-black px-3 py-1 rounded-full border ${theme.border} uppercase tracking-widest`}>
-                                    {displayCategory}
+                                <span className="bg-black text-white text-[10px] font-black px-3 py-1 border border-black uppercase tracking-[0.2em] italic">
+                                    {displayCategory}_INTEL
                                 </span>
-                                <span className="text-gray-500 text-xs font-mono">Market ID: #{market.id}</span>
+                                <span className="text-black/40 text-[10px] font-mono font-black uppercase tracking-widest">ADDR: {market.id.toString().slice(0, 12)}...</span>
                                 {isExpired && !resolved && (
-                                    <span className="bg-red-500/20 text-red-500 text-[10px] font-black px-3 py-1 rounded-full border border-red-500/30 uppercase tracking-widest">
-                                        ENDED
+                                    <span className="bg-orange-600 text-white text-[10px] font-black px-3 py-1 border border-black uppercase tracking-widest animate-pulse">
+                                        THROTTLE_LOCKED
                                     </span>
                                 )}
                             </div>
 
-                            <h1 className="text-2xl md:text-5xl font-black text-white leading-tight mb-8">
+                            <h1 className="text-3xl md:text-6xl font-black text-black leading-[0.9] mb-10 tracking-tighter uppercase italic">
                                 {displayTitle}
                             </h1>
 
                             {/* Large Chart Area */}
-                            <div className="w-full aspect-square md:aspect-[21/9] bg-white/5 rounded-2xl md:rounded-3xl mb-8 relative group overflow-hidden border border-white/5">
-                                <div
-                                    className="absolute inset-x-0 bottom-0 h-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    style={{ background: `linear-gradient(to top, ${theme.color}20, transparent)` }}
-                                />
-                                <div className="p-8 h-full flex flex-col">
+                            <div className="w-full aspect-square md:aspect-[21/9] bg-white border-2 border-black mb-10 relative group overflow-hidden">
+                                <div className="absolute inset-0 dot-grid opacity-5" />
+                                <div className="p-8 h-full flex flex-col relative z-10">
                                     <div className="flex justify-between items-end mb-auto">
                                         <div>
-                                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-tighter">Current Oracle Price</p>
-                                            <p className="text-4xl font-black text-white">
-                                                {pythPrice ? `$${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '74%'}
+                                            <p className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] mb-1">REAL_TIME_FEED_VALUATION</p>
+                                            <p className="text-5xl font-black text-black font-mono tracking-tighter">
+                                                {pythPrice ? `$${pythPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '74.00%'}
                                                 {pythPrice ? (
-                                                    <span className="text-sm text-green-400 ml-2 animate-pulse">● LIVE</span>
+                                                    <span className="text-xs text-orange-600 ml-3 animate-pulse italic font-black uppercase">● PROTOCOL_STREAM</span>
                                                 ) : (
-                                                    <span className="text-sm text-green-400 ml-2">↑ 4.2%</span>
+                                                    <span className="text-xs text-orange-600 ml-3 italic font-black uppercase">↑ 4.2%_VOL</span>
                                                 )}
                                             </p>
                                         </div>
-                                        <TrendingUp style={{ color: resolved ? '#4b5563' : theme.color }} size={32} />
+                                        <TrendingUp className="text-black opacity-20" size={48} />
                                     </div>
-                                    <div className="h-48 w-full">
-                                        <Sparkline data={pythData || market.sparklineData || [30, 40, 35, 50, 45, 60, 55, 74]} width={800} height={120} color={resolved ? '#4b5563' : theme.color} />
+                                    <div className="h-48 w-full mt-4">
+                                        <Sparkline
+                                            data={pythData || market.sparklineData || [30, 40, 35, 50, 45, 60, 55, 74, 70, 85]}
+                                            width={1000}
+                                            height={150}
+                                            color="#ff5722"
+                                        />
                                     </div>
                                 </div>
                             </div>
 
                             {/* Stats Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-2 border-black">
                                 {[
                                     { label: 'Total Volume', value: market.totalVolume ? `$${market.totalVolume.toLocaleString()}` : '$0', icon: TrendingUp },
                                     { label: 'Liquidity', value: '$124.5k', icon: ShieldCheck },
-                                    { label: 'Traders', value: '1,245', icon: Users },
-                                    { label: 'Sentiment', value: isExpired ? 'Closed' : 'Bullish', icon: MessageSquare }
+                                    { label: 'Active Traders', value: '1,245', icon: Users },
+                                    { label: 'Sentiment', value: isExpired ? 'CLOSED' : 'BULLISH', icon: MessageSquare }
                                 ].map((stat, i) => (
-                                    <div key={i} className="bg-white/5 border border-white/5 p-4 rounded-2xl">
-                                        <div className="flex items-center gap-2 mb-2 text-gray-500">
+                                    <div key={i} className="border-black md:border-r-2 last:border-r-0 p-6 bg-white hover:bg-black hover:text-white transition-colors group">
+                                        <div className="flex items-center gap-2 mb-3 text-black/40 group-hover:text-white/40">
                                             <stat.icon size={12} />
-                                            <span className="text-[10px] font-black uppercase tracking-widest">{stat.label}</span>
+                                            <span className="text-[9px] font-black uppercase tracking-widest">{stat.label}</span>
                                         </div>
-                                        <div className="text-lg font-bold text-white">{stat.value}</div>
+                                        <div className="text-xl font-black font-mono tracking-tight uppercase italic">{stat.value}</div>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         {/* Right Side: Betting Panel */}
-                        <div className="w-full md:w-[400px] bg-white/5 border-l border-white/5 p-8 flex flex-col">
-                            <h3 className="text-xl font-black text-white mb-6 uppercase tracking-tight">
-                                {isExpired ? 'Market Has Ended' : 'Place Your Prediction'}
+                        <div className="w-full md:w-[420px] bg-gray-50 border-t-2 md:border-t-0 md:border-l-2 border-black p-8 flex flex-col pt-16 md:pt-16">
+                            <h3 className="text-xl font-black text-black mb-8 uppercase tracking-tighter italic leading-none border-b-2 border-black pb-4">
+                                {isExpired ? 'MARKET_SETTLED' : 'EXECUTE_SELECTION'}
                             </h3>
 
                             <div className="space-y-4 flex-1">
@@ -287,7 +301,6 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
 
                                     return market.outcomes?.map((outcome: string, i: number) => {
                                         const prob = total > 0 ? (totals[i] / total) * 100 : 50;
-                                        // Apply 10% fee on winnings: (Raw - 1) * 0.9 + 1
                                         const rawMultiplier = prob > 0 ? (100 / prob) : 0;
                                         const taxedMultiplier = rawMultiplier > 1 ? ((rawMultiplier - 1) * 0.9 + 1) : rawMultiplier;
                                         const multiplier = taxedMultiplier.toFixed(2);
@@ -296,27 +309,26 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                                             <button
                                                 key={outcome}
                                                 disabled={isExpired || resolved}
-                                                className={`w-full group relative overflow-hidden bg-gray-900 border border-white/10 ${isExpired ? 'cursor-not-allowed opacity-60' : `hover:${theme.border.replace('/30', '/50')}`} p-6 rounded-2xl transition-all text-left`}
+                                                className={`w-full group relative overflow-hidden bg-white border-2 border-black ${isExpired ? 'cursor-not-allowed opacity-40' : 'hover:translate-x-1 hover:shadow-[4px_4px_0px_0px_rgba(255,87,34,1)]'} p-6 transition-all text-left`}
                                             >
                                                 <div
-                                                    className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500"
-                                                    style={{ background: isExpired ? 'none' : `linear-gradient(to r, ${theme.color}10, transparent)` }}
+                                                    className={`absolute inset-0 bg-orange-600 transition-all duration-300 opacity-0 group-hover:opacity-5`}
                                                 />
                                                 <div className="relative z-10 flex justify-between items-center">
                                                     <div>
-                                                        <p className="text-[10px] font-black text-gray-500 uppercase mb-1">Outcome {i + 1}</p>
-                                                        <p className="text-xl font-bold text-white">
+                                                        <p className="text-[9px] font-black text-black/40 uppercase tracking-widest mb-1 italic">STREAM_OUTCOME_{i + 1}</p>
+                                                        <p className="text-2xl font-black text-black uppercase tracking-tighter">
                                                             {outcome}
                                                             {priceTarget && (outcome.toLowerCase() === 'up' || outcome.toLowerCase() === 'down' || outcome.toLowerCase() === 'yes' || outcome.toLowerCase() === 'no') && (
-                                                                <span className="ml-2 text-xs text-gray-500 font-normal">
+                                                                <span className="ml-2 text-xs text-black/40 font-bold font-mono">
                                                                     {(outcome.toLowerCase() === 'up' || outcome.toLowerCase() === 'yes') ? '>' : '<'} {priceTarget}
                                                                 </span>
                                                             )}
                                                         </p>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className={`text-xs font-mono ${resolved ? 'text-gray-500' : theme.text}`}>Wins: {multiplier}x</p>
-                                                        <p className="text-2xl font-black text-white">{prob.toFixed(0)}%</p>
+                                                        <p className={`text-[10px] font-mono font-black ${resolved ? 'text-black/40' : 'text-orange-600'}`}>EST_YIELD: {multiplier}x</p>
+                                                        <p className="text-3xl font-black text-black font-mono tracking-tighter">{prob.toFixed(0)}%</p>
                                                     </div>
                                                 </div>
                                             </button>
@@ -325,39 +337,35 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                                 })()}
                             </div>
 
-                            <div className="mt-8 space-y-4">
+                            <div className="mt-10 space-y-4">
                                 {isExpired ? (
-                                    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center">
-                                        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Market Status</p>
-                                        <p className="text-white text-sm font-black">AWAITING FINAL ORACLE SIGNATURE</p>
+                                    <div className="p-6 border-2 border-black bg-white text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                        <p className="text-black/40 text-[10px] font-black uppercase tracking-widest mb-2">NETWORK_STATUS</p>
+                                        <p className="text-black text-sm font-black italic">AWAITING_ORACLE_CONSENSUS</p>
                                         <div className="mt-4 flex justify-center">
-                                            <div className="w-12 h-1 bg-gray-800 rounded-full overflow-hidden">
+                                            <div className="w-full h-1 bg-gray-100 border border-black overflow-hidden relative">
                                                 <motion.div
-                                                    animate={{ x: [-48, 48] }}
-                                                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                                    className="w-1/2 h-full bg-purple-500"
+                                                    animate={{ x: ['-100%', '100%'] }}
+                                                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                                                    className="w-1/3 h-full bg-orange-600 absolute"
                                                 />
                                             </div>
                                         </div>
                                     </div>
                                 ) : (
                                     <>
-                                        <div
-                                            className="p-4 rounded-xl border text-[11px]"
-                                            style={{ backgroundColor: `${theme.color}10`, borderColor: `${theme.color}20`, color: theme.color }}
-                                        >
-                                            ⚠️ Prediction markets involve capital risk. Always verify the resolving oracle before placing big bites.
+                                        <div className="p-4 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(255,87,34,1)] text-[10px] font-mono font-bold text-black uppercase leading-tight italic">
+                                            WARNING: CAPITAL_AT_RISK. PREDICTION_PROTOCOL_ACTIVE. VERIFY_INTEL_BEFORE_SIGNING.
                                         </div>
                                         <button
-                                            className="w-full py-4 text-white font-black text-sm uppercase tracking-[0.2em] rounded-2xl shadow-lg transition-all"
-                                            style={{ backgroundColor: theme.color, boxShadow: `0 10px 20px ${theme.color}20` }}
+                                            className="w-full py-5 bg-orange-600 text-white border-2 border-black font-black text-sm uppercase tracking-[0.3em] italic shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none transition-all"
                                         >
-                                            Approve Polybet
+                                            APPROVE_PROTOCOL_ACCESS
                                         </button>
                                     </>
                                 )}
-                                <button className="w-full py-2 flex items-center justify-center gap-2 text-gray-500 hover:text-white transition-colors text-xs">
-                                    <Share2 size={14} /> Share this market
+                                <button onClick={shareToX} className="w-full py-2 flex items-center justify-center gap-2 text-black/40 hover:text-black transition-colors text-[10px] font-black uppercase tracking-widest italic">
+                                    <Share2 size={12} /> BROADCAST_INTEL
                                 </button>
                             </div>
                         </div>

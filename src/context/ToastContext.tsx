@@ -78,28 +78,35 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                             exit={{ opacity: 0, x: 20, scale: 0.9 }}
                             layout
                             className={`
-                                pointer-events-auto min-w-[300px] p-4 rounded-xl border backdrop-blur-xl shadow-2xl flex items-start gap-3
-                                ${toast.type === 'success' ? 'bg-gray-900/90 border-green-500/30 text-green-100' : ''}
-                                ${toast.type === 'error' ? 'bg-gray-900/90 border-red-500/30 text-red-100' : ''}
-                                ${toast.type === 'info' ? 'bg-gray-900/90 border-blue-500/30 text-blue-100' : ''}
-                                ${toast.type === 'loading' ? 'bg-gray-900/90 border-purple-500/30 text-purple-100' : ''}
+                                pointer-events-auto min-w-[320px] p-4 border-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-start gap-4 transition-all
+                                ${toast.type === 'success' ? 'bg-white border-black text-black' : ''}
+                                ${toast.type === 'error' ? 'bg-white border-red-600 text-black' : ''}
+                                ${toast.type === 'info' ? 'bg-white border-black text-black' : ''}
+                                ${toast.type === 'loading' ? 'bg-black border-black text-white' : ''}
                             `}
                         >
-                            <div className={`mt-0.5 shrink-0 ${toast.type === 'success' ? 'text-green-500' :
-                                toast.type === 'error' ? 'text-red-500' :
-                                    toast.type === 'loading' ? 'text-purple-500' : 'text-blue-500'
+                            <div className={`mt-0.5 shrink-0 ${toast.type === 'success' ? 'text-green-600' :
+                                toast.type === 'error' ? 'text-red-600' :
+                                    toast.type === 'loading' ? 'text-orange-600' : 'text-black'
                                 }`}>
-                                {toast.type === 'success' && <CheckCircle size={18} />}
-                                {toast.type === 'error' && <AlertCircle size={18} />}
-                                {toast.type === 'info' && <Info size={18} />}
-                                {toast.type === 'loading' && <Loader2 size={18} className="animate-spin" />}
+                                {toast.type === 'success' && <CheckCircle size={18} strokeWidth={3} />}
+                                {toast.type === 'error' && <AlertCircle size={18} strokeWidth={3} />}
+                                {toast.type === 'info' && <Info size={18} strokeWidth={3} />}
+                                {toast.type === 'loading' && <Loader2 size={18} className="animate-spin" strokeWidth={3} />}
                             </div>
-                            <p className="text-sm font-medium leading-relaxed">{toast.message}</p>
+                            <div className="flex-1 overflow-hidden">
+                                <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1 italic">
+                                    {toast.type}_SIGNAL
+                                </div>
+                                <p className="text-[11px] font-mono font-bold leading-tight uppercase tracking-tight">
+                                    {toast.message}
+                                </p>
+                            </div>
                             <button
                                 onClick={() => removeToast(toast.id)}
-                                className="ml-auto text-white/50 hover:text-white transition-colors"
+                                className={`ml-2 shrink-0 p-1 hover:bg-black hover:text-white transition-colors border border-transparent hover:border-black ${toast.type === 'loading' ? 'text-white/50' : 'text-black/50'}`}
                             >
-                                <X size={16} />
+                                <X size={14} />
                             </button>
                         </motion.div>
                     ))}

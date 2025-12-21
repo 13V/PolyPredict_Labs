@@ -29,12 +29,10 @@ export const ResolutionPanel = ({ id, yesLabel, noLabel, onResolve }: Resolution
         const hasFunds = await hasMinimumTokens(publicKey.toString(), STAKE_AMOUNT);
 
         if (!hasFunds) {
-            alert(`Insufficient Balance! You need ${STAKE_AMOUNT} $POLYBET to verify.`);
+            alert(`INSUFFICIENT_FUNDS: Required ${STAKE_AMOUNT} $PREDICT for validation commit.`);
             setIsStaking(false);
             return;
         }
-
-        // ... (inside component)
 
         // Simulate network delay
         setTimeout(() => {
@@ -52,65 +50,65 @@ export const ResolutionPanel = ({ id, yesLabel, noLabel, onResolve }: Resolution
 
     if (hasStaked) {
         return (
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 text-center animate-in fade-in zoom-in">
-                <div className="flex justify-center mb-2">
-                    <ShieldCheck className="text-blue-400 w-8 h-8" />
+            <div className="bg-black text-white border-2 border-black p-6 text-center animate-in fade-in slide-in-from-bottom-2">
+                <div className="flex justify-center mb-4">
+                    <ShieldCheck className="text-orange-500 w-8 h-8" strokeWidth={3} />
                 </div>
-                <h4 className="text-blue-400 font-bold mb-1">Verification Cast!</h4>
-                <p className="text-xs text-blue-300/80">
-                    You staked {STAKE_AMOUNT} $POLYBET on <strong>{selected === 'yes' ? yesLabel : noLabel}</strong>.
+                <h4 className="text-xl font-black uppercase italic tracking-tighter mb-2 leading-none">SIGNAL_COMMITTED</h4>
+                <p className="text-[10px] uppercase font-black tracking-widest leading-relaxed">
+                    COMMITTED {STAKE_AMOUNT} $PREDICT TO <strong>{selected === 'yes' ? yesLabel : noLabel}</strong>.
                 </p>
-                <div className="mt-2 text-[10px] text-gray-500 uppercase tracking-wider">
-                    Reward Distribution in 24h
+                <div className="mt-4 pt-4 border-t border-white/20 text-[8px] font-black uppercase tracking-[0.3em] opacity-40">
+                    NETWORK_SETTLEMENT_EXPECTED: 24H
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-gray-800/50 border border-blue-500/20 rounded-xl p-3">
-            <div className="flex items-center gap-2 mb-3">
-                <Trophy size={14} className="text-blue-500" />
-                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">
-                    Verify Outcome
+        <div className="bg-white border-2 border-black p-4 space-y-4">
+            <div className="flex items-center gap-3">
+                <Trophy size={16} className="text-black" strokeWidth={3} />
+                <span className="text-[10px] font-black text-black uppercase tracking-[0.2em] italic">
+                    OUTCOME_VERIFICATION
                 </span>
-                <span className="ml-auto text-[10px] bg-blue-900/40 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20">
-                    Stake {STAKE_AMOUNT}
+                <span className="ml-auto text-[10px] font-black bg-black text-white px-2 py-0.5 italic">
+                    STAKE: {STAKE_AMOUNT}
                 </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="grid grid-cols-2 gap-0 border-2 border-black">
                 <button
                     onClick={() => setSelected('yes')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 border transition-all ${selected === 'yes'
-                        ? 'bg-blue-500 text-white border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)]'
-                        : 'bg-gray-900 text-gray-400 border-gray-700 hover:border-gray-600'
+                    className={`py-3 px-4 text-[10px] font-black uppercase tracking-widest border-r-2 border-black transition-all italic ${selected === 'yes'
+                        ? 'bg-black text-white'
+                        : 'bg-white text-black/40 hover:bg-gray-50'
                         }`}
                 >
-                    <Check size={14} /> {yesLabel}
+                    {yesLabel}
                 </button>
                 <button
                     onClick={() => setSelected('no')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 border transition-all ${selected === 'no'
-                        ? 'bg-blue-500 text-white border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)]'
-                        : 'bg-gray-900 text-gray-400 border-gray-700 hover:border-gray-600'
+                    className={`py-3 px-4 text-[10px] font-black uppercase tracking-widest transition-all italic ${selected === 'no'
+                        ? 'bg-black text-white'
+                        : 'bg-white text-black/40 hover:bg-gray-50'
                         }`}
                 >
-                    <X size={14} /> {noLabel}
+                    {noLabel}
                 </button>
             </div>
 
             <button
                 disabled={!selected || isStaking || !connected}
                 onClick={handleStake}
-                className={`w-full py-2 rounded-lg font-bold text-xs transition-all ${!selected
-                    ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                className={`w-full py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all italic border-2 border-black ${!selected
+                    ? 'bg-white text-black/20 border-black/10 cursor-not-allowed'
                     : isStaking
-                        ? 'bg-blue-900 text-blue-300 cursor-wait'
-                        : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20'
+                        ? 'bg-gray-100 text-black cursor-wait'
+                        : 'bg-orange-600 text-white hover:bg-black hover:text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
                     }`}
             >
-                {isStaking ? 'Verifying...' : !connected ? 'Connect Wallet' : `Confirm & Stake ${STAKE_AMOUNT}`}
+                {isStaking ? 'SYNCHRONIZING...' : !connected ? 'NO_WALLET_SIGNAL' : `COMMIT_STAKE_FOR_${STAKE_AMOUNT}`}
             </button>
         </div>
     );

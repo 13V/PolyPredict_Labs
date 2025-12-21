@@ -33,7 +33,7 @@ export function BetSuccessProvider({ children }: { children: ReactNode }) {
 
     const handleShare = () => {
         if (!details) return;
-        const text = `I just bet $${details.amount} on ${details.outcome.toUpperCase()} for "${details.question}" on Polybet! 🔮`;
+        const text = `I just committed $${details.amount} to ${details.outcome.toUpperCase()} for "${details.question}" on PolyPredict. The signal is live. ⚡`;
         navigator.clipboard.writeText(text);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -45,79 +45,67 @@ export function BetSuccessProvider({ children }: { children: ReactNode }) {
             <AnimatePresence>
                 {isOpen && details && (
                     <div className="fixed inset-0 flex items-center justify-center z-[100] px-4">
-                        {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={handleClose}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                            className="absolute inset-0 bg-white/80 backdrop-blur-md"
                         />
 
-                        {/* Modal Card */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                            className="relative w-full max-w-sm bg-gray-900 border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-sm bg-white border-2 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
                         >
-                            {/* Glow Effect */}
-                            <div className={`absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent ${details.outcome === 'yes' ? 'via-green-500' : 'via-red-500'} to-transparent opacity-50`} />
+                            <div className="absolute top-0 left-0 w-2 h-full bg-orange-600" />
 
                             <button
                                 onClick={handleClose}
-                                className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+                                className="absolute top-6 right-6 text-black hover:scale-110 transition-transform font-black"
                             >
-                                <X size={20} />
+                                <X size={20} strokeWidth={3} />
                             </button>
 
-                            <div className="flex flex-col items-center text-center space-y-6">
-
-                                {/* Minimalist Checkmark Animation */}
-                                <div className={`w-16 h-16 rounded-full flex items-center justify-center ${details.outcome === 'yes' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                                    <motion.div
-                                        initial={{ scale: 0, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.1 }}
-                                    >
-                                        <Check size={32} strokeWidth={4} />
-                                    </motion.div>
+                            <div className="flex flex-col items-center text-center space-y-8">
+                                <div className="p-4 bg-black text-white">
+                                    <Check size={32} strokeWidth={4} />
                                 </div>
 
-                                <div className="space-y-1">
-                                    <h3 className="text-xl font-bold text-white">Position Secured</h3>
-                                    <p className="text-sm text-gray-400 line-clamp-2">{details.question}</p>
+                                <div className="space-y-2">
+                                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-black">POSITION_SECURED</h3>
+                                    <p className="text-[10px] font-black text-black/40 uppercase tracking-widest leading-relaxed px-4">{details.question}</p>
                                 </div>
 
-                                <div className="w-full bg-white/5 rounded-xl p-4 border border-white/5 space-y-3">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500">Outcome</span>
-                                        <span className={`font-bold uppercase ${details.outcome === 'yes' ? 'text-green-400' : 'text-red-400'}`}>
+                                <div className="w-full border-2 border-black p-5 space-y-4 bg-gray-50">
+                                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                        <span className="text-black/40">NODE_OUTCOME</span>
+                                        <span className={`px-2 py-0.5 ${details.outcome === 'yes' ? 'bg-black text-white italic' : 'bg-orange-600 text-white italic'}`}>
                                             {details.outcome}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500">Staked</span>
-                                        <span className="text-white font-mono font-bold">${details.amount.toLocaleString()}</span>
+                                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest border-t border-black/10 pt-4">
+                                        <span className="text-black/40">STAKE_VALUE</span>
+                                        <span className="text-black font-mono">${details.amount.toLocaleString()}</span>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-3 w-full">
-                                    <button
-                                        onClick={handleClose}
-                                        className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-bold text-sm transition-colors"
-                                    >
-                                        Close
-                                    </button>
+                                <div className="flex flex-col gap-3 w-full">
                                     <button
                                         onClick={handleShare}
-                                        className="flex-1 py-3 bg-white text-black hover:bg-gray-200 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                                        className="w-full py-4 bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] italic hover:bg-black transition-colors flex items-center justify-center gap-3"
                                     >
-                                        {copied ? <Check size={16} /> : <Share2 size={16} />}
-                                        {copied ? 'Copied' : 'Share'}
+                                        {copied ? <Check size={16} strokeWidth={3} /> : <Share2 size={16} strokeWidth={3} />}
+                                        {copied ? 'SIGNAL_COPIED' : 'EXFILTRATE_REPORT'}
+                                    </button>
+                                    <button
+                                        onClick={handleClose}
+                                        className="w-full py-4 border-2 border-black bg-white text-black font-black text-xs uppercase tracking-[0.2em] italic hover:bg-gray-100 transition-colors"
+                                    >
+                                        RETURN_TO_TERMINAL
                                     </button>
                                 </div>
-
                             </div>
                         </motion.div>
                     </div>
@@ -125,7 +113,7 @@ export function BetSuccessProvider({ children }: { children: ReactNode }) {
             </AnimatePresence>
         </BetSuccessContext.Provider>
     );
-}
+};
 
 export function useBetSuccess() {
     const context = useContext(BetSuccessContext);

@@ -282,7 +282,7 @@ export const PredictionCard = ({
         }
 
         if (amount > MAX_BET) {
-            toast.error(`Exceeds max bet of ${MAX_BET.toLocaleString()} $POLYBET`);
+            toast.error(`Exceeds max bet of ${MAX_BET.toLocaleString()} $PREDICT`);
             return;
         }
 
@@ -565,8 +565,7 @@ export const PredictionCard = ({
                                 className="w-full h-14 bg-gray-50 border-2 border-black px-4 font-mono font-black text-2xl focus:bg-white focus:outline-none transition-all placeholder:text-gray-300"
                             />
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-end">
-                                <span className="text-[10px] text-gray-500 font-bold uppercase">MAX 1M</span>
-                                <span className="text-xs font-black text-black">$POLYBET</span>
+                                <span className="text-xs font-black text-black">$PREDICT</span>
                             </div>
                         </div>
                         <div className="grid grid-cols-4 gap-2">

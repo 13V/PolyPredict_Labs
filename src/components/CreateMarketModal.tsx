@@ -16,7 +16,7 @@ interface CreateMarketModalProps {
     onClose: () => void;
 }
 
-const CREATION_THRESHOLD = 5000000; // 5M POLYBET to create
+const CREATION_THRESHOLD = 5000000; // 5M $PREDICT to create
 
 export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) => {
     const { publicKey, signTransaction, signAllTransactions } = useWallet();
@@ -27,7 +27,7 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
     const [lastCreationTime, setLastCreationTime] = useState<number | null>(null);
 
     // Variants for responsive animation
-    const modalVariants = {
+    const modalVariants: any = {
         hidden: {
             opacity: 0,
             y: typeof window !== 'undefined' && window.innerWidth < 768 ? '100%' : 20,
@@ -77,7 +77,7 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
 
             if (myMarkets.length > 0) {
                 // Sort by creation time (marketId is the timestamp)
-                const sorted = myMarkets.sort((a, b) => b.account.marketId.toNumber() - a.account.marketId.toNumber());
+                const sorted = myMarkets.sort((a: any, b: any) => b.account.marketId.toNumber() - a.account.marketId.toNumber());
                 const lastCreation = sorted[0].account.marketId.toNumber();
                 const now = Date.now();
                 const dayInMs = 24 * 60 * 60 * 1000;
@@ -171,104 +171,106 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
         }
     };
 
+    const eligibilityStatus = !eligible ? 'access_denied' : !withinLimit ? 'limit_reached' : 'ready';
+
     if (!isOpen) return null;
 
     return (
         <AnimatePresence>
-            <div className={`fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-sm ${isOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+            <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 ${isOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
                 {isOpen && (
                     <motion.div
                         variants={modalVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative w-full max-w-md bg-gray-900 border-t md:border border-gray-800 rounded-t-3xl md:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+                        className="relative w-full max-w-md bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden max-h-[90vh] flex flex-col"
                     >
-                        {/* Mobile Drag Handle */}
-                        <div className="md:hidden w-full flex justify-center pt-3 pb-1" onClick={onClose}>
-                            <div className="w-12 h-1.5 bg-gray-700 rounded-full" />
+                        {/* Status Bar */}
+                        <div className="bg-black text-[8px] font-mono text-white/40 px-3 py-1 flex justify-between uppercase font-bold">
+                            <span>TERMINAL_SESSION: CREATE_MARKET</span>
+                            <span>STATUS: {isLoading ? 'SYNCING...' : eligibilityStatus.toUpperCase()}</span>
                         </div>
+
                         {/* Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-gray-800">
-                            <h2 className="text-xl font-black text-white flex items-center gap-2">
-                                <Rocket className="text-purple-500" />
-                                Create Market
+                        <div className="flex items-center justify-between p-5 border-b-2 border-black">
+                            <h2 className="text-xl font-black text-black flex items-center gap-2 uppercase tracking-tighter italic leading-none">
+                                <Rocket className="text-orange-600" size={24} />
+                                LAUNCH_MARKET
                             </h2>
-                            <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
-                                <X size={24} />
+                            <button onClick={onClose} className="p-1 border border-black hover:bg-black hover:text-white transition-colors">
+                                <X size={20} strokeWidth={3} />
                             </button>
                         </div>
 
                         {/* Content */}
-                        <div className="p-6">
+                        <div className="p-6 overflow-y-auto">
                             {isLoading ? (
-                                <div className="flex flex-col items-center justify-center py-12 gap-4">
-                                    <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                                    <p className="text-gray-400 text-sm">Checking whale status...</p>
+                                <div className="flex flex-col items-center justify-center py-12 gap-6">
+                                    <div className="w-10 h-10 border-4 border-black border-t-orange-600 animate-spin" />
+                                    <p className="text-black font-mono text-[10px] font-black uppercase tracking-widest">VERIFYING_CREDENTIALS...</p>
                                 </div>
                             ) : !eligible ? (
                                 // LOCKED STATE
-                                <div className="text-center py-8">
-                                    <div className="bg-red-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <Lock size={40} className="text-red-500" />
+                                <div className="text-center py-6 border-2 border-red-600 bg-red-50/50">
+                                    <div className="bg-black text-white w-16 h-16 border-2 border-black flex items-center justify-center mx-auto mb-6">
+                                        <Lock size={32} />
                                     </div>
-                                    <h3 className="text-xl font-bold text-white mb-2">Whales Only</h3>
-                                    <p className="text-gray-400 mb-6 max-w-[80%] mx-auto">
-                                        You need <strong>{CREATION_THRESHOLD.toLocaleString()} $POLYBET</strong> to create new prediction markets on the protocol.
+                                    <h3 className="text-lg font-black text-black mb-2 uppercase tracking-tighter italic">WHALES_ONLY_PROTOCOL</h3>
+                                    <p className="text-black/60 text-[10px] font-mono font-bold mb-6 max-w-[85%] mx-auto uppercase">
+                                        REQUIRED_THRESHOLD: {CREATION_THRESHOLD.toLocaleString()} $PREDICT_TOKENS
                                     </p>
-                                    <div className="bg-gray-800 rounded-lg p-4 inline-block border border-gray-700">
-                                        <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Your Balance</p>
-                                        <p className="text-2xl font-mono text-white">
-                                            {balance !== null ? balance.toLocaleString() : '0'} POLYBET
+                                    <div className="border-t-2 border-black p-4 bg-white">
+                                        <p className="text-[8px] text-black/40 uppercase tracking-[0.2em] font-black mb-1">CURRENT_SIGNATURE_BALANCE</p>
+                                        <p className="text-2xl font-mono font-black text-black uppercase">
+                                            {balance !== null ? balance.toLocaleString() : '0'} $PREDICT
                                         </p>
                                     </div>
                                 </div>
                             ) : (
                                 // UNLOCKED FORM
-                                <form onSubmit={handleCreate} className="space-y-4">
-                                    <div className="bg-green-500/10 border border-green-500/20 p-3 rounded-lg flex items-center gap-3 mb-6">
-                                        <Unlock size={20} className="text-green-500" />
+                                <form onSubmit={handleCreate} className="space-y-6">
+                                    <div className="bg-orange-50 border-2 border-orange-600 p-4 flex items-center gap-4">
+                                        <div className="bg-orange-600 text-white p-2 border-2 border-black">
+                                            <Unlock size={18} />
+                                        </div>
                                         <div>
-                                            <p className="text-sm font-bold text-green-400">Access Granted</p>
-                                            <p className="text-xs text-green-500/80">You hold {balance?.toLocaleString()} POLYBET</p>
+                                            <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest italic leading-none">ACCESS_GRANTED</p>
+                                            <p className="text-xs font-mono font-bold text-black uppercase">{balance?.toLocaleString()} $PREDICT_VERIFIED</p>
                                         </div>
                                     </div>
 
                                     {!withinLimit && (
-                                        <div className="bg-orange-500/10 border border-orange-500/20 p-4 rounded-xl flex flex-col items-center text-center gap-2 mb-6">
-                                            <Calendar className="text-orange-500 mb-2" size={32} />
-                                            <h3 className="text-orange-400 font-bold uppercase tracking-wider text-sm">Limit Reached</h3>
-                                            <p className="text-xs text-orange-500/70">
-                                                Polybet enforces a **1 market per day** limit for quality assurance.
+                                        <div className="border-2 border-black p-4 flex flex-col items-center text-center gap-3 bg-gray-50">
+                                            <Calendar className="text-black" size={28} />
+                                            <h3 className="text-black font-black uppercase tracking-widest text-xs italic leading-none">THROTTLE_ACTIVE</h3>
+                                            <p className="text-[10px] font-mono font-bold text-black/60 uppercase">
+                                                PROTOCOL_LIMIT: 01_MARKET_PER_24H_CYCLE
                                             </p>
-                                            <div className="mt-2 text-[10px] font-mono bg-orange-500/20 px-3 py-1 rounded-full text-orange-400 uppercase">
-                                                Next Slot: {new Date(lastCreationTime! + (24 * 60 * 60 * 1000)).toLocaleString()}
+                                            <div className="mt-1 text-[8px] font-mono font-black bg-black text-white px-3 py-1 uppercase tracking-widest">
+                                                NEXT_WINDOW: {new Date(lastCreationTime! + (24 * 60 * 60 * 1000)).toLocaleString().toUpperCase()}
                                             </div>
                                         </div>
                                     )}
 
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
-                                            Pump.fun Token Address (Utility Locked)
+                                    <div className="space-y-1">
+                                        <label className="block text-[10px] font-black text-black/40 uppercase tracking-widest">
+                                            PUMP_UTILITY_GATING_ADDR
                                         </label>
                                         <input
                                             type="text"
-                                            placeholder="e.g. HqQq...pump (Optional)"
-                                            className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none transition-colors font-mono text-sm"
+                                            placeholder="HqQq...pump_INTEL"
+                                            className="w-full bg-white border-2 border-black px-4 py-3 text-black focus:bg-orange-50 focus:outline-none transition-colors font-mono text-xs font-bold uppercase placeholder:text-black/20"
                                             value={mintConf}
                                             onChange={e => setMintConf(e.target.value)}
                                         />
-                                        <p className="text-[10px] text-gray-500 mt-1">
-                                            If set, only holders of this specific Pump.fun token can bet.
-                                        </p>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Question</label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g. Will Bitcoin hit $100k this week?"
-                                            className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none transition-colors"
+                                    <div className="space-y-1">
+                                        <label className="block text-[10px] font-black text-black/40 uppercase tracking-widest italic">PREDICTION_PROMPT</label>
+                                        <textarea
+                                            placeholder="E.G. WILL_SOLANA_HIT_ATH_BEFORE_2026?"
+                                            className="w-full bg-white border-2 border-black px-4 py-3 text-black focus:bg-orange-50 focus:outline-none transition-colors font-black uppercase tracking-tighter text-sm h-24 resize-none"
                                             value={question}
                                             onChange={e => setQuestion(e.target.value)}
                                             required
@@ -276,28 +278,28 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
-                                                <div className="flex items-center gap-1"><Tag size={12} /> Category</div>
+                                        <div className="space-y-1">
+                                            <label className="block text-[10px] font-black text-black/40 uppercase tracking-widest italic flex items-center gap-1">
+                                                <Tag size={10} /> CATEGORY
                                             </label>
                                             <select
-                                                className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                                                className="w-full bg-white border-2 border-black px-4 py-3 text-black font-black uppercase tracking-tighter text-sm focus:bg-orange-50 focus:outline-none cursor-pointer"
                                                 value={category}
                                                 onChange={e => setCategory(e.target.value)}
                                             >
-                                                <option value="CRYPTO">Crypto</option>
-                                                <option value="SPORTS">Sports</option>
-                                                <option value="POLITICS">Politics</option>
-                                                <option value="POP">Pop Culture</option>
+                                                <option value="CRYPTO">CRYPTO</option>
+                                                <option value="SPORTS">SPORTS</option>
+                                                <option value="POLITICS">POLITICS</option>
+                                                <option value="POP">POP_CULTURE</option>
                                             </select>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
-                                                <div className="flex items-center gap-1"><Calendar size={12} /> End Date</div>
+                                        <div className="space-y-1">
+                                            <label className="block text-[10px] font-black text-black/40 uppercase tracking-widest italic flex items-center gap-1">
+                                                <Calendar size={10} /> EXPIRY_DATE
                                             </label>
                                             <input
                                                 type="date"
-                                                className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                                                className="w-full bg-white border-2 border-black px-4 py-3 text-black font-black uppercase tracking-tighter text-sm focus:bg-orange-50 focus:outline-none cursor-pointer"
                                                 value={endDate}
                                                 onChange={e => setEndDate(e.target.value)}
                                                 required
@@ -308,15 +310,26 @@ export const CreateMarketModal = ({ isOpen, onClose }: CreateMarketModalProps) =
                                     <button
                                         type="submit"
                                         disabled={!withinLimit}
-                                        className={`w-full font-bold py-4 rounded-xl shadow-lg transition-all mt-4 ${withinLimit
-                                            ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-900/20'
-                                            : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700 shadow-none'
+                                        className={`w-full font-black py-4 border-2 border-black transition-all mt-4 uppercase tracking-widest text-xs italic ${withinLimit
+                                            ? 'bg-orange-600 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none'
+                                            : 'bg-gray-100 text-black/20 cursor-not-allowed grayscale'
                                             }`}
                                     >
-                                        {withinLimit ? '🚀 Launch Market' : '⏳ Daily Limit Active'}
+                                        {withinLimit ? 'EXECUTE_DEPLOYMENT_🚀' : '⏳_LIMIT_ACTIVE_THROTTLE'}
                                     </button>
                                 </form>
                             )}
+                        </div>
+
+                        {/* Footer Ticker */}
+                        <div className="bg-black py-2 px-4 overflow-hidden border-t-2 border-black">
+                            <div className="whitespace-nowrap flex gap-8 animate-infinite-scroll">
+                                {[...Array(3)].map((_, i) => (
+                                    <span key={i} className="text-[8px] font-mono font-black text-white/40 uppercase tracking-[0.2em]">
+                                        POLYPREDICT_TERMINAL_V0.1 // VERIFIED_WHALE_CREATION_MODE_ACTIVE // SOLANA_MAINNET_FEED_STABLE
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     </motion.div>
                 )}

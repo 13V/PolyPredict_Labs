@@ -6,44 +6,46 @@ export const TrustBadges = () => {
     const badges = [
         {
             icon: Shield,
-            title: 'Audited Contract',
-            description: 'Smart contract audited by leading security firms',
+            title: 'AUDIT_VERIFIED',
+            description: 'Core logic validated by top-tier security labs',
         },
         {
             icon: Lock,
-            title: 'Liquidity Locked',
-            description: '40% LP locked for 1 year on Pump.fun',
+            title: 'LP_ENCRYPTION',
+            description: '40% liquidity locked via protocol smart-contract',
         },
         {
             icon: CheckCircle,
-            title: 'Fair Launch',
-            description: 'No presale, no team allocation, 100% fair',
+            title: 'PROTOCOL_EQUITY',
+            description: 'Zero team allocation. Full public distribution.',
         },
         {
             icon: Users,
-            title: 'Community Driven',
-            description: 'Governed by $POLYBET token holders',
+            title: 'GOVERNANCE_CONSENSUS',
+            description: 'Decentralized management by $PREDICT holders',
         },
     ];
 
     return (
-        <section className="py-12 px-6 bg-gradient-to-r from-purple-900/10 via-pink-900/10 to-purple-900/10 border-y border-gray-800">
-            <div className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <section className="py-24 px-6 bg-white border-y-2 border-black relative overflow-hidden">
+            <div className="absolute inset-0 dot-grid opacity-5" />
+
+            <div className="max-w-7xl mx-auto relative z-10">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 border-2 border-black bg-black">
                     {badges.map((badge, index) => (
                         <motion.div
                             key={index}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
-                            className="text-center"
+                            className="bg-white p-10 border-black border-r-2 last:border-r-0 lg:border-r-2 group hover:bg-black transition-all"
                         >
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mb-3">
-                                <badge.icon className="w-8 h-8 text-white" />
+                            <div className="inline-flex items-center justify-center w-12 h-12 bg-black text-white group-hover:bg-orange-600 transition-colors mb-8">
+                                <badge.icon className="w-6 h-6" strokeWidth={3} />
                             </div>
-                            <h3 className="text-white font-bold mb-1">{badge.title}</h3>
-                            <p className="text-gray-400 text-sm">{badge.description}</p>
+                            <h3 className="text-black group-hover:text-white font-black text-xs uppercase tracking-[0.3em] mb-4 italic leading-none">{badge.title}</h3>
+                            <p className="text-black/40 group-hover:text-white/60 font-bold text-[10px] uppercase tracking-widest leading-relaxed italic">{badge.description}</p>
                         </motion.div>
                     ))}
                 </div>

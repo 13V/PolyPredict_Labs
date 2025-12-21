@@ -6,46 +6,44 @@ export const Stats = () => {
     const stats = [
         {
             icon: Users,
-            value: 'Coming Soon',
-            label: 'Community Members',
-            color: 'text-blue-400',
+            value: 'TBD',
+            label: 'USER_SIGNAL_BASE',
         },
         {
             icon: Vote,
             value: '10',
-            label: 'Live Predictions',
-            color: 'text-purple-400',
+            label: 'ACTIVE_TERMINALS',
         },
         {
             icon: TrendingUp,
             value: '100%',
-            label: 'Fair Launch',
-            color: 'text-green-400',
+            label: 'EQUITY_FAIRNESS',
         },
         {
             icon: Zap,
             value: '1B',
-            label: 'Total Supply',
-            color: 'text-yellow-400',
+            label: 'PROTOCOL_SUPPLY',
         },
     ];
 
     return (
-        <section className="py-16 px-6 bg-gradient-to-r from-purple-900/20 via-pink-900/20 to-purple-900/20 border-y border-gray-800">
-            <div className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <section className="py-24 px-6 bg-white border-y-2 border-black relative overflow-hidden">
+            <div className="absolute inset-0 dot-grid opacity-5" />
+
+            <div className="max-w-7xl mx-auto relative z-10">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-2 border-black bg-black">
                     {stats.map((stat, index) => (
                         <motion.div
                             key={index}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
-                            className="text-center"
+                            className="bg-white p-12 border-black border-r-2 last:border-r-0 md:border-r-2 group hover:bg-black transition-all text-center"
                         >
-                            <stat.icon className={`w-12 h-12 mx-auto mb-4 ${stat.color}`} />
-                            <div className="text-4xl font-bold text-white mb-2">{stat.value}</div>
-                            <div className="text-gray-400">{stat.label}</div>
+                            <stat.icon className="w-8 h-8 mx-auto mb-6 text-orange-600 group-hover:text-white transition-colors" strokeWidth={3} />
+                            <div className="text-5xl font-black text-black group-hover:text-white mb-2 font-mono tracking-tighter italic leading-none">{stat.value}</div>
+                            <div className="text-black/40 group-hover:text-white/60 text-[10px] uppercase font-black tracking-widest leading-none">{stat.label}</div>
                         </motion.div>
                     ))}
                 </div>

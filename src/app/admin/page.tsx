@@ -56,7 +56,7 @@ export default function AdminPage() {
 
     const loadData = () => {
         setOutcomes(getAllOutcomes());
-        setAllRewards(calculateAllRewards(1000)); // 1000 $POLYBET per prediction
+        setAllRewards(calculateAllRewards(1000)); // 1000 $PREDICT per prediction
         setTotalVotes(getAllVotes().length);
     };
 
@@ -92,13 +92,13 @@ export default function AdminPage() {
     const totalWinners = allRewards.reduce((sum, r) => sum + r.totalWinners, 0);
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 p-6">
+        <div className="min-h-screen bg-white p-6 md:p-12">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-white mb-2">POLYBET Admin Panel</h1>
-                        <p className="text-gray-400">Developer Tools & Management</p>
+                        <h1 className="text-4xl font-black text-black uppercase tracking-tighter italic">POLYPREDICT_ADMIN</h1>
+                        <p className="text-[10px] font-mono font-bold text-black/40 uppercase tracking-widest">PROPHET_PROTOCOL // MANAGEMENT_CONSOLE</p>
                     </div>
                     <WalletConnect />
                 </div>
@@ -157,9 +157,9 @@ export default function AdminPage() {
                             transition={{ delay: 0.3 }}
                             className="bg-gradient-to-br from-yellow-900/20 to-orange-900/20 border border-yellow-500/30 rounded-xl p-6"
                         >
-                            <DollarSign className="w-8 h-8 text-yellow-400 mb-2" />
-                            <div className="text-3xl font-bold text-white">{totalRewardPool.toLocaleString()}</div>
-                            <div className="text-sm text-gray-400">$POLYBET Rewards</div>
+                            <DollarSign className="w-8 h-8 text-orange-600 mb-2" />
+                            <div className="text-3xl font-black text-black">{totalRewardPool.toLocaleString()}</div>
+                            <div className="text-sm font-black text-black/40 uppercase tracking-widest">$PREDICT_REWARDS</div>
                         </motion.div>
                     </div>
                 )}
@@ -249,8 +249,8 @@ export default function AdminPage() {
                                             <h3 className="text-lg font-bold text-white mb-2">{prediction.question}</h3>
 
                                             {rewardData && (
-                                                <div className="text-sm text-gray-400">
-                                                    Winners: {rewardData.totalWinners} | Reward per winner: {rewardData.rewardPerWinner.toFixed(2)} $POLYBET
+                                                <div className="text-[10px] font-mono font-bold text-black/40 uppercase">
+                                                    WINNERS: {rewardData.totalWinners} | REWARD_PER_NODE: {rewardData.rewardPerWinner.toFixed(2)} $PREDICT
                                                 </div>
                                             )}
                                         </div>

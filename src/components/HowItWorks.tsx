@@ -6,73 +6,64 @@ export const HowItWorks = () => {
     const steps = [
         {
             icon: Wallet,
-            title: 'Connect Wallet',
-            description: 'Link your Solana wallet (Phantom, Solflare) to get started.',
-            color: 'from-blue-500 to-cyan-500',
+            title: 'PROTOCOL_AUTH',
+            description: 'Initialize connection with Solana network (Phantom/Solflare).',
         },
         {
             icon: Vote,
-            title: 'Vote on Predictions',
-            description: 'Use your $POLYBET tokens to vote YES or NO on crypto predictions.',
-            color: 'from-purple-500 to-pink-500',
+            title: 'EXECUTE_ORDER',
+            description: 'Allocate $PREDICT tokens to verified outcome streams.',
         },
         {
             icon: TrendingUp,
-            title: 'Track Results',
-            description: 'Watch the predictions unfold and see if you were right.',
-            color: 'from-green-500 to-emerald-500',
+            title: 'INTEL_MONITOR',
+            description: 'Track real-time data feeds and market volatility metrics.',
         },
         {
             icon: Gift,
-            title: 'Earn Rewards',
-            description: 'Correct predictions earn you rewards from the prize pool.',
-            color: 'from-yellow-500 to-orange-500',
+            title: 'YIELD_CLAIM',
+            description: 'Settle correct forecasts and extract protocol rewards.',
         },
     ];
 
     return (
-        <section className="py-20 px-6 bg-gray-900">
-            <div className="max-w-7xl mx-auto">
+        <section className="py-24 px-6 border-y-2 border-black bg-white relative overflow-hidden">
+            <div className="absolute inset-0 dot-grid opacity-5" />
+
+            <div className="max-w-7xl mx-auto relative z-10">
                 {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center mb-16"
-                >
-                    <h2 className="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-                        How It Works
+                <div className="text-center mb-20">
+                    <div className="inline-block bg-black text-white text-[10px] font-black px-4 py-1 mb-6 uppercase tracking-[0.3em] italic">
+                        PROTOCOL_OPERATIONS
+                    </div>
+                    <h2 className="text-5xl md:text-7xl font-black mb-4 text-black uppercase tracking-tighter italic leading-none">
+                        HOW_IT_WORKS
                     </h2>
-                    <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                        Start predicting the future in 4 simple steps.
+                    <p className="text-sm font-mono font-bold text-black/40 uppercase max-w-xl mx-auto tracking-widest">
+                        Standard_Operating_Procedures for high-frequency prediction markets.
                     </p>
-                </motion.div>
+                </div>
 
                 {/* Steps Grid */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-0 border-2 border-black">
                     {steps.map((step, index) => (
-                        <motion.div
+                        <div
                             key={index}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.15 }}
-                            className="relative"
+                            className="relative p-10 bg-white border-black md:border-r-2 last:border-r-0 group hover:bg-black transition-colors duration-200"
                         >
                             {/* Step Number */}
-                            <div className="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-xl border-4 border-gray-900 z-10">
-                                {index + 1}
+                            <div className="absolute top-4 right-4 text-4xl font-black text-black/5 group-hover:text-white/10 transition-colors">
+                                0{index + 1}
                             </div>
 
-                            {/* Card */}
-                            <div className="bg-gradient-to-br from-gray-950 to-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-purple-500/50 transition-all h-full">
-                                <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center mb-6`}>
-                                    <step.icon className="w-8 h-8 text-white" />
+                            <div className="relative z-10 flex flex-col items-center lg:items-start text-center lg:text-left">
+                                <div className={`w-16 h-16 border-2 border-black bg-white flex items-center justify-center mb-8 group-hover:bg-orange-600 group-hover:border-white transition-all`}>
+                                    <step.icon className="w-8 h-8 text-black group-hover:text-white" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-3">{step.title}</h3>
-                                <p className="text-gray-400">{step.description}</p>
+                                <h3 className="text-xl font-black text-black mb-4 uppercase tracking-tighter italic group-hover:text-white">{step.title}</h3>
+                                <p className="text-xs font-mono font-bold text-black/60 group-hover:text-white/70 uppercase leading-relaxed">{step.description}</p>
                             </div>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             </div>
