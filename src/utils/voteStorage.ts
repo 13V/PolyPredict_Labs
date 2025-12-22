@@ -1,7 +1,6 @@
 import { Connection, PublicKey, Transaction, SystemProgram } from '@solana/web3.js';
 import { getProgram, getProvider, PROGRAM_ID, TOKEN_PROGRAM_ID, getVotePDA, getATA, BETTING_MINT } from '@/services/web3';
-import { BN } from '@project-serum/anchor';
-import { web3 } from '@project-serum/anchor';
+import { BN, web3 } from '@coral-xyz/anchor';
 
 export interface Vote {
     predictionId: number;

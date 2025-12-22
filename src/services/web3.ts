@@ -1,6 +1,5 @@
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
-import { Program, AnchorProvider, web3, Idl } from '@project-serum/anchor';
-import { BN } from '@project-serum/anchor';
+import { Program, AnchorProvider, web3, Idl, BN } from '@coral-xyz/anchor';
 import idl from '@/idl/polybet.json';
 
 const network = process.env.NEXT_PUBLIC_RPC_URL || 'https://solana-rpc.publicnode.com';

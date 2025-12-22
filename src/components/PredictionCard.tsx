@@ -1,7 +1,7 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PublicKey } from '@solana/web3.js';
-import { BN } from '@project-serum/anchor';
+import { BN } from '@coral-xyz/anchor';
 import {
     TrendingUp,
     TrendingDown,
