@@ -351,14 +351,14 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                     </div>
 
                     {/* Chart Area */}
-                    <div className="h-24 md:h-32 w-full relative overflow-hidden opacity-30">
+                    <div className="h-24 md:h-32 w-full relative overflow-hidden opacity-50">
                         {pythData && <Sparkline data={pythData} width={600} height={128} color="#000000" />}
                     </div>
 
                     {/* Industrial Provenance */}
-                    <div className="pt-4 flex justify-between items-center opacity-40">
-                        <span className="text-[8px] font-mono uppercase tracking-[0.2em]">TRANS_LAYER: SOLANA_MAINNET_BETA</span>
-                        <span className="text-[8px] font-mono uppercase tracking-[0.2em]">ORACLE: PYTH_NETWORK_L2</span>
+                    <div className="pt-4 flex justify-between items-center opacity-60">
+                        <span className="text-[8px] font-mono uppercase tracking-[0.2em] font-bold">TRANS_LAYER: SOLANA_MAINNET_BETA</span>
+                        <span className="text-[8px] font-mono uppercase tracking-[0.2em] font-bold">ORACLE: PYTH_NETWORK_L2</span>
                     </div>
                 </div>
 
@@ -386,7 +386,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                             >
                                 <div className="relative z-10">
                                     <span className="text-2xl block mb-1 truncate uppercase italic font-black">{outcomes[0]}</span>
-                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100">POSITION_A</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60 group-hover:opacity-100">POSITION_A</span>
                                 </div>
                             </button>
                             <button
@@ -396,7 +396,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                             >
                                 <div className="relative z-10">
                                     <span className="text-2xl block mb-1 truncate uppercase italic font-black">{outcomes[1]}</span>
-                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100">POSITION_B</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60 group-hover:opacity-100">POSITION_B</span>
                                 </div>
                             </button>
                         </div>
@@ -416,7 +416,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                                     className="w-full bg-transparent border-b-2 border-black py-4 text-black font-mono font-black text-4xl focus:outline-none placeholder:text-gray-200"
                                 />
                                 <div className="absolute right-0 bottom-1">
-                                    <span className="text-[10px] font-black text-black uppercase tracking-tighter opacity-30">$PREDICT_UNITS</span>
+                                    <span className="text-[10px] font-black text-black uppercase tracking-tighter opacity-50">$PREDICT_UNITS</span>
                                 </div>
                             </div>
                             <button
@@ -428,7 +428,7 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                         </div>
                     )}
 
-                    <button onClick={(e) => { e.stopPropagation(); onOpenCreateModal?.() }} className="text-[10px] font-black text-gray-400 hover:text-black uppercase tracking-widest text-center mt-2 underline italic">
+                    <button onClick={(e) => { e.stopPropagation(); onOpenCreateModal?.() }} className="text-[10px] font-black text-gray-500 hover:text-black uppercase tracking-widest text-center mt-2 underline italic">
                         Terminal_Create_Custom_Market
                     </button>
                 </div>

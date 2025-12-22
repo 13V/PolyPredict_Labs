@@ -197,13 +197,13 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
     const getCategoryTheme = (cat: string) => {
         const c = cat.toLowerCase();
         const q = market.question.toLowerCase();
-        if (q.includes(' vs ') || q.includes(' vs. ') || c.includes('sports')) return { color: '#f59e0b', glow: 'rgba(245, 158, 11, 0.15)', text: 'text-amber-400', border: 'border-amber-500/30' };
+        if (q.includes(' vs ') || q.includes(' vs. ') || c.includes('sports')) return { color: '#f59e0b', glow: 'rgba(245, 158, 11, 0.15)', text: 'text-amber-600', border: 'border-amber-600/30' };
 
-        if (c.includes('crypto')) return { color: '#06b6d4', glow: 'rgba(6, 182, 212, 0.15)', text: 'text-cyan-400', border: 'border-cyan-500/30' };
-        if (c.includes('politics')) return { color: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)', text: 'text-red-400', border: 'border-red-500/30' };
-        if (c.includes('esports')) return { color: '#ec4899', glow: 'rgba(236, 72, 153, 0.15)', text: 'text-pink-400', border: 'border-pink-500/30' };
-        if (c.includes('news')) return { color: '#10b981', glow: 'rgba(16, 185, 129, 0.15)', text: 'text-emerald-400', border: 'border-emerald-500/30' };
-        return { color: '#a855f7', glow: 'rgba(168, 85, 247, 0.15)', text: 'text-purple-400', border: 'border-purple-500/30' }; // Default
+        if (c.includes('crypto')) return { color: '#06b6d4', glow: 'rgba(6, 182, 212, 0.15)', text: 'text-cyan-600', border: 'border-cyan-600/30' };
+        if (c.includes('politics')) return { color: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)', text: 'text-red-600', border: 'border-red-600/30' };
+        if (c.includes('esports')) return { color: '#ec4899', glow: 'rgba(236, 72, 153, 0.15)', text: 'text-pink-600', border: 'border-pink-600/30' };
+        if (c.includes('news')) return { color: '#10b981', glow: 'rgba(16, 185, 129, 0.15)', text: 'text-emerald-600', border: 'border-emerald-600/30' };
+        return { color: '#a855f7', glow: 'rgba(168, 85, 247, 0.15)', text: 'text-purple-600', border: 'border-purple-600/30' }; // Default
     };
 
     const getCategoryIcon = (cat: string) => {
@@ -305,7 +305,7 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                                     REF_ID: #{market.id.toString().padStart(4, '0')}
                                 </div>
                             </div>
-                            <span className="text-black/40 text-[10px] font-mono font-black uppercase tracking-widest">ADDR: {market.id.toString().slice(0, 12)}...</span>
+                            <span className="text-black/60 text-[10px] font-mono font-black uppercase tracking-widest">ADDR: {market.id.toString().slice(0, 12)}...</span>
                             {isExpired && !resolved && (
                                 <span className="bg-orange-600 text-white text-[10px] font-black px-3 py-1 border border-black uppercase tracking-widest animate-pulse">
                                     THROTTLE_LOCKED
@@ -364,7 +364,7 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                                     { label: 'Sentiment', value: isExpired ? 'CLOSED' : 'BULLISH', icon: MessageSquare }
                                 ].map((stat, i) => (
                                     <div key={i} className="border-black md:border-r-2 last:border-r-0 p-6 bg-white hover:bg-black hover:text-white transition-colors group">
-                                        <div className="flex items-center gap-2 mb-3 text-black/40 group-hover:text-white/40">
+                                        <div className="flex items-center gap-2 mb-3 text-gray-500 group-hover:text-white/60">
                                             <stat.icon size={12} strokeWidth={3} />
                                             <span className="text-[8px] font-black uppercase tracking-widest font-outfit">{stat.label}</span>
                                         </div>
@@ -375,8 +375,8 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
 
                             {/* Technical Provenance */}
                             <div className="mt-8 pt-4 flex justify-between items-center border-t border-dashed border-black/10">
-                                <span className="text-[8px] font-mono text-black/40 uppercase tracking-[0.2em]">TRACE_LAYER: SOLANA_MAINNET_L2</span>
-                                <span className="text-[8px] font-mono text-black/40 uppercase tracking-[0.2em]">ORACLE: {isCrypto ? 'PYTH_NETWORK' : 'POLYMARKET_SETTLEMENT_CORE'}</span>
+                                <span className="text-[8px] font-mono text-black/60 uppercase tracking-[0.2em]">TRACE_LAYER: SOLANA_MAINNET_L2</span>
+                                <span className="text-[8px] font-mono text-black/60 uppercase tracking-[0.2em]">ORACLE: {isCrypto ? 'PYTH_NETWORK' : 'POLYMARKET_SETTLEMENT_CORE'}</span>
                             </div>
                         </div>
 
@@ -456,7 +456,7 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                                         </button>
                                     </>
                                 )}
-                                <button onClick={shareToX} className="w-full py-2 flex items-center justify-center gap-2 text-black/40 hover:text-black transition-colors text-[10px] font-black uppercase tracking-widest italic">
+                                <button onClick={shareToX} className="w-full py-2 flex items-center justify-center gap-2 text-gray-500 hover:text-black transition-colors text-[10px] font-black uppercase tracking-widest italic">
                                     <Share2 size={12} /> BROADCAST_INTEL
                                 </button>
                             </div>

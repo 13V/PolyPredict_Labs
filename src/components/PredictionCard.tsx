@@ -525,7 +525,7 @@ export const PredictionCard = ({
                             #{id.toString().padStart(4, '0')}
                         </div>
                         {!resolved && (
-                            <div className="flex items-center gap-2 px-2 py-0.5 border-y border-r border-black bg-gray-50 text-black/40 text-[9px] font-black uppercase tracking-widest">
+                            <div className="flex items-center gap-2 px-2 py-0.5 border-y border-r border-black bg-gray-50 text-black/60 text-[9px] font-black uppercase tracking-widest">
                                 STATUS: {polymarketId && !isOnChain ? 'INITIALIZING' : 'LIVE_FEED'}
                             </div>
                         )}
@@ -575,13 +575,13 @@ export const PredictionCard = ({
                     <div className="flex items-center gap-3 md:gap-4 text-[10px] font-black text-black z-10 border-b-2 border-black pb-2">
                         <div className="flex items-center gap-1.5 border-r border-black/10 pr-3 md:pr-4">
                             <Clock size={12} className={isExpired ? 'text-red-500' : 'text-black'} strokeWidth={3} />
-                            <span className={`font-mono ${isExpired ? 'text-red-500' : ''}`}>{timeLeft()} <span className="font-outfit opacity-40">REMAINING</span></span>
+                            <span className={`font-mono font-bold ${isExpired ? 'text-red-500' : ''}`}>{timeLeft()} <span className="font-outfit opacity-60">REMAINING</span></span>
                         </div>
                         <div className="flex items-center gap-1.5">
                             <BarChart3 size={12} className="text-black" strokeWidth={3} />
-                            <span className="text-[8px] text-black/40 mr-1 hidden md:inline font-outfit">POOL_VOLUME:</span>
-                            <span className="font-mono">{totalLiquidity.toLocaleString()}</span>
-                            <span className="text-[8px] text-black/40 font-outfit">$PREDICT</span>
+                            <span className="text-[8px] text-black/60 mr-1 hidden md:inline font-outfit">POOL_VOLUME:</span>
+                            <span className="font-mono font-bold">{totalLiquidity.toLocaleString()}</span>
+                            <span className="text-[8px] text-black/60 font-outfit">$PREDICT</span>
                         </div>
                     </div>
                 )
