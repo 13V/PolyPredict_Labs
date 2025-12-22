@@ -613,20 +613,20 @@ export const PredictionCard = ({
                 {topOutcomes.map((index) => {
                     const isWinning = winningOutcome === index;
                     const isSelected = betMode === index;
-                    // User Request: Orange Scheme, 60% opacity -> 100% hover
-                    const baseColor = 'bg-orange-500/60 hover:bg-orange-500';
-                    // Border: Orange default -> Black hover
-                    const finalBorderColor = 'border-orange-500 hover:border-black';
+
+                    // User Request: White Buttons
+                    const baseColor = 'bg-white hover:bg-gray-50';
+                    const finalBorderColor = 'border-black hover:border-orange-500'; // Brutalist default
 
                     const textColor = 'text-black';
-                    const progressColor = 'bg-white/30';
+                    const progressColor = 'bg-gray-100'; // Subtle progress indication
 
                     return (
                         <button
                             key={index}
                             onClick={(e) => handleOutcomeClick(e, index)}
                             disabled={isExpired || resolved}
-                            className={`group/btn relative h-20 border-2 overflow-hidden transition-all duration-200 
+                            className={`group/btn relative h-14 border-2 overflow-hidden transition-all duration-200 
                                 ${finalBorderColor} ${baseColor}
                                 ${isSelected ? 'transform translate-y-1 shadow-none' : 'shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]'}
                                 ${resolved && !isWinning ? 'opacity-40 grayscale' : ''}
@@ -634,20 +634,18 @@ export const PredictionCard = ({
                         >
                             {/* Progress Bar Background */}
                             <div
-                                className={`absolute inset-y-0 left-0 transition-all duration-500 ${progressColor}`}
+                                className={`absolute inset-y-0 left-0 transition-all duration-500 ${progressColor} opacity-50`}
                                 style={{ width: `${outcomeProbabilities[index]}%` }}
                             />
 
-                            <div className="relative z-10 flex flex-col justify-between items-start px-3 py-2 h-full">
-                                <span className={`text-xs font-black uppercase italic leading-tight ${textColor} flex items-start gap-2 w-full text-left`}>
-                                    <span className="line-clamp-2">{outcomes[index]}</span>
-                                    {isWinning && <CheckCircle2 size={14} className="text-black shrink-0 mt-0.5" />}
+                            <div className="relative z-10 flex items-center justify-between px-3 h-full w-full">
+                                <span className={`text-xs font-black uppercase italic leading-none ${textColor} flex items-center gap-2 truncate text-left`}>
+                                    <span className="truncate">{outcomes[index]}</span>
+                                    {isWinning && <CheckCircle2 size={14} className="text-black shrink-0" />}
                                 </span>
-                                <div className="w-full flex justify-end items-end">
-                                    <span className="text-xs font-black font-mono text-black shrink-0">
-                                        {Math.round(outcomeProbabilities[index])}%
-                                    </span>
-                                </div>
+                                <span className="text-sm font-black font-mono text-black shrink-0 pl-2">
+                                    {Math.round(outcomeProbabilities[index])}%
+                                </span>
                             </div>
                         </button>
                     );
