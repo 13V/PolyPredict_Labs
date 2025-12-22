@@ -625,7 +625,7 @@ export const PredictionCard = ({
                             key={index}
                             onClick={(e) => handleOutcomeClick(e, index)}
                             disabled={isExpired || resolved}
-                            className={`group/btn relative h-14 border-2 overflow-hidden transition-all duration-200 
+                            className={`group/btn relative h-16 border-2 overflow-hidden transition-all duration-200 
                                 ${borderColor} ${baseColor}
                                 ${isSelected ? 'transform translate-y-1 shadow-none' : 'shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]'}
                                 ${resolved && !isWinning ? 'opacity-40 grayscale' : ''}
@@ -640,16 +640,16 @@ export const PredictionCard = ({
                             {/* Hover Fill Effect */}
                             <div className={`absolute inset-0 opacity-0 group-hover/btn:opacity-10 transition-opacity ${isYes ? 'bg-green-500' : 'bg-red-500'}`} />
 
-                            <div className="relative z-10 flex flex-col justify-center items-start px-3 h-full">
-                                <span className={`text-sm font-black uppercase italic leading-none ${textColor} flex items-center gap-2 w-full justify-between`}>
-                                    {outcomes[index]}
-                                    {isWinning && <CheckCircle2 size={14} className="text-black" />}
+                            <div className="relative z-10 flex flex-col justify-between items-start px-3 py-2 h-full">
+                                <span className={`text-sm font-black uppercase italic leading-none ${textColor} flex items-center gap-2 w-full truncate`}>
+                                    <span className="truncate">{outcomes[index]}</span>
+                                    {isWinning && <CheckCircle2 size={14} className="text-black shrink-0" />}
                                 </span>
-                                <div className="w-full flex justify-between items-end mt-1">
-                                    <span className="text-[10px] font-bold text-black font-mono tracking-tight">
+                                <div className="w-full flex justify-between items-end">
+                                    <span className="text-[10px] font-bold text-black font-mono tracking-tight shrink-0">
                                         {isYes ? 'YES' : 'NO'}
                                     </span>
-                                    <span className="text-xs font-black font-mono text-black">
+                                    <span className="text-xs font-black font-mono text-black shrink-0">
                                         {Math.round(outcomeProbabilities[index])}%
                                     </span>
                                 </div>
