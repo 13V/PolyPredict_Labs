@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, MintInterface, TokenAccountInterface, TokenInterface, TransferInterface};
 
-declare_id!("FEbCHi9LXo1AxKTtv3N9ZaHbs64Zq85b7dYPmjwVXYfv");
+declare_id!("F4ftWfZqAq99NK6yWTdA3B65xMwHVeD3MqVcqsvwbKzD");
 
 #[program]
 pub mod polybet {
