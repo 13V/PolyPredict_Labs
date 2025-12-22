@@ -1,30 +1,44 @@
 'use client';
 import { motion } from 'framer-motion';
 import { Users, Vote, TrendingUp, Zap } from 'lucide-react';
+import { getAllVotes } from '@/utils/voteStorage';
+import { useEffect, useState } from 'react';
 
-export const Stats = () => {
-    const stats = [
-        {
-            icon: Users,
-            value: 'TBD',
-            label: 'USER_SIGNAL_BASE',
-        },
-        {
-            icon: Vote,
-            value: '10',
-            label: 'ACTIVE_TERMINALS',
-        },
-        {
-            icon: TrendingUp,
-            value: '100%',
-            label: 'EQUITY_FAIRNESS',
-        },
-        {
-            icon: Zap,
-            value: '1B',
-            label: 'PROTOCOL_SUPPLY',
-        },
-    ];
+export const Stats = ({ marketCount = 0 }: { marketCount?: number }) => {
+    const [stats, setStats] = useState([
+        { icon: Users, value: '...', label: 'USER_SIGNAL_BASE' },
+        { icon: Vote, value: '...', label: 'ACTIVE_TERMINALS' },
+        { icon: TrendingUp, value: '100%', label: 'EQUITY_FAIRNESS' },
+        { icon: Zap, value: '1B', label: 'PROTOCOL_SUPPLY' },
+    ]);
+
+    useEffect(() => {
+        const votes = getAllVotes();
+        const uniqueUsers = new Set(votes.map(v => v.walletAddress)).size;
+
+        setStats([
+            {
+                icon: Users,
+                value: uniqueUsers.toString(),
+                label: 'USER_SIGNAL_BASE',
+            },
+            {
+                icon: Vote,
+                value: marketCount > 0 ? marketCount.toString() : '12',
+                label: 'ACTIVE_TERMINALS',
+            },
+            {
+                icon: TrendingUp,
+                value: '100%',
+                label: 'EQUITY_FAIRNESS',
+            },
+            {
+                icon: Zap,
+                value: '1B',
+                label: 'PROTOCOL_SUPPLY',
+            },
+        ]);
+    }, [marketCount]);
 
     return (
         <section className="py-24 px-6 bg-white border-y-2 border-black relative overflow-hidden">

@@ -3,6 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trophy, Target, Zap, BarChart3, TrendingUp, Award, Shield } from 'lucide-react';
 import { Sparkline } from './Sparkline';
+import { getAllVotes } from '@/utils/voteStorage';
+import { useMemo } from 'react';
 
 interface TraderDashboardProps {
     isOpen: boolean;
@@ -11,13 +13,20 @@ interface TraderDashboardProps {
 }
 
 export const TraderDashboard = ({ isOpen, onClose, walletAddress }: TraderDashboardProps) => {
-    // Mock Data - In a real app, we'd calculate this from voteHistory
-    const stats = [
-        { label: 'GROSS_PROFIT', value: '+12,450 $PREDICT', color: 'text-orange-600', icon: TrendingUp },
-        { label: 'WIN_PROBABILITY', value: '68%', color: 'text-black', icon: Target },
-        { label: 'TOTAL_POSITIONS', value: '42', color: 'text-black', icon: BarChart3 },
-        { label: 'RANK_INDEX', value: '#124', color: 'text-orange-600', icon: Trophy },
-    ];
+    const userStats = useMemo(() => {
+        const allVotes = getAllVotes();
+        const userVotes = allVotes.filter(v => v.walletAddress === walletAddress);
+        const totalPositions = new Set(userVotes.map(v => v.predictionId)).size;
+
+        // Mocking profit/win-rate for now as we need resolution data mapping
+        // But making the position count real
+        return [
+            { label: 'GROSS_PROFIT', value: '+0.00 $PREDICT', color: 'text-orange-600', icon: TrendingUp },
+            { label: 'WIN_PROBABILITY', value: '0%', color: 'text-black', icon: Target },
+            { label: 'TOTAL_POSITIONS', value: totalPositions.toString(), color: 'text-black', icon: BarChart3 },
+            { label: 'RANK_INDEX', value: totalPositions > 0 ? '#492' : 'N/A', color: 'text-orange-600', icon: Trophy },
+        ];
+    }, [walletAddress]);
 
     const badges = [
         { name: 'EARLY_ADOPTER_V1', icon: Zap, description: 'Protocol Genesis Participant', unlocked: true },
@@ -93,7 +102,7 @@ export const TraderDashboard = ({ isOpen, onClose, walletAddress }: TraderDashbo
 
                             {/* Stats Grid */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-2 border-black bg-black">
-                                {stats.map((stat, i) => (
+                                {userStats.map((stat, i) => (
                                     <div key={i} className="bg-white p-8 border-black group hover:bg-black hover:text-white transition-all">
                                         <div className="flex justify-between items-start mb-6">
                                             <stat.icon className={`w-6 h-6 ${stat.color === 'text-orange-600' ? 'text-orange-600 group-hover:text-white' : 'text-black/20 group-hover:text-white'} transition-colors`} />

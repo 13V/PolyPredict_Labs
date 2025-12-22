@@ -15,6 +15,7 @@ import { Hero } from "@/components/Hero";
 import { Background } from "@/components/Background";
 import { MarketWarRoom } from "@/components/MarketWarRoom";
 import { TraderDashboard } from "@/components/TraderDashboard";
+import { Stats } from "@/components/Stats";
 import { useWallet } from '@solana/wallet-adapter-react';
 
 import { fetchPolymarketTrending, fetchMarketResult } from '@/services/polymarket';
@@ -396,6 +397,8 @@ export default function Home() {
           <section>
             <Hero />
           </section>
+
+          <Stats marketCount={predictions.length} />
 
           {/* Discovery & Sort Bar */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 sticky top-[56px] md:top-[64px] z-40 bg-white py-4 md:py-6 border-b-2 border-black">

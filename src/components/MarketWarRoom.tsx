@@ -6,7 +6,8 @@ import { TeamLogo } from './TeamLogo';
 import { Sparkline } from './Sparkline';
 import { getPythPrices } from '@/services/pyth';
 import { getCoinGeckoSparkline } from '@/services/coingecko';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { getAllVotes } from '@/utils/voteStorage';
 
 interface MarketWarRoomProps {
     isOpen: boolean;
@@ -368,20 +369,33 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
 
                             {/* Stats Grid */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-2 border-black">
-                                {[
-                                    { label: 'Total Volume', value: market.totalLiquidity ? market.totalLiquidity.toLocaleString() : '0', icon: TrendingUp },
-                                    { label: 'Liquidity', value: '$124,500', icon: ShieldCheck },
-                                    { label: 'Active Traders', value: '1,245', icon: Users },
-                                    { label: 'Sentiment', value: isExpired ? 'CLOSED' : 'BULLISH', icon: MessageSquare }
-                                ].map((stat, i) => (
-                                    <div key={i} className="border-black md:border-r-2 last:border-r-0 p-6 bg-white hover:bg-black hover:text-white transition-colors group">
-                                        <div className="flex items-center gap-2 mb-3 text-gray-500 group-hover:text-white/60">
-                                            <stat.icon size={12} strokeWidth={3} />
-                                            <span className="text-[8px] font-black uppercase tracking-widest font-outfit">{stat.label}</span>
+                                {(() => {
+                                    const votes = getAllVotes().filter(v => v.predictionId === market.id);
+                                    const uniqueTraders = new Set(votes.map(v => v.walletAddress)).size;
+
+                                    // Calculate Sentiment
+                                    const totals = market.totals || [1, 1];
+                                    const total = totals.reduce((a: number, b: number) => a + (typeof b === 'number' ? b : 0), 0);
+                                    const prob = total > 0 ? (totals[0] / total) * 100 : 50;
+                                    let sentiment = 'NEUTRAL';
+                                    if (prob > 60) sentiment = 'BULLISH';
+                                    if (prob < 40) sentiment = 'BEARISH';
+
+                                    return [
+                                        { label: 'Total Volume', value: market.totalLiquidity ? `${market.totalLiquidity.toLocaleString()} $PREDICT` : '0', icon: TrendingUp },
+                                        { label: 'Liquidity', value: market.totalLiquidity ? `$${(market.totalLiquidity * 0.1).toLocaleString()}` : '$0', icon: ShieldCheck },
+                                        { label: 'Active Traders', value: (uniqueTraders + 5).toString(), icon: Users }, // +5 for base simulation
+                                        { label: 'Sentiment', value: isExpired ? 'CLOSED' : sentiment, icon: MessageSquare }
+                                    ].map((stat, i) => (
+                                        <div key={i} className="border-black md:border-r-2 last:border-r-0 p-6 bg-white hover:bg-black hover:text-white transition-colors group">
+                                            <div className="flex items-center gap-2 mb-3 text-gray-500 group-hover:text-white/60">
+                                                <stat.icon size={12} strokeWidth={3} />
+                                                <span className="text-[8px] font-black uppercase tracking-widest font-outfit">{stat.label}</span>
+                                            </div>
+                                            <div className="text-xl font-black font-mono tracking-tight uppercase italic">{stat.value}</div>
                                         </div>
-                                        <div className="text-xl font-black font-mono tracking-tight uppercase italic">{stat.value}</div>
-                                    </div>
-                                ))}
+                                    ));
+                                })()}
                             </div>
 
                             {/* Technical Provenance */}
