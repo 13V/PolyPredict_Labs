@@ -546,11 +546,9 @@ export const PredictionCard = ({
                         <div className="flex items-center gap-2 px-2 py-0.5 border border-black bg-white text-black font-mono text-[9px] font-bold">
                             #{id.toString().padStart(4, '0')}
                         </div>
-                        {!resolved && (
-                            <div className="flex items-center gap-2 px-2 py-0.5 border-y border-r border-black bg-gray-50 text-black/60 text-[9px] font-black uppercase tracking-widest">
-                                STATUS: {polymarketId && !isOnChain ? 'INITIALIZING' : 'LIVE_FEED'}
-                            </div>
-                        )}
+                        <div className={`flex items-center gap-2 px-2 py-0.5 border-y border-r border-black font-black uppercase tracking-widest text-[9px] ${isOnChain ? 'bg-green-600 text-white' : 'bg-gray-50 text-black/60'}`}>
+                            STATUS: {isOnChain ? 'INITIALIZED' : (polymarketId ? 'INITIALIZING' : 'LIVE_FEED')}
+                        </div>
                     </div>
                     <h3 className={`font-outfit font-black text-xl leading-tight transition-colors uppercase italic ${resolved ? 'text-gray-400' : 'text-black'} h-[4.5rem] line-clamp-3 overflow-hidden`}>
                         {displayTitle}
@@ -596,14 +594,14 @@ export const PredictionCard = ({
                 !resolved && (
                     <div className="flex items-center gap-3 md:gap-4 text-[10px] font-black text-black z-10 border-b-2 border-black pb-2">
                         <div className="flex items-center gap-1.5 border-r border-black/10 pr-3 md:pr-4">
-                            <Clock size={12} className={isExpired ? 'text-red-500' : 'text-black'} strokeWidth={3} />
-                            <span className={`font-mono font-bold ${isExpired ? 'text-red-500' : ''}`}>{timeLeft()} <span className="font-outfit opacity-60">REMAINING</span></span>
+                            <Clock size={14} className={isExpired ? 'text-red-500' : 'text-black'} strokeWidth={3.5} />
+                            <span className={`text-xs font-mono font-black ${isExpired ? 'text-red-500' : ''}`}>{timeLeft()} <span className="font-black opacity-60">REMAINING</span></span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <BarChart3 size={12} className="text-black" strokeWidth={3} />
-                            <span className="text-[8px] text-black/60 mr-1 hidden md:inline font-outfit">POOL_VOLUME:</span>
-                            <span className="font-mono font-bold">{totalLiquidity.toLocaleString()}</span>
-                            <span className="text-[8px] text-black/60 font-outfit">$PREDICT</span>
+                            <BarChart3 size={14} className="text-black" strokeWidth={3.5} />
+                            <span className="text-[10px] text-black font-black mr-1 hidden md:inline">POOL_VOLUME:</span>
+                            <span className="text-xs font-mono font-black">{totalLiquidity.toLocaleString()}</span>
+                            <span className="text-[10px] text-black font-black">$PREDICT</span>
                         </div>
                     </div>
                 )
@@ -647,11 +645,11 @@ export const PredictionCard = ({
                             />
 
                             <div className="relative z-10 flex items-center justify-between px-3 h-full w-full pb-1">
-                                <span className={`text-xs font-black uppercase italic leading-none ${textColor} flex items-center gap-2 truncate text-left`}>
-                                    <span className={`text-[10px] font-black uppercase tracking-tighter ${textColor}`}>
-                                        {!IS_TOKEN_LIVE ? 'LAUNCHING_SOON' : outcomes[index]}
+                                <span className={`text-sm font-black uppercase italic leading-none ${textColor} flex items-center gap-2 truncate text-left`}>
+                                    <span className={`text-[11px] font-black uppercase tracking-tighter ${textColor}`}>
+                                        {outcomes[index]}
                                     </span>
-                                    <span className={`text-xs font-mono font-black ${textColor} bg-black/5 px-1 py-0.5 rounded`}>
+                                    <span className={`text-[11px] font-mono font-black ${textColor} bg-black/10 px-1.5 py-0.5 rounded`}>
                                         {multiplier.toFixed(2)}x
                                     </span>
                                 </span>

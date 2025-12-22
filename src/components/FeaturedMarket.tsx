@@ -333,8 +333,8 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
                         <div className="flex items-center gap-2 px-3 py-1 border border-black bg-white text-black font-mono text-[10px] font-bold">
                             MARKET_REF: #{id.toString().padStart(4, '0')}
                         </div>
-                        <div className="flex items-center gap-2 px-3 py-1 border-y border-r border-black bg-gray-50 text-black/40 text-[10px] font-black uppercase tracking-widest hidden md:flex">
-                            SYS_STATUS: {polymarketId && !isOnChain ? 'INIT_PENDING' : 'OPERATIONAL'}
+                        <div className={`flex items-center gap-2 px-3 py-1 border-y border-r border-black font-black uppercase tracking-widest text-[10px] ${isOnChain ? 'bg-green-600 text-white' : 'bg-gray-50 text-black/40'}`}>
+                            SYS_STATUS: {isOnChain ? 'INITIALIZED' : (polymarketId ? 'INIT_PENDING' : 'OPERATIONAL')}
                         </div>
                     </div>
 
@@ -366,8 +366,8 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
 
                         {/* Vol */}
                         <div className="flex flex-col">
-                            <span className="text-[9px] text-black/40 font-black uppercase tracking-widest mb-1 italic">Volume_PREDICT</span>
-                            <span className="text-xl md:text-3xl font-mono font-black text-black">${totalLiquidity.toLocaleString()}</span>
+                            <span className="text-[10px] text-black font-black uppercase tracking-widest mb-1 italic">Volume_PREDICT</span>
+                            <span className="text-2xl md:text-4xl font-mono font-black text-black">${totalLiquidity.toLocaleString()}</span>
                         </div>
                     </div>
 
