@@ -692,87 +692,124 @@ export const PredictionCard = ({
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 20 }}
+                                    className="absolute inset-0 z-40 bg-white p-4 flex flex-col"
+                                >
+                                    <div className="flex justify-between items-center mb-4 border-b-2 border-black pb-2">
+                                        <span className="font-black italic uppercase text-lg">Confirm Position</span>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setBetMode(null); }}
+                                            className="text-black hover:bg-black hover:text-white px-2 py-1 font-bold text-xs border border-black transition-colors"
+                                        >
+                                            CANCEL
+                                        </button>
+                                    </div>
+
+                                    <div className="flex-1 flex flex-col justify-center gap-4">
+                                        <div className="bg-gray-50 border border-black p-3">
+                                            <span className="block text-[10px] font-black uppercase tracking-widest text-black/60 mb-1">Outcome Selected</span>
+                                            <span className="text-2xl font-black uppercase italic">{outcomes[betMode]}</span>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase tracking-widest text-black/60 mb-2">
+                                                Stake Amount ($PREDICT)
+                                            </label>
+                                            <div className="relative">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-black">$</span>
+                                                <input
+                                                    type="number"
+                                                    value={stakeAmount}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    onChange={(e) => setStakeAmount(e.target.value)}
+                                                    className="w-full bg-white border-2 border-black px-8 py-3 font-mono font-bold focus:outline-none focus:neo-shadow transition-all"
+                                                    placeholder="100"
+                                                    autoFocus
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); confirmBet(); }}
+                                            className="w-full bg-black text-white font-black uppercase italic py-4 hover:bg-green-600 transition-colors border-2 border-transparent hover:border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]"
+                                        >
+                                            CONFIRM TRADE
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Provenance Footer */}
+                        <div className="mt-auto pt-4 flex flex-col gap-1 border-t border-dashed border-black/10 origin-bottom scale-y-95">
+                            <div className="flex justify-between items-center">
+                                <span className="text-[7px] font-mono text-black/40 uppercase tracking-[0.2em]">
+                                    DATA_LAYER: {isCrypto ? 'PYTH_NETWORK' : 'POLYMARKET_RELAY_V2'}
+                                </span>
+                                <span className="text-[7px] font-mono text-black/40 uppercase">
+                                    SIG_STUB: {marketPublicKey ? `${marketPublicKey.slice(0, 8)}...` : 'UNSIGN_DATA'}
+                                </span>
+                            </div>
                         </div>
-                        <button
-                            onClick={(e) => { e.stopPropagation(); confirmBet(); }}
-                            className="w-full h-14 bg-black text-white font-black uppercase tracking-widest text-sm neo-shadow-sm hover:translate-y-[-2px] hover:neo-shadow active:translate-y-[2px] active:neo-shadow-none transition-all"
-                        >
-                            {isOnChain || !polymarketId ? 'CONFIRM FORECAST' : 'INITIALIZE & PREDICT'}
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
 
-            {/* Provenance Footer */}
-            <div className="mt-auto pt-4 flex flex-col gap-1 border-t border-dashed border-black/10 origin-bottom scale-y-95">
-                <div className="flex justify-between items-center">
-                    <span className="text-[7px] font-mono text-black/40 uppercase tracking-[0.2em]">
-                        DATA_LAYER: {isCrypto ? 'PYTH_NETWORK' : 'POLYMARKET_RELAY_V2'}
-                    </span>
-                    <span className="text-[7px] font-mono text-black/40 uppercase">
-                        SIG_STUB: {marketPublicKey ? `${marketPublicKey.slice(0, 8)}...` : 'UNSIGN_DATA'}
-                    </span>
-                </div>
-            </div>
+                        {/* Footer / Status */}
+                        {
+                            resolved && (
+                                <div className="pt-2 border-t-2 border-black flex justify-between items-center">
+                                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">ARCHIVED RECORD</span>
+                                    <button
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            if (!connected || !publicKey) return toast.error("Connect Wallet");
+                                            if (!isOnChain || !marketPublicKey) return toast.error("Not an on-chain market");
 
-            {/* Footer / Status */}
-            {
-                resolved && (
-                    <div className="pt-2 border-t-2 border-black flex justify-between items-center">
-                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">ARCHIVED RECORD</span>
-                        <button
-                            onClick={async (e) => {
-                                e.stopPropagation();
-                                if (!connected || !publicKey) return toast.error("Connect Wallet");
-                                if (!isOnChain || !marketPublicKey) return toast.error("Not an on-chain market");
+                                            const toastId = toast.loading("Processing claim...");
+                                            try {
+                                                const { getProgram, getMarketPDA, getVotePDA, getConfigPDA, getATA, BETTING_MINT, TOKEN_PROGRAM_ID } = await import('@/services/web3');
+                                                const program = getProgram({ publicKey, signTransaction, signAllTransactions });
+                                                if (!program) throw new Error("Program not initialized");
 
-                                const toastId = toast.loading("Processing claim...");
-                                try {
-                                    const { getProgram, getMarketPDA, getVotePDA, getConfigPDA, getATA, BETTING_MINT, TOKEN_PROGRAM_ID } = await import('@/services/web3');
-                                    const program = getProgram({ publicKey, signTransaction, signAllTransactions });
-                                    if (!program) throw new Error("Program not initialized");
+                                                const marketPda = new PublicKey(marketPublicKey);
+                                                const votePda = (await getVotePDA(marketPda, publicKey))[0];
+                                                const configPda = (await getConfigPDA());
+                                                const configAccount: any = await program.account.globalConfig.fetch(configPda);
 
-                                    const marketPda = new PublicKey(marketPublicKey);
-                                    const votePda = (await getVotePDA(marketPda, publicKey))[0];
-                                    const configPda = (await getConfigPDA());
-                                    const configAccount: any = await program.account.globalConfig.fetch(configPda);
+                                                const vaultTokenAcc = (await getATA(marketPda, BETTING_MINT));
+                                                const userTokenAcc = (await getATA(publicKey, BETTING_MINT));
+                                                const devVault = configAccount.devVault;
+                                                const devTokenAcc = (await getATA(devVault, BETTING_MINT));
 
-                                    const vaultTokenAcc = (await getATA(marketPda, BETTING_MINT));
-                                    const userTokenAcc = (await getATA(publicKey, BETTING_MINT));
-                                    const devVault = configAccount.devVault;
-                                    const devTokenAcc = (await getATA(devVault, BETTING_MINT));
+                                                // Resolved Creator ATA
+                                                const creatorPubkey = creator ? new PublicKey(creator) : publicKey; // fallback to user if not found (will fail contract constraint if wrong)
+                                                const creatorTokenAcc = (await getATA(creatorPubkey, BETTING_MINT));
 
-                                    // Resolved Creator ATA
-                                    const creatorPubkey = creator ? new PublicKey(creator) : publicKey; // fallback to user if not found (will fail contract constraint if wrong)
-                                    const creatorTokenAcc = (await getATA(creatorPubkey, BETTING_MINT));
+                                                await program.methods.claimWinnings().accounts({
+                                                    market: marketPda,
+                                                    config: configPda,
+                                                    voteRecord: votePda,
+                                                    user: publicKey,
+                                                    userTokenAccount: userTokenAcc,
+                                                    creatorTokenAccount: creatorTokenAcc,
+                                                    devTokenAccount: devTokenAcc,
+                                                    vaultTokenAccount: vaultTokenAcc,
+                                                    mint: BETTING_MINT,
+                                                    tokenProgram: TOKEN_PROGRAM_ID,
+                                                }).rpc();
 
-                                    await program.methods.claimWinnings().accounts({
-                                        market: marketPda,
-                                        config: configPda,
-                                        voteRecord: votePda,
-                                        user: publicKey,
-                                        userTokenAccount: userTokenAcc,
-                                        creatorTokenAccount: creatorTokenAcc,
-                                        devTokenAccount: devTokenAcc,
-                                        vaultTokenAccount: vaultTokenAcc,
-                                        mint: BETTING_MINT,
-                                        tokenProgram: TOKEN_PROGRAM_ID,
-                                    }).rpc();
-
-                                    toast.success("Winnings Claimed Successfully!", { id: toastId });
-                                    if (onSettle) onSettle(id);
-                                } catch (e: any) {
-                                    console.error("Claim Failed:", e);
-                                    toast.error(`Claim Failed: ${e.message}`, { id: toastId });
-                                }
-                            }}
-                            className="text-[10px] font-black text-green-600 hover:underline uppercase tracking-tighter"
-                        >
-                            REDEEM WINNINGS
-                        </button>
+                                                toast.success("Winnings Claimed Successfully!", { id: toastId });
+                                                if (onSettle) onSettle(id);
+                                            } catch (e: any) {
+                                                console.error("Claim Failed:", e);
+                                                toast.error(`Claim Failed: ${e.message}`, { id: toastId });
+                                            }
+                                        }}
+                                        className="text-[10px] font-black text-green-600 hover:underline uppercase tracking-tighter"
+                                    >
+                                        REDEEM WINNINGS
+                                    </button>
+                                </div>
+                            )
+                        }
                     </div>
-                )
-            }
-        </div>
-    );
+                );
 };
