@@ -40,7 +40,8 @@ const NBA_LOGOS: Record<string, string> = {
     // Central
     'bulls': 'https://upload.wikimedia.org/wikipedia/en/6/67/Chicago_Bulls_logo.svg',
     'cavaliers': 'https://upload.wikimedia.org/wikipedia/en/4/4b/Cleveland_Cavaliers_logo.svg',
-    'pistons': 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Pistons_logo17.svg',
+    'pistons': 'https://upload.wikimedia.org/wikipedia/en/1/1e/Detroit_Pistons_logo.svg',
+    'detroit pistons': 'https://upload.wikimedia.org/wikipedia/en/1/1e/Detroit_Pistons_logo.svg',
     'pacers': 'https://upload.wikimedia.org/wikipedia/en/1/1b/Indiana_Pacers.svg',
     'bucks': 'https://upload.wikimedia.org/wikipedia/en/4/4a/Milwaukee_Bucks_logo.svg',
 
@@ -106,9 +107,10 @@ const NFL_LOGOS: Record<string, string> = {
     // NFC West
     'cardinals': 'https://upload.wikimedia.org/wikipedia/en/7/72/Arizona_Cardinals_logo.svg',
     'rams': 'https://upload.wikimedia.org/wikipedia/en/8/8a/Los_Angeles_Rams_logo.svg',
-    '49ers': 'https://upload.wikimedia.org/wikipedia/commons/5/59/San_Francisco_49ers_logo.svg',
+    '49ers': 'https://upload.wikimedia.org/wikipedia/en/7/7b/San_Francisco_49ers_logo.svg',
+    'san francisco 49ers': 'https://upload.wikimedia.org/wikipedia/en/7/7b/San_Francisco_49ers_logo.svg',
     'seahawks': 'https://upload.wikimedia.org/wikipedia/en/8/8e/Seattle_Seahawks_logo.svg',
-    'niners': 'https://upload.wikimedia.org/wikipedia/commons/5/59/San_Francisco_49ers_logo.svg'
+    'niners': 'https://upload.wikimedia.org/wikipedia/en/7/7b/San_Francisco_49ers_logo.svg'
 };
 
 const NHL_LOGOS: Record<string, string> = {
