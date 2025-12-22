@@ -98,6 +98,8 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
     };
 
     const displayTitle = reconstructTitle();
+    // Display category override
+    const displayCategory = (market.question.toLowerCase().includes(' vs ') || market.question.toLowerCase().includes(' vs. ')) ? 'SPORTS' : market.category;
 
     // Team Parsing Logic for Sports (Enhanced)
     const getTeams = () => {
@@ -106,12 +108,12 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
         const eventTitle = market?.eventTitle || '';
         const fullSource = `${question} ${slug} ${eventTitle}`.toLowerCase();
 
-        // 1. Explicit "vs" or "@" check
+        // 1. Explicit "vs", " vs. ", or " @ " check
         if (fullSource.includes(' vs ') || fullSource.includes(' vs. ') || fullSource.includes(' @ ')) {
             const parts = (eventTitle || question).split(/ vs\.? | @ /i);
             if (parts.length === 2) {
                 return [
-                    parts[0].replace(/^Will\s+/i, '').replace(/\s+win\??$/i, '').replace(/Spread:\s+/i, '').trim(),
+                    parts[0].replace(/^Will\s+/i, '').replace(/\s+win\??$/i, '').replace(/Spread:\s+/i, '').replace(/Total:\s+/i, '').trim(),
                     parts[1].replace(/\s+win\??$/i, '').replace(/\?$/, '').trim()
                 ];
             }
@@ -120,7 +122,10 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
         // 2. Fallback to binary outcomes if category is SPORTS
         const isSport = (market?.category || '').toLowerCase().includes('sport') || (displayCategory === 'SPORTS');
         if (isSport && market?.outcomes?.length === 2) {
-            return [market.outcomes[0], market.outcomes[1]];
+            // Filter out generic Yes/No
+            if (!['YES', 'NO'].includes(market.outcomes[0].toUpperCase())) {
+                return [market.outcomes[0], market.outcomes[1]];
+            }
         }
 
         return null;
@@ -215,7 +220,6 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
 
     const CategoryIcon = getCategoryIcon(market.category || '');
     const theme = getCategoryTheme(market.category || '');
-    const displayCategory = (market.question.toLowerCase().includes(' vs ') || market.question.toLowerCase().includes(' vs. ')) ? 'SPORTS' : market.category;
     const isExpired = Date.now() > (market.endTime * 1000);
     const resolved = market.resolved;
 
@@ -246,11 +250,11 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                     >
                         {/* Team Background Watermarks */}
                         {teams && (
-                            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden grayscale">
-                                <div className="absolute -left-24 top-1/2 -translate-y-1/2 w-[600px] h-[600px] rotate-[-12deg]">
+                            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden grayscale opacity-30">
+                                <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-[800px] h-[800px] rotate-[-12deg]">
                                     <TeamLogo name={teams[0]} className="w-full h-full" />
                                 </div>
-                                <div className="absolute -right-24 top-1/2 -translate-y-1/2 w-[600px] h-[600px] rotate-[12deg]">
+                                <div className="absolute -right-32 top-1/2 -translate-y-1/2 w-[800px] h-[800px] rotate-[12deg]">
                                     <TeamLogo name={teams[1]} className="w-full h-full" />
                                 </div>
                             </div>

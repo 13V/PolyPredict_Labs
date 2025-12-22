@@ -95,26 +95,31 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
     };
 
     const displayTitle = reconstructTitle();
+    // Display category override
+    const displayCategory = (question.toLowerCase().includes(' vs ') || question.toLowerCase().includes(' vs. ')) ? 'SPORTS' : category;
 
     // Team Parsing Logic for Sports (Enhanced)
     const getTeams = () => {
         const fullSource = `${question} ${slug || ''} ${eventTitle || ''}`.toLowerCase();
 
-        // 1. Explicit "vs" or "@" check
+        // 1. Explicit "vs", " vs. ", or " @ " check
         if (fullSource.includes(' vs ') || fullSource.includes(' vs. ') || fullSource.includes(' @ ')) {
             const parts = (eventTitle || question).split(/ vs\.? | @ /i);
             if (parts.length === 2) {
                 return [
-                    parts[0].replace(/^Will\s+/i, '').replace(/\s+win\??$/i, '').replace(/Spread:\s+/i, '').trim(),
+                    parts[0].replace(/^Will\s+/i, '').replace(/\s+win\??$/i, '').replace(/Spread:\s+/i, '').replace(/Total:\s+/i, '').trim(),
                     parts[1].replace(/\s+win\??$/i, '').replace(/\?$/, '').trim()
                 ];
             }
         }
 
         // 2. Fallback to outcomes if category is SPORTS
-        const isSport = category.toLowerCase().includes('sport') || displayCategory === 'SPORTS';
+        const isSport = category.toLowerCase().includes('sport') || (displayCategory === 'SPORTS');
         if (isSport && outcomes.length === 2) {
-            return [outcomes[0], outcomes[1]];
+            // Filter out generic Yes/No
+            if (!['YES', 'NO'].includes(outcomes[0].toUpperCase())) {
+                return [outcomes[0], outcomes[1]];
+            }
         }
 
         return null;
@@ -271,7 +276,6 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
     };
 
     const CategoryIcon = getCategoryIcon(category);
-    const displayCategory = (question.toLowerCase().includes(' vs ') || question.toLowerCase().includes(' vs. ')) ? 'SPORTS' : category;
 
     return (
         <div onClick={onOpenExpanded} className="relative group overflow-hidden neo-border neo-shadow bg-white cursor-pointer" style={{ paddingLeft: '1.25rem' }}>
@@ -280,11 +284,11 @@ export const FeaturedMarket = ({ data, onOpenCreateModal, onOpenExpanded }: Feat
 
             {/* Team Background Watermarks */}
             {teams && (
-                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden grayscale transition-opacity opacity-100 group-hover:opacity-100">
-                    <div className="absolute -left-12 top-1/2 -translate-y-1/2 w-96 h-96 rotate-[-12deg]">
+                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden grayscale transition-opacity opacity-20 group-hover:opacity-40">
+                    <div className="absolute -left-16 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rotate-[-12deg]">
                         <TeamLogo name={teams[0]} className="w-full h-full" />
                     </div>
-                    <div className="absolute -right-12 top-1/2 -translate-y-1/2 w-96 h-96 rotate-[12deg]">
+                    <div className="absolute -right-16 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rotate-[12deg]">
                         <TeamLogo name={teams[1]} className="w-full h-full" />
                     </div>
                 </div>
