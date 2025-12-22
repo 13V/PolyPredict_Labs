@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Token, TokenAccount, Transfer};
+use anchor_spl::token_interface::{self, MintInterface, TokenAccountInterface, TokenInterface, TransferInterface};
 
 declare_id!("FEbCHi9LXo1AxKTtv3N9ZaHbs64Zq85b7dYPmjwVXYfv");
 
@@ -66,8 +66,8 @@ pub mod polybet {
         };
 
         // Move tokens to Global Treasury
-        token::transfer(CpiContext::new(ctx.accounts.token_program.to_account_info(), 
-            Transfer { from: ctx.accounts.user_token.to_account_info(), to: ctx.accounts.treasury_vault.to_account_info(), authority: ctx.accounts.user.to_account_info() }), 
+        token_interface::transfer(CpiContext::new(ctx.accounts.token_program.to_account_info(), 
+            token_interface::TransferInterface { from: ctx.accounts.user_token.to_account_info(), to: ctx.accounts.treasury_vault.to_account_info(), authority: ctx.accounts.user.to_account_info() }), 
             amount)?;
 
         let vote = &mut ctx.accounts.vote;
@@ -100,8 +100,8 @@ pub mod polybet {
         let signer = &[&seeds[..]];
 
         let cpi_program = ctx.accounts.token_program.to_account_info();
-        token::transfer(CpiContext::new_with_signer(cpi_program.clone(), Transfer { from: ctx.accounts.treasury_vault.to_account_info(), to: ctx.accounts.user_token.to_account_info(), authority: ctx.accounts.treasury_vault.to_account_info() }, signer), payout)?;
-        token::transfer(CpiContext::new_with_signer(cpi_program.clone(), Transfer { from: ctx.accounts.treasury_vault.to_account_info(), to: ctx.accounts.dev_token.to_account_info(), authority: ctx.accounts.treasury_vault.to_account_info() }, signer), d_fee)?;
+        token_interface::transfer(CpiContext::new_with_signer(cpi_program.clone(), token_interface::TransferInterface { from: ctx.accounts.treasury_vault.to_account_info(), to: ctx.accounts.user_token.to_account_info(), authority: ctx.accounts.treasury_vault.to_account_info() }, signer), payout)?;
+        token_interface::transfer(CpiContext::new_with_signer(cpi_program.clone(), token_interface::TransferInterface { from: ctx.accounts.treasury_vault.to_account_info(), to: ctx.accounts.dev_token.to_account_info(), authority: ctx.accounts.treasury_vault.to_account_info() }, signer), d_fee)?;
 
         ctx.accounts.vote.claimed = true;
         Ok(())
@@ -117,8 +117,8 @@ pub mod polybet {
     pub fn sweep_profit(ctx: Context<SweepProfit>, amount: u64) -> Result<()> {
         let seeds = &[b"treasury".as_ref(), &[ctx.accounts.config.vault_bump]];
         let signer = &[&seeds[..]];
-        token::transfer(CpiContext::new_with_signer(ctx.accounts.token_program.to_account_info(), 
-            Transfer { from: ctx.accounts.treasury_vault.to_account_info(), to: ctx.accounts.destination_token.to_account_info(), authority: ctx.accounts.treasury_vault.to_account_info() }, 
+        token_interface::transfer(CpiContext::new_with_signer(ctx.accounts.token_program.to_account_info(), 
+            token_interface::TransferInterface { from: ctx.accounts.treasury_vault.to_account_info(), to: ctx.accounts.destination_token.to_account_info(), authority: ctx.accounts.treasury_vault.to_account_info() }, 
             signer), amount)?;
         Ok(())
     }
@@ -128,13 +128,13 @@ pub mod polybet {
 pub struct InitializeProtocol<'info> {
     #[account(init, payer = authority, space = ProtocolConfig::SPACE, seeds = [b"config"], bump)]
     pub config: Account<'info, ProtocolConfig>,
-    #[account(init, payer = authority, token::mint = mint, token::authority = treasury_vault, seeds = [b"treasury"], bump)]
-    pub treasury_vault: Account<'info, TokenAccount>,
-    pub mint: Account<'info, token::Mint>,
+    #[account(init, payer = authority, mint::token_program = token_program, mint::authority = treasury_vault, seeds = [b"treasury"], bump)]
+    pub treasury_vault: InterfaceAccount<'info, TokenAccountInterface>,
+    pub mint: InterfaceAccount<'info, MintInterface>,
     #[account(mut)]
     pub authority: Signer<'info>,
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, Token>,
+    pub token_program: Interface<'info, TokenInterface>,
     pub rent: Sysvar<'info, Rent>,
 }
 
@@ -155,14 +155,14 @@ pub struct PlaceVote<'info> {
     #[account(init, payer = user, space = Vote::SPACE, seeds = [b"vote", market.key().as_ref(), user.key().as_ref()], bump)]
     pub vote: Account<'info, Vote>,
     #[account(mut, seeds = [b"treasury"], bump = config.vault_bump)]
-    pub treasury_vault: Account<'info, TokenAccount>,
+    pub treasury_vault: InterfaceAccount<'info, TokenAccountInterface>,
     #[account(mut)]
-    pub user_token: Account<'info, TokenAccount>,
+    pub user_token: InterfaceAccount<'info, TokenAccountInterface>,
     pub config: Account<'info, ProtocolConfig>,
     #[account(mut)]
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, Token>,
+    pub token_program: Interface<'info, TokenInterface>,
 }
 
 #[derive(Accounts)]
@@ -172,14 +172,14 @@ pub struct ClaimWinnings<'info> {
     #[account(mut, seeds = [b"vote", market.key().as_ref(), user.key().as_ref()], bump = vote.bump, has_one = user)]
     pub vote: Account<'info, Vote>,
     #[account(mut, seeds = [b"treasury"], bump = config.vault_bump)]
-    pub treasury_vault: Account<'info, TokenAccount>,
+    pub treasury_vault: InterfaceAccount<'info, TokenAccountInterface>,
     #[account(mut)]
-    pub user_token: Account<'info, TokenAccount>,
+    pub user_token: InterfaceAccount<'info, TokenAccountInterface>,
     #[account(mut)]
-    pub dev_token: Account<'info, TokenAccount>,
+    pub dev_token: InterfaceAccount<'info, TokenAccountInterface>,
     #[account(mut)]
     pub user: Signer<'info>,
-    pub token_program: Program<'info, Token>,
+    pub token_program: Interface<'info, TokenInterface>,
 }
 
 #[derive(Accounts)]
@@ -194,11 +194,11 @@ pub struct SweepProfit<'info> {
     #[account(has_one = authority)]
     pub config: Account<'info, ProtocolConfig>,
     #[account(mut, seeds = [b"treasury"], bump = config.vault_bump)]
-    pub treasury_vault: Account<'info, TokenAccount>,
+    pub treasury_vault: InterfaceAccount<'info, TokenAccountInterface>,
     #[account(mut)]
-    pub destination_token: Account<'info, TokenAccount>,
+    pub destination_token: InterfaceAccount<'info, TokenAccountInterface>,
     pub authority: Signer<'info>,
-    pub token_program: Program<'info, Token>,
+    pub token_program: Interface<'info, TokenInterface>,
 }
 
 #[account]

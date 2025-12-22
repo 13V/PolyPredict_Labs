@@ -26,9 +26,10 @@ export const TREASURY_WALLET = new PublicKey(
     process.env.NEXT_PUBLIC_TREASURY_WALLET || '2KF9SAvpU2h2ZhczzMLbgx7arkjG8QHCXbQ6XaDqtEtm'
 );
 
-// Constants
+// Token Program IDs
 export const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
-export const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+export const TOKEN_PROGRAM_ID = new PublicKey('TokenzQdBnBLqP5VE-hdkAS6EPFLC1PHnBqCXEpPxuEb'); // Token-2022 (Used by $PREDICT)
+export const LEGACY_TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 
 export const getATA = async (owner: PublicKey, mint: PublicKey) => {
     const [ata] = await PublicKey.findProgramAddress(
