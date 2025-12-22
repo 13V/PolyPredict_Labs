@@ -551,7 +551,7 @@ export const PredictionCard = ({
                             </div>
                         )}
                     </div>
-                    <h3 className={`font-outfit font-black text-xl leading-tight transition-colors uppercase italic ${resolved ? 'text-gray-400' : 'text-black'}`}>
+                    <h3 className={`font-outfit font-black text-xl leading-tight transition-colors uppercase italic ${resolved ? 'text-gray-400' : 'text-black'} h-[4.5rem] line-clamp-3 overflow-hidden`}>
                         {displayTitle}
                     </h3>
                 </div>
