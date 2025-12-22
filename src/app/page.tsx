@@ -355,7 +355,7 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="hidden xl:flex items-center gap-2 px-3 py-1 bg-gray-50 border border-black text-[9px] font-mono font-bold">
+              <div className="hidden xl:flex items-center gap-2 px-3 py-1 bg-white border-2 border-black text-[9px] font-mono font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 <span className="text-gray-400 uppercase">FEED_ADDR:</span>
                 <span className="text-black">{CONTRACT_ADDRESS === 'COMING SOON' ? CONTRACT_ADDRESS : `${(CONTRACT_ADDRESS as string).slice(0, 4)}...${(CONTRACT_ADDRESS as string).slice(-4)}`}</span>
                 <button onClick={copyToClipboard} className="text-black hover:text-orange-600 transition-colors p-[2px]">
@@ -366,13 +366,13 @@ export default function Home() {
               <div className="flex items-center border-l-2 border-black h-16 md:h-20 ml-2">
                 <button
                   onClick={() => setIsDashboardOpen(true)}
-                  className="px-4 h-full hidden sm:flex items-center text-[10px] font-black text-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors border-r border-black/10"
+                  className="px-4 h-full hidden sm:flex items-center text-[10px] font-black text-black uppercase tracking-widest hover:bg-orange-500 transition-colors border-r border-black/10"
                 >
                   STATS
                 </button>
                 <button
                   onClick={() => setIsPositionsOpen(true)}
-                  className="px-4 h-full hidden md:flex items-center text-[10px] font-black text-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors"
+                  className="px-4 h-full hidden md:flex items-center text-[10px] font-black text-black uppercase tracking-widest hover:bg-orange-500 transition-colors"
                 >
                   MY_BOOK
                 </button>
