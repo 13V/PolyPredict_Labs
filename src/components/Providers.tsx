@@ -36,8 +36,12 @@ export const Providers: FC<{ children: ReactNode }> = ({ children }) => {
     );
 
     return (
-        <ConnectionProvider endpoint={endpoint}>
-            <WalletProvider wallets={wallets} autoConnect>
+        <ConnectionProvider endpoint={endpoint} config={{ commitment: 'confirmed' }}>
+            <WalletProvider
+                wallets={wallets}
+                autoConnect={true}
+                onError={(error) => console.error("WalletProvider Error:", error)}
+            >
                 <WalletModalProvider>
                     <ToastProvider>
                         <BetSuccessProvider>
