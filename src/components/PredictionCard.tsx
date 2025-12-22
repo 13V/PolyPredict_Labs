@@ -616,82 +616,72 @@ export const PredictionCard = ({
                             style={{ width: `${outcomeProbabilities[idx]}%` }}
                         />
 
-                        <div className="relative z-10 flex justify-between items-center w-full">
-                            <div className="flex items-center gap-2">
-                                {resolved && winningOutcome === idx && <Trophy size={14} className="text-yellow-400" />}
-                                <span className="text-sm font-black uppercase tracking-tight">
-                                    {outcomes[idx]}
-                                    {priceTarget && (
-                                        outcomes[idx].toLowerCase().includes('up') ||
-                                        outcomes[idx].toLowerCase().includes('down') ||
-                                        outcomes[idx].toLowerCase().includes('yes') ||
-                                        outcomes[idx].toLowerCase().includes('no')
-                                    ) && (
-                                            <span className="ml-1 text-[8px] font-mono opacity-40">
-                                                {(outcomes[idx].toLowerCase().includes('up') || outcomes[idx].toLowerCase().includes('yes')) ? 'GTE' : 'LTE'} {priceTarget}
+                        <div className="mt-auto grid grid-cols-2 gap-3 z-10 pt-4">
+                            {topOutcomes.map((index) => {
+                                const isWinning = winningOutcome === index;
+                                const isSelected = betMode === index;
+                                // Dynamic Colors for Yes/No default
+                                const isYes = index === 0;
+                                const baseColor = isYes ? 'bg-green-100' : 'bg-red-100'; // Default light background
+                                const borderColor = isYes ? 'border-green-600' : 'border-red-600';
+                                const textColor = 'text-black';
+                                const progressColor = isYes ? 'bg-green-500' : 'bg-red-500';
+
+                                return (
+                                    <button
+                                        key={index}
+                                        onClick={(e) => handleOutcomeClick(e, index)}
+                                        disabled={isExpired || resolved}
+                                        className={`group/btn relative h-14 border-2 overflow-hidden transition-all duration-200 
+                                ${borderColor} ${baseColor}
+                                ${isSelected ? 'transform translate-y-1 shadow-none' : 'shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]'}
+                                ${resolved && !isWinning ? 'opacity-40 grayscale' : ''}
+                            `}
+                                    >
+                                        {/* Progress Bar Background (Visible on Hover or Default?) -> User wants "Colours... before you hover" */}
+                                        <div
+                                            className={`absolute inset-y-0 left-0 transition-all duration-500 opacity-20 group-hover/btn:opacity-40 ${progressColor}`}
+                                            style={{ width: `${outcomeProbabilities[index]}%` }}
+                                        />
+
+                                        {/* Hover Fill Effect - Optional, keeping minimal to respect "swiss" clean feel but adding interaction */}
+                                        <div className={`absolute inset-0 opacity-0 group-hover/btn:opacity-10 transition-opacity ${isYes ? 'bg-green-500' : 'bg-red-500'}`} />
+
+                                        <div className="relative z-10 flex flex-col justify-center items-start px-3 h-full">
+                                            <span className={`text-sm font-black uppercase italic leading-none ${textColor} flex items-center gap-2 w-full justify-between`}>
+                                                {outcomes[index]}
+                                                {isWinning && <CheckCircle2 size={14} className="text-black" />}
                                             </span>
-                                        )}
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className={`text-[10px] font-mono font-bold ${votedIndex === idx ? 'text-white' : 'text-black group-hover/btn:text-white opacity-40 group-hover/btn:opacity-100 transition-colors'}`}>
-                                    {outcomeProbabilities[idx].toFixed(0)}%
-                                </span>
-                            </div>
+                                            <div className="w-full flex justify-between items-end mt-1">
+                                                <span className="text-[10px] font-bold text-black font-mono tracking-tight">
+                                                    {isYes ? 'YES' : 'NO'}  {/* Explicit Label */}
+                                                </span>
+                                                <span className="text-xs font-black font-mono text-black">
+                                                    {Math.round(outcomeProbabilities[index])}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
-                    </button>
-                ))}
 
-                {outcomes.length > 2 && !resolved && (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); setShowAllOutcomes(!showAllOutcomes); }}
-                        className="text-[10px] font-black uppercase tracking-widest text-black hover:underline py-1 self-center col-span-full"
-                    >
-                        {showAllOutcomes ? 'Show Less' : `+ [ ${outcomes.length - 2} ] MORE OUTCOMES`}
-                    </button>
-                )}
-            </div>
+                        {outcomes.length > 2 && !resolved && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setShowAllOutcomes(!showAllOutcomes); }}
+                                className="text-[10px] font-black uppercase tracking-widest text-black hover:underline py-1 self-center col-span-full"
+                            >
+                                {showAllOutcomes ? 'Show Less' : `+ [ ${outcomes.length - 2} ] MORE OUTCOMES`}
+                            </button>
+                        )}
 
 
-            {/* Bet Modal Overlay */}
-            <AnimatePresence mode="wait">
-                {betMode !== null && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute inset-x-0 bottom-0 bg-white border-t-2 border-black p-5 flex flex-col gap-4 z-20"
-                    >
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <span className="text-xs font-black text-black uppercase tracking-tighter">Stake: {outcomes[betMode]}</span>
-                                <span className="text-[9px] font-black text-black/40 uppercase tracking-widest bg-gray-100 px-1.5 py-0.5 border border-black/10">PLATFORM_FEE: 10%</span>
-                            </div>
-                            <button onClick={(e) => { e.stopPropagation(); setBetMode(null); }} className="text-black font-black hover:scale-110">✕</button>
-                        </div>
-                        <div className="relative">
-                            <input
-                                autoFocus
-                                type="number"
-                                value={stakeAmount}
-                                onChange={(e) => setStakeAmount(e.target.value)}
-                                placeholder="0.00"
-                                className="w-full h-14 bg-gray-50 border-2 border-black px-4 font-mono font-black text-2xl focus:bg-white focus:outline-none transition-all placeholder:text-gray-300"
-                            />
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-end">
-                                <span className="text-xs font-black text-black">$PREDICT</span>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-4 gap-2">
-                            {['100', '500', '1k', '5k'].map(val => (
-                                <button
-                                    key={val}
-                                    onClick={() => setStakeAmount(val.replace('k', '000'))}
-                                    className="h-8 border-2 border-black bg-white hover:bg-black hover:text-white text-[10px] font-black uppercase transition-colors"
-                                >
-                                    {val}
-                                </button>
-                            ))}
+                        {/* Bet Modal Overlay */}
+                        <AnimatePresence mode="wait">
+                            {betMode !== null && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
                         </div>
                         <button
                             onClick={(e) => { e.stopPropagation(); confirmBet(); }}
