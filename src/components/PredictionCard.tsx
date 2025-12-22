@@ -613,12 +613,17 @@ export const PredictionCard = ({
                 {topOutcomes.map((index) => {
                     const isWinning = winningOutcome === index;
                     const isSelected = betMode === index;
-                    // Dynamic Colors for Yes/No default
-                    const isYes = index === 0;
-                    const baseColor = isYes ? 'bg-green-100' : 'bg-red-100'; // Default light background
-                    const borderColor = isYes ? 'border-green-600' : 'border-red-600';
+                    // User Request: Orange Scheme, 60% opacity -> 100% hover
+                    const baseColor = 'bg-orange-500/60 hover:bg-orange-500';
+                    const borderColor = 'border-black'; // Keeping border black for contrast or orange? User said "button colours... orange". Let's stick to black border for the "Swiss" feel or orange? Previous was green/red. I'll use black to match the "Brutalist" outlines usually found in this design, or maybe border-orange-600. Let's use border-black to be safe with the "Swiss" aesthetic, or match the fill. Let's try border-orange-500 to match the fill request, but border-black is safer for visibility. 
+                    // Wait, previous was border-green-600.
+                    // "make both the options 60% Orange opacity".
+                    // I'll make the border black to ensure it is defined, as the background is semi-transparent.
+                    // Actually, "border-2" is on the button.
+                    const finalBorderColor = 'border-orange-600'; // slightly darker than fill
+
                     const textColor = 'text-black';
-                    const progressColor = isYes ? 'bg-green-500' : 'bg-red-500';
+                    const progressColor = 'bg-white/30'; // White shimmer for progress against orange?
 
                     return (
                         <button
@@ -626,29 +631,23 @@ export const PredictionCard = ({
                             onClick={(e) => handleOutcomeClick(e, index)}
                             disabled={isExpired || resolved}
                             className={`group/btn relative h-16 border-2 overflow-hidden transition-all duration-200 
-                                ${borderColor} ${baseColor}
+                                ${finalBorderColor} ${baseColor}
                                 ${isSelected ? 'transform translate-y-1 shadow-none' : 'shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]'}
                                 ${resolved && !isWinning ? 'opacity-40 grayscale' : ''}
                             `}
                         >
                             {/* Progress Bar Background */}
                             <div
-                                className={`absolute inset-y-0 left-0 transition-all duration-500 opacity-20 group-hover/btn:opacity-40 ${progressColor}`}
+                                className={`absolute inset-y-0 left-0 transition-all duration-500 ${progressColor}`}
                                 style={{ width: `${outcomeProbabilities[index]}%` }}
                             />
-
-                            {/* Hover Fill Effect */}
-                            <div className={`absolute inset-0 opacity-0 group-hover/btn:opacity-10 transition-opacity ${isYes ? 'bg-green-500' : 'bg-red-500'}`} />
 
                             <div className="relative z-10 flex flex-col justify-between items-start px-3 py-2 h-full">
                                 <span className={`text-sm font-black uppercase italic leading-none ${textColor} flex items-center gap-2 w-full truncate`}>
                                     <span className="truncate">{outcomes[index]}</span>
                                     {isWinning && <CheckCircle2 size={14} className="text-black shrink-0" />}
                                 </span>
-                                <div className="w-full flex justify-between items-end">
-                                    <span className="text-[10px] font-bold text-black font-mono tracking-tight shrink-0">
-                                        {isYes ? 'YES' : 'NO'}
-                                    </span>
+                                <div className="w-full flex justify-end items-end">
                                     <span className="text-xs font-black font-mono text-black shrink-0">
                                         {Math.round(outcomeProbabilities[index])}%
                                     </span>
