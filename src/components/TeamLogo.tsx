@@ -116,7 +116,7 @@ const NHL_LOGOS: Record<string, string> = {
     'ducks': 'https://upload.wikimedia.org/wikipedia/en/7/72/Anaheim_Ducks.svg',
     'flames': 'https://upload.wikimedia.org/wikipedia/en/6/60/Calgary_Flames_Logo.svg',
     'oilers': 'https://upload.wikimedia.org/wikipedia/en/4/4d/Edmonton_Oilers_Logo_2017.svg',
-    'kings': 'https://upload.wikimedia.org/wikipedia/en/c/c7/SacramentoKings.svg', // Overlap
+    'kings': 'https://upload.wikimedia.org/wikipedia/en/c/c7/SacramentoKings.svg', // Default to NBA Kings due to overlap
     'nhl_kings': 'https://upload.wikimedia.org/wikipedia/en/6/63/Los_Angeles_Kings_logo.svg',
     'sharks': 'https://upload.wikimedia.org/wikipedia/en/3/37/San_Jose_Sharks_Logo.svg',
     'kraken': 'https://upload.wikimedia.org/wikipedia/en/4/48/Seattle_Kraken_official_logo.svg',
@@ -208,7 +208,7 @@ export const TeamLogo = ({ name, className = "", style = {} }: TeamLogoProps) =>
                     <img
                         src={logoUrl}
                         alt={name}
-                        className="w-[80%] h-[80%] object-contain opacity-40 grayscale contrast-125 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
+                        className="w-[85%] h-[85%] object-contain opacity-60 grayscale contrast-125 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
                     />
                 </div>
             ) : (
@@ -226,7 +226,7 @@ export const TeamLogo = ({ name, className = "", style = {} }: TeamLogoProps) =>
             )}
 
             {/* Technical Metadata overlay for that "System" feel */}
-            <div className="absolute bottom-6 right-6 flex flex-col items-end opacity-40">
+            <div className="absolute bottom-6 right-6 flex flex-col items-end opacity-80 text-black">
                 <span className="text-[12px] font-black uppercase tracking-widest leading-none">ID_REF</span>
                 <span className="text-[12px] font-mono leading-none">{name.slice(0, 3).toUpperCase()}_0x</span>
             </div>

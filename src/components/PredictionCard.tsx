@@ -483,7 +483,7 @@ export const PredictionCard = ({
     return (
         <div
             onClick={onOpenExpanded}
-            className={`terminal-card neo-shadow-sm p-4 md:p-5 flex flex-col gap-4 transition-all duration-200 relative overflow-hidden group hover:neo-shadow cursor-pointer ${isHot ? 'bg-orange-50/10' : 'bg-white'
+            className={`terminal-card h-full neo-shadow-sm p-4 md:p-5 flex flex-col gap-4 transition-all duration-200 relative overflow-hidden group hover:neo-shadow cursor-pointer ${isHot ? 'bg-orange-50/10' : 'bg-white'
                 } ${(isExpired && !resolved) ? 'grayscale opacity-80' : ''}`}
             style={{
                 borderColor: '#000000',
@@ -599,7 +599,7 @@ export const PredictionCard = ({
             }
 
             {/* Outcomes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 relative mt-auto">
                 {topOutcomes.map((idx) => (
                     <button
                         key={idx}
