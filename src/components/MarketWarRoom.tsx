@@ -99,22 +99,30 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
 
     const displayTitle = reconstructTitle();
 
-    // Team Parsing Logic for Sports
+    // Team Parsing Logic for Sports (Enhanced)
     const getTeams = () => {
         const question = market?.question || '';
         const slug = market?.slug || '';
         const eventTitle = market?.eventTitle || '';
         const fullSource = `${question} ${slug} ${eventTitle}`.toLowerCase();
 
-        if (fullSource.includes(' vs ') || fullSource.includes(' vs. ')) {
-            const parts = (eventTitle || question).split(/ vs\.? /i);
+        // 1. Explicit "vs" or "@" check
+        if (fullSource.includes(' vs ') || fullSource.includes(' vs. ') || fullSource.includes(' @ ')) {
+            const parts = (eventTitle || question).split(/ vs\.? | @ /i);
             if (parts.length === 2) {
                 return [
-                    parts[0].replace(/^Will\s+/i, '').replace(/\s+win\??$/i, '').trim(),
+                    parts[0].replace(/^Will\s+/i, '').replace(/\s+win\??$/i, '').replace(/Spread:\s+/i, '').trim(),
                     parts[1].replace(/\s+win\??$/i, '').replace(/\?$/, '').trim()
                 ];
             }
         }
+
+        // 2. Fallback to binary outcomes if category is SPORTS
+        const isSport = (market?.category || '').toLowerCase().includes('sport') || (displayCategory === 'SPORTS');
+        if (isSport && market?.outcomes?.length === 2) {
+            return [market.outcomes[0], market.outcomes[1]];
+        }
+
         return null;
     };
 
@@ -238,7 +246,7 @@ export const MarketWarRoom = ({ isOpen, onClose, market }: MarketWarRoomProps) =
                     >
                         {/* Team Background Watermarks */}
                         {teams && (
-                            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-10 grayscale">
+                            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden grayscale">
                                 <div className="absolute -left-24 top-1/2 -translate-y-1/2 w-[600px] h-[600px] rotate-[-12deg]">
                                     <TeamLogo name={teams[0]} className="w-full h-full" />
                                 </div>

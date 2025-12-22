@@ -31,18 +31,18 @@ export const TeamLogo = ({ name, className = "", style = {} }: TeamLogoProps) =>
         >
             {/* The "Shield" container */}
             <div className="absolute inset-0 border-2 border-black/10 flex items-center justify-center bg-white/5">
-                <Shield className="w-full h-full text-black/[0.03]" strokeWidth={1} />
+                <Shield className="w-full h-full text-black/[0.08]" strokeWidth={1} />
             </div>
 
             {/* The "Initials" as the core brand mark */}
-            <span className="relative z-10 font-black text-black/20 text-4xl italic tracking-tighter font-mono">
+            <span className="relative z-10 font-black text-black/30 text-8xl italic tracking-tighter font-mono">
                 {initials}
             </span>
 
             {/* Technical Metadata overlay for that "System" feel */}
-            <div className="absolute bottom-1 right-1 flex flex-col items-end opacity-20">
-                <span className="text-[6px] font-black uppercase tracking-widest leading-none">ID_REF</span>
-                <span className="text-[6px] font-mono leading-none">{name.slice(0, 3).toUpperCase()}_0x</span>
+            <div className="absolute bottom-2 right-2 flex flex-col items-end opacity-40">
+                <span className="text-[8px] font-black uppercase tracking-widest leading-none">ID_REF</span>
+                <span className="text-[8px] font-mono leading-none">{name.slice(0, 3).toUpperCase()}_0x</span>
             </div>
         </div>
     );
