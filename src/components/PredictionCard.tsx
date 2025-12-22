@@ -380,7 +380,7 @@ export const PredictionCard = ({
             try {
                 // Dynamically import web3 to avoid server issues
                 const { getProgram, getMarketPDA, getConfigPDA, getATA, BETTING_MINT, TOKEN_PROGRAM_ID } = await import('@/services/web3');
-                const { BN } = await import('@project-serum/anchor');
+                const { BN } = await import('@coral-xyz/anchor');
                 const { SystemProgram, SYSVAR_RENT_PUBKEY } = await import('@solana/web3.js');
 
                 const program = getProgram({ publicKey, signTransaction, signAllTransactions });
