@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface, Transfer};
 use anchor_spl::token_2022::Token2022;
 
-declare_id!("F4ftWfZqAq99NK6yWTdA3B65xMwHVeD3MqVcqsvwbKzD");
+declare_id!("61naeXoio8omjBNTvDMfzaQrtAuR1uhWwN5wgrry7zPu");
 
 #[program]
 pub mod polybet {

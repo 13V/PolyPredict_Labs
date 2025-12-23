@@ -18,7 +18,7 @@ const safePK = (pk?: string) => {
 };
 
 // Program ID (Prophet/Polybet Contract)
-export const PROGRAM_ID = safePK(process.env.NEXT_PUBLIC_PROGRAM_ID || 'F4ftWfZqAq99NK6yWTdA3B65xMwHVeD3MqVcqsvwbKzD');
+export const PROGRAM_ID = safePK(process.env.NEXT_PUBLIC_PROGRAM_ID || '61naeXoio8omjBNTvDMfzaQrtAuR1uhWwN5wgrry7zPu');
 
 // Token used for betting ($PREDICT) - Pump.fun deployment
 export const IS_TOKEN_LIVE = true;
