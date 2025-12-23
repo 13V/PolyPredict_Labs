@@ -58,7 +58,20 @@ export const getProgram = (wallet: any) => {
     if (!provider) return null;
 
     // Cast JSON to IDL type unsafely for now to avoid TS hell with custom IDLs
-    return new Program(idl as any, provider);
+    // RUNTIME PATCH: Force-strip the 'address' field from token_program to fix Vercel caching issues
+    const patchedIdl = JSON.parse(JSON.stringify(idl));
+    patchedIdl.instructions.forEach((ix: any) => {
+        if (ix.accounts) {
+            ix.accounts.forEach((acc: any) => {
+                if (acc.name === 'token_program' && acc.address) {
+                    delete acc.address;
+                    console.log(`[Runtime Fix] Stripped legacy address constraint from ${ix.name}`);
+                }
+            });
+        }
+    });
+
+    return new Program(patchedIdl as Idl, provider);
 };
 
 
