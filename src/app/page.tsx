@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 import { WalletConnect } from "@/components/WalletConnect";
 import { PredictionCard } from "@/components/PredictionCard";
 import { useState, useEffect } from 'react';
