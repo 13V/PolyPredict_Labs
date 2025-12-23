@@ -175,12 +175,7 @@ pub struct ClaimWinnings<'info> {
     #[account(mut, seeds = [b"treasury"], bump = config.vault_bump)]
     pub treasury_vault: InterfaceAccount<'info, TokenAccount>,
     #[account(mut)]
-    pub user_token: InterfaceAccount<'info, TokenAccount>,
-    #[account(mut)]
-    pub dev_token: InterfaceAccount<'info, TokenAccount>,
-    #[account(mut)]
-    pub user: Signer<'info>,
-    pub token_program: Interface<'info, TokenInterface>,
+    pub token_program: Program<'info, Token2022>,
 }
 
 #[derive(Accounts)]
@@ -199,7 +194,7 @@ pub struct SweepProfit<'info> {
     #[account(mut)]
     pub destination_token: InterfaceAccount<'info, TokenAccount>,
     pub authority: Signer<'info>,
-    pub token_program: Interface<'info, TokenInterface>,
+    pub token_program: Program<'info, Token2022>,
 }
 
 #[account]
