@@ -1,6 +1,10 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface, Transfer};
 use solana_program::pubkey;
+use anchor_lang::solana_program::{
+    program::invoke_signed,
+    system_instruction,
+};
 
 declare_id!("8m7wUvDdNc7U8nyutZKPLM4zn5CXuJWXovpKE6PvuiEj");
 
@@ -12,10 +16,55 @@ pub mod polybet {
 
     pub fn initialize_protocol(ctx: Context<InitializeProtocol>) -> Result<()> {
         require_keys_eq!(ctx.accounts.token_program.key(), TOKEN_2022_ID, PolybetError::InvalidProgramId);
+        
         let config = &mut ctx.accounts.config;
         config.authority = ctx.accounts.authority.key();
         config.vault_bump = ctx.bumps.treasury_vault;
         config.bump = ctx.bumps.config;
+
+        // Manual Initialization of Treasury Vault (Bypassing Anchor Macro)
+        // Space for TokenAccount: 165 bytes
+        let space = 165;
+        let rent = Rent::get()?;
+        let lamports = rent.minimum_balance(space);
+
+        let vault_seeds = &[b"treasury".as_ref(), &[ctx.bumps.treasury_vault]];
+        let signer_seeds = &[&vault_seeds[..]];
+
+        // 1. Create Account
+        invoke_signed(
+            &system_instruction::create_account(
+                ctx.accounts.authority.key,
+                ctx.accounts.treasury_vault.key,
+                lamports,
+                space as u64,
+                &TOKEN_2022_ID,
+            ),
+            &[
+                ctx.accounts.authority.to_account_info(),
+                ctx.accounts.treasury_vault.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
+            signer_seeds,
+        )?;
+
+        // 2. Initialize Token Account (Manual CPI for TokenzQdBnBLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb)
+        let ix = spl_token_2022::instruction::initialize_account_3(
+            &TOKEN_2022_ID,
+            ctx.accounts.treasury_vault.key,
+            ctx.accounts.mint.key,
+            ctx.accounts.treasury_vault.key, // Vault is its own authority
+        ).map_err(|_| ProgramError::InvalidInstructionData)?;
+
+        invoke_signed(
+            &ix,
+            &[
+                ctx.accounts.treasury_vault.to_account_info(),
+                ctx.accounts.mint.to_account_info(),
+            ],
+            signer_seeds,
+        )?;
+
         Ok(())
     }
 
@@ -134,8 +183,9 @@ pub mod polybet {
 pub struct InitializeProtocol<'info> {
     #[account(init, payer = authority, space = ProtocolConfig::SPACE, seeds = [b"config"], bump)]
     pub config: Account<'info, ProtocolConfig>,
-    #[account(init, payer = authority, token::token_program = token_program, token::mint = mint, token::authority = treasury_vault, seeds = [b"treasury"], bump)]
-    pub treasury_vault: InterfaceAccount<'info, TokenAccount>,
+    /// CHECK: Manually created and initialized in the handler to bypass library typos
+    #[account(mut, seeds = [b"treasury"], bump)]
+    pub treasury_vault: UncheckedAccount<'info>,
     pub mint: InterfaceAccount<'info, Mint>,
     #[account(mut)]
     pub authority: Signer<'info>,
