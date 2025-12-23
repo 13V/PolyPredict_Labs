@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface, Transfer};
-use anchor_lang::solana_program::pubkey;
+use solana_program::pubkey;
 
 declare_id!("EtckMubyhEtQWfEVcnbka16sghSsXMb8tKf3AWHFmSPf");
 
