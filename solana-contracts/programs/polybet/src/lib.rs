@@ -49,10 +49,10 @@ pub mod polybet {
         )?;
 
         // 2. Initialize Token Account (Manual CPI for TokenzQdBnBLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb)
-        let ix = spl_token_2022::instruction::initialize_account3(
+        let ix = anchor_spl::token_2022::spl_token_2022::instruction::initialize_account3(
             &TOKEN_2022_ID,
             ctx.accounts.treasury_vault.key,
-            ctx.accounts.mint.key(),
+            &ctx.accounts.mint.key(),
             ctx.accounts.treasury_vault.key, // Vault is its own authority
         ).map_err(|_| ProgramError::InvalidInstructionData)?;
 
