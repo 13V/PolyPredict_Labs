@@ -1,15 +1,16 @@
-use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface, Transfer};
-use anchor_spl::token_2022::Token2022;
+use anchor_lang::solana_program::pubkey;
+use anchor_lang::solana_program::pubkey::Pubkey;
 
 declare_id!("EtckMubyhEtQWfEVcnbka16sghSsXMb8tKf3AWHFmSPf");
+
+const TOKEN_2022_ID: Pubkey = pubkey!("TokenzQdBnBLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 
 #[program]
 pub mod polybet {
     use super::*;
 
     pub fn initialize_protocol(ctx: Context<InitializeProtocol>) -> Result<()> {
-        require_keys_eq!(ctx.accounts.token_program.key(), anchor_spl::token_2022::ID, PolybetError::InvalidProgramId);
+        require_keys_eq!(ctx.accounts.token_program.key(), TOKEN_2022_ID, PolybetError::InvalidProgramId);
         let config = &mut ctx.accounts.config;
         config.authority = ctx.accounts.authority.key();
         config.vault_bump = ctx.bumps.treasury_vault;
@@ -51,7 +52,7 @@ pub mod polybet {
 
     /// 3. Place Bet (90/10 Split Implemented)
     pub fn place_vote(ctx: Context<PlaceVote>, outcome_index: u8, amount: u64) -> Result<()> {
-        require_keys_eq!(ctx.accounts.token_program.key(), anchor_spl::token_2022::ID, PolybetError::InvalidProgramId);
+        require_keys_eq!(ctx.accounts.token_program.key(), TOKEN_2022_ID, PolybetError::InvalidProgramId);
         let market = &mut ctx.accounts.market;
         let clock = Clock::get()?;
         require!(clock.unix_timestamp < market.end_timestamp, PolybetError::MarketEnded);
@@ -89,7 +90,7 @@ pub mod polybet {
 
     /// 4. Claim Winnings (Paid from Global Vault)
     pub fn claim_winnings(ctx: Context<ClaimWinnings>) -> Result<()> {
-        require_keys_eq!(ctx.accounts.token_program.key(), anchor_spl::token_2022::ID, PolybetError::InvalidProgramId);
+        require_keys_eq!(ctx.accounts.token_program.key(), TOKEN_2022_ID, PolybetError::InvalidProgramId);
         let (payout, d_fee) = {
             let market = &ctx.accounts.market;
             let vote = &ctx.accounts.vote;
@@ -118,7 +119,7 @@ pub mod polybet {
     }
 
     pub fn sweep_profit(ctx: Context<SweepProfit>, amount: u64) -> Result<()> {
-        require_keys_eq!(ctx.accounts.token_program.key(), anchor_spl::token_2022::ID, PolybetError::InvalidProgramId);
+        require_keys_eq!(ctx.accounts.token_program.key(), TOKEN_2022_ID, PolybetError::InvalidProgramId);
         let seeds = &[b"treasury".as_ref(), &[ctx.accounts.config.vault_bump]];
         let signer = &[&seeds[..]];
         token_interface::transfer(CpiContext::new_with_signer(ctx.accounts.token_program.to_account_info(), 
@@ -138,7 +139,8 @@ pub struct InitializeProtocol<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, Token2022>,
+    /// CHECK: Manual validation to bypass casing bugs in library constants
+    pub token_program: UncheckedAccount<'info>,
     pub rent: Sysvar<'info, Rent>,
 }
 
@@ -166,7 +168,8 @@ pub struct PlaceVote<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, Token2022>,
+    /// CHECK: Manual validation to bypass casing bugs in library constants
+    pub token_program: UncheckedAccount<'info>,
 }
 
 #[derive(Accounts)]
@@ -183,7 +186,8 @@ pub struct ClaimWinnings<'info> {
     pub dev_token: InterfaceAccount<'info, TokenAccount>,
     #[account(mut)]
     pub user: Signer<'info>,
-    pub token_program: Program<'info, Token2022>,
+    /// CHECK: Manual validation to bypass casing bugs in library constants
+    pub token_program: UncheckedAccount<'info>,
 }
 
 #[derive(Accounts)]
@@ -202,7 +206,8 @@ pub struct SweepProfit<'info> {
     #[account(mut)]
     pub destination_token: InterfaceAccount<'info, TokenAccount>,
     pub authority: Signer<'info>,
-    pub token_program: Program<'info, Token2022>,
+    /// CHECK: Manual validation to bypass casing bugs in library constants
+    pub token_program: UncheckedAccount<'info>,
 }
 
 #[account]
