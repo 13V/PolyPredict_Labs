@@ -72,7 +72,7 @@ export const getProgram = (wallet: any) => {
         }
     });
 
-    return new Program(patchedIdl as Idl, PROGRAM_ID, provider);
+    return new Program(patchedIdl as Idl, provider);
 };
 
 
