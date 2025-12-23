@@ -1,11 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface, Transfer};
 use solana_program::pubkey;
-use anchor_lang::solana_program::{
-    program::invoke_signed,
-    system_instruction,
-    instruction::{AccountMeta, Instruction},
-};
 
 declare_id!("8m7wUvDdNc7U8nyutZKPLM4zn5CXuJWXovpKE6PvuiEj");
 
@@ -22,63 +17,6 @@ pub mod polybet {
         config.authority = ctx.accounts.authority.key();
         config.vault_bump = ctx.bumps.treasury_vault;
         config.bump = ctx.bumps.config;
-
-        // Manual Initialization of Treasury Vault (Bypassing Anchor Macro)
-        // Solscan confirms Token-2022 with extensions. 
-        // 173 bytes = 165 (Base) + 8 (TransferFeeAmount extension)
-        let space = 173;
-        let rent = Rent::get()?;
-        let lamports = rent.minimum_balance(space);
-
-        let vault_seeds = &[b"treasury".as_ref(), &[ctx.bumps.treasury_vault]];
-        let signer_seeds = &[&vault_seeds[..]];
-
-        // 1. Create Account (Handle case where it might already exist from previous failure)
-        // Check if the account is currently owned by the System Program
-        if ctx.accounts.treasury_vault.owner == &System::id() {
-            invoke_signed(
-                &system_instruction::create_account(
-                    ctx.accounts.authority.key,
-                    ctx.accounts.treasury_vault.key,
-                    lamports,
-                    space as u64,
-                    &TOKEN_2022_ID,
-                ),
-                &[
-                    ctx.accounts.authority.to_account_info(),
-                    ctx.accounts.treasury_vault.to_account_info(),
-                    ctx.accounts.system_program.to_account_info(),
-                ],
-                signer_seeds,
-            )?;
-        }
-
-        // 2. Initialize Token Account (Manual bytes to bypass library typos and checks)
-        // Discriminator for InitializeAccount3 is 18.
-        // Data format: [18, 32 bytes of owner pubkey]
-        let mut data = vec![18];
-        data.extend_from_slice(&ctx.accounts.treasury_vault.key().to_bytes());
-
-        let accounts = vec![
-            AccountMeta::new(ctx.accounts.treasury_vault.key(), false),
-            AccountMeta::new_readonly(ctx.accounts.mint.key(), false),
-        ];
-
-        let ix = Instruction {
-            program_id: TOKEN_2022_ID,
-            accounts,
-            data,
-        };
-
-        invoke_signed(
-            &ix,
-            &[
-                ctx.accounts.treasury_vault.to_account_info(),
-                ctx.accounts.mint.to_account_info(),
-                ctx.accounts.token_program.to_account_info(),
-            ],
-            signer_seeds,
-        )?;
 
         Ok(())
     }
@@ -198,15 +136,14 @@ pub mod polybet {
 pub struct InitializeProtocol<'info> {
     #[account(init, payer = authority, space = ProtocolConfig::SPACE, seeds = [b"config"], bump)]
     pub config: Account<'info, ProtocolConfig>,
-    /// CHECK: Manually created and initialized in the handler to bypass library typos
-    #[account(mut, seeds = [b"treasury"], bump)]
-    pub treasury_vault: UncheckedAccount<'info>,
+    #[account(init, payer = authority, token::token_program = token_program, token::mint = mint, token::authority = treasury_vault, seeds = [b"vault"], bump)]
+    pub treasury_vault: InterfaceAccount<'info, TokenAccount>,
     pub mint: InterfaceAccount<'info, Mint>,
     #[account(mut)]
     pub authority: Signer<'info>,
     pub system_program: Program<'info, System>,
     /// CHECK: Manual validation to bypass casing bugs in library constants
-    pub token_program: UncheckedAccount<'info>,
+    pub token_program: Interface<'info, TokenInterface>,
     pub rent: Sysvar<'info, Rent>,
 }
 
@@ -226,7 +163,7 @@ pub struct PlaceVote<'info> {
     pub market: Account<'info, Market>,
     #[account(init, payer = user, space = Vote::SPACE, seeds = [b"vote", market.key().as_ref(), user.key().as_ref()], bump)]
     pub vote: Account<'info, Vote>,
-    #[account(mut, seeds = [b"treasury"], bump = config.vault_bump)]
+    #[account(mut, seeds = [b"vault"], bump = config.vault_bump)]
     pub treasury_vault: InterfaceAccount<'info, TokenAccount>,
     #[account(mut)]
     pub user_token: InterfaceAccount<'info, TokenAccount>,
@@ -235,7 +172,7 @@ pub struct PlaceVote<'info> {
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,
     /// CHECK: Manual validation to bypass casing bugs in library constants
-    pub token_program: UncheckedAccount<'info>,
+    pub token_program: Interface<'info, TokenInterface>,
 }
 
 #[derive(Accounts)]
@@ -244,7 +181,7 @@ pub struct ClaimWinnings<'info> {
     pub market: Account<'info, Market>,
     #[account(mut, seeds = [b"vote", market.key().as_ref(), user.key().as_ref()], bump = vote.bump, has_one = user)]
     pub vote: Account<'info, Vote>,
-    #[account(mut, seeds = [b"treasury"], bump = config.vault_bump)]
+    #[account(mut, seeds = [b"vault"], bump = config.vault_bump)]
     pub treasury_vault: InterfaceAccount<'info, TokenAccount>,
     #[account(mut)]
     pub user_token: InterfaceAccount<'info, TokenAccount>,
@@ -253,7 +190,7 @@ pub struct ClaimWinnings<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
     /// CHECK: Manual validation to bypass casing bugs in library constants
-    pub token_program: UncheckedAccount<'info>,
+    pub token_program: Interface<'info, TokenInterface>,
 }
 
 #[derive(Accounts)]
@@ -267,13 +204,13 @@ pub struct ResolveMarket<'info> {
 pub struct SweepProfit<'info> {
     #[account(has_one = authority)]
     pub config: Account<'info, ProtocolConfig>,
-    #[account(mut, seeds = [b"treasury"], bump = config.vault_bump)]
+    #[account(mut, seeds = [b"vault"], bump = config.vault_bump)]
     pub treasury_vault: InterfaceAccount<'info, TokenAccount>,
     #[account(mut)]
     pub destination_token: InterfaceAccount<'info, TokenAccount>,
     pub authority: Signer<'info>,
     /// CHECK: Manual validation to bypass casing bugs in library constants
-    pub token_program: UncheckedAccount<'info>,
+    pub token_program: Interface<'info, TokenInterface>,
 }
 
 #[account]

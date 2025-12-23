@@ -44,7 +44,7 @@ async function main() {
         PROGRAM_ID
     );
     const [vaultPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from("treasury")],
+        [Buffer.from("vault")],
         PROGRAM_ID
     );
 
